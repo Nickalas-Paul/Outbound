@@ -1,4 +1,4 @@
-import { type AgentCard } from '@gexis/gexis-core';
+import { type AgentCard } from '@outbound/core';
 
 import { ApiError, getApiUrl } from '@/services/api';
 

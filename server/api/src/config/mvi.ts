@@ -11,7 +11,7 @@ import {
   INDUSTRY_VERTICAL_KEYS,
   INDUSTRY_VERTICAL_LABELS,
   type IndustryVerticalKey,
-} from '@gexis/gexis-core';
+} from '@outbound/core';
 
 export const MVI_SCORING_VERSION = '0.1.0';
 
@@ -331,7 +331,7 @@ export interface IndustryVertical {
 
 /**
  * Industry vertical weight profiles for on-the-fly overall MVI recomputation.
- * COUPLING: TypeScript vertical keys/labels now live in @gexis/gexis-core (verticals.ts).
+ * COUPLING: TypeScript vertical keys/labels now live in @outbound/core (verticals.ts).
  * Weights remain here. Keep in sync with server/workers/scoring_config.py INDUSTRY_VERTICALS.
  * Dimension scores are stored once (equal-weight); overall is reweighted at query time.
  *
@@ -520,7 +520,7 @@ export const INDUSTRY_VERTICALS: IndustryVertical[] = [
 
 if (INDUSTRY_VERTICALS.length !== INDUSTRY_VERTICAL_KEYS.length) {
   throw new Error(
-    'INDUSTRY_VERTICALS length must match INDUSTRY_VERTICAL_KEYS from gexis-core'
+    'INDUSTRY_VERTICALS length must match INDUSTRY_VERTICAL_KEYS from @outbound/core'
   );
 }
 

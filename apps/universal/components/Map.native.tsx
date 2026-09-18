@@ -1,4 +1,4 @@
-import { DEFAULT_MAP_STYLE, DEFAULT_MAP_VIEWPORT } from '@gexis/gexis-core';
+import { DEFAULT_MAP_STYLE, DEFAULT_MAP_VIEWPORT } from '@outbound/core';
 import MapboxGL from '@rnmapbox/maps';
 import { useEffect, useMemo, useRef } from 'react';
 import { StyleSheet, Text, View } from 'react-native';

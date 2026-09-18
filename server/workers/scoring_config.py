@@ -4,7 +4,7 @@ MVI Scoring Configuration
 Edit this file to add/remove indicators, change weights, or adjust normalization.
 The scoring engine reads this config — it does not hardcode indicator mappings.
 
-Dimension keys match MVIScore.dimensions in packages/gexis-core/src/index.ts.
+Dimension keys match MVIScore.dimensions in packages/core/src/index.ts.
 Source names must match raw_indicators.source values from the ingestion workers.
 """
 

@@ -1,7 +1,7 @@
-# GEXIS Data Source Catalog
+# Outbound Data Source Catalog
 ## Phase 7.5 — Institutional + Layer 2 sources
 
-Canonical MVI field name: **`dimensions`** (not `dimension_scores`). Keys match `MVIScore.dimensions` in `@gexis/gexis-core`.
+Canonical MVI field name: **`dimensions`** (not `dimension_scores`). Keys match `MVIScore.dimensions` in `@outbound/core`.
 
 Status values use the Source Status Key at the bottom of this document.
 

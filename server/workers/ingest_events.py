@@ -196,7 +196,7 @@ def fetch_gdelt(query: str) -> list[dict[str, Any]]:
         "format": "json",
         "timespan": "7d",
     }
-    headers = {"User-Agent": "GEXIS-MVP/0.1 (data-engine)"}
+    headers = {"User-Agent": "Outbound-MVP/0.1 (data-engine)"}
 
     for attempt in range(2):
         response = requests.get(

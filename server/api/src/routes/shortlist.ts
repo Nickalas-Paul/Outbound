@@ -10,7 +10,7 @@ import {
   type AgentCategory,
   type ResponseTime,
   type ShortlistEntry,
-} from '@gexis/gexis-core';
+} from '@outbound/core';
 import { Router, Request, Response } from 'express';
 import { pool } from '../config/database';
 import { requireAuth } from '../middleware/auth';

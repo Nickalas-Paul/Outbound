@@ -5,7 +5,7 @@ import {
   formatDirection,
   formatNormalization,
   sourceDisplayName,
-} from '@gexis/gexis-core';
+} from '@outbound/core';
 import type { ReactNode } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 

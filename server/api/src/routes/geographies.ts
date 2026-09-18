@@ -4,7 +4,7 @@
  * Static paths (/search, /geojson, /filter) MUST be registered before /:id.
  */
 
-import { canUseHorizon, getQuickFacts, isGatingEnabled } from '@gexis/gexis-core';
+import { canUseHorizon, getQuickFacts, isGatingEnabled } from '@outbound/core';
 import { Router, Request, Response } from 'express';
 import { pool } from '../config/database';
 import {

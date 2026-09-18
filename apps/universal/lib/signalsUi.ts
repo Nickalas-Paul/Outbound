@@ -2,7 +2,7 @@
  * Display helpers for Layer 2 market signals in the explorer UI.
  */
 
-import type { MarketSignal, SignalDirection } from '@gexis/gexis-core';
+import type { MarketSignal, SignalDirection } from '@outbound/core';
 
 const DIM_SHORT: Record<string, string> = {
   marketSizeAndGrowth: 'Market',

@@ -6,7 +6,7 @@ import {
   type AgentReview,
   type IndustryVerticalKey,
   type ResponseTime,
-} from '@gexis/gexis-core';
+} from '@outbound/core';
 import { Link, router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {

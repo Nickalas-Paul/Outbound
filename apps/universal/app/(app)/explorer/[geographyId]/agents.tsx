@@ -2,7 +2,7 @@ import {
   AGENT_CATEGORY_KEYS,
   AGENT_CATEGORY_LABELS,
   type AgentCategory,
-} from '@gexis/gexis-core';
+} from '@outbound/core';
 import { Link, router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import {

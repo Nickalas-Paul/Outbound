@@ -8,7 +8,7 @@ export default function LandingScreen() {
       <Text style={styles.route}>Route: /</Text>
       <Text style={styles.headline}>See where to expand.</Text>
       <Text style={styles.subcopy}>
-        GEXIS geospatial market intelligence - landing placeholder.
+        Outbound geospatial market intelligence - landing placeholder.
       </Text>
     </MarketingShell>
   );

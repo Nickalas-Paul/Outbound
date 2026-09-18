@@ -2,7 +2,7 @@
  * Market signals client — Layer 2 events & prediction markets.
  */
 
-import type { MarketSignal, SignalSummaryMap } from '@gexis/gexis-core';
+import type { MarketSignal, SignalSummaryMap } from '@outbound/core';
 import { getApiUrl } from './api';
 
 interface SignalsListPayload {

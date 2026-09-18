@@ -3,7 +3,7 @@ import {
   sourceDisplayName,
   type DimensionKey,
   type MarketSignal,
-} from '@gexis/gexis-core';
+} from '@outbound/core';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';

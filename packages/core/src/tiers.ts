@@ -1,7 +1,7 @@
 /**
  * Subscription tiers and feature gating (Phase 6).
  *
- * Gating is OFF by default for beta. Set GEXIS_GATING_ENABLED=true to enforce.
+ * Gating is OFF by default for beta. Set OUTBOUND_GATING_ENABLED=true to enforce.
  */
 
 export type SubscriptionTier = 'free' | 'pro' | 'marketplace';
@@ -93,17 +93,17 @@ export const TIER_FEATURES: Record<SubscriptionTier, TierFeatureMap> = {
 };
 
 /**
- * Reads GEXIS_GATING_ENABLED from the environment.
+ * Reads OUTBOUND_GATING_ENABLED from the environment.
  * Defaults to false (gating off for beta). True only for "true" or "1".
  */
 export function isGatingEnabled(): boolean {
   if (typeof process === 'undefined' || process.env == null) {
     return false;
   }
-  // Server uses GEXIS_GATING_ENABLED; Expo client only inlines EXPO_PUBLIC_*.
+  // Server uses OUTBOUND_GATING_ENABLED; Expo client only inlines EXPO_PUBLIC_*.
   const raw =
-    process.env.GEXIS_GATING_ENABLED ??
-    process.env.EXPO_PUBLIC_GEXIS_GATING_ENABLED;
+    process.env.OUTBOUND_GATING_ENABLED ??
+    process.env.EXPO_PUBLIC_OUTBOUND_GATING_ENABLED;
   return raw === 'true' || raw === '1';
 }
 

@@ -5,7 +5,7 @@ import {
   type AgentCard as AgentCardType,
   type IndustryVerticalKey,
   type ResponseTime,
-} from '@gexis/gexis-core';
+} from '@outbound/core';
 import { Link } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 

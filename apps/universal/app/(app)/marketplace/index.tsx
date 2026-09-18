@@ -5,7 +5,7 @@ import {
   INDUSTRY_VERTICAL_LABELS,
   type AgentCategory,
   type IndustryVerticalKey,
-} from '@gexis/gexis-core';
+} from '@outbound/core';
 import { Link, router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {

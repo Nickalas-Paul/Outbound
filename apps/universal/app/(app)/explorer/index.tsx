@@ -35,7 +35,7 @@ import {
   type GeographyListItem,
 } from '@/services/geographies';
 import { getSignalsSummary } from '@/services/signals';
-import type { SignalSummaryMap } from '@gexis/gexis-core';
+import type { SignalSummaryMap } from '@outbound/core';
 
 const DESKTOP_BREAKPOINT = 768;
 

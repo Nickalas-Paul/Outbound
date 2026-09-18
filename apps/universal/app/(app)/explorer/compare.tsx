@@ -1,4 +1,4 @@
-import { MVI_DIMENSION_DISPLAY } from '@gexis/gexis-core';
+import { MVI_DIMENSION_DISPLAY } from '@outbound/core';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import {

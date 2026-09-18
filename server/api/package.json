@@ -1,5 +1,5 @@
 {
-  "name": "gexis-api",
+  "name": "outbound-api",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -10,7 +10,7 @@
     "test": "echo \"No tests yet\""
   },
   "dependencies": {
-    "@gexis/gexis-core": "^0.1.0",
+    "@outbound/core": "^0.1.0",
     "argon2": "^0.45.1",
     "connect-redis": "^10.0.0",
     "cookie-parser": "^1.4.7",

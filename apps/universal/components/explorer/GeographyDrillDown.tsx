@@ -9,7 +9,7 @@ import {
   View,
 } from 'react-native';
 
-import type { MarketSignal } from '@gexis/gexis-core';
+import type { MarketSignal } from '@outbound/core';
 
 import {
   COMPARE_MAX,

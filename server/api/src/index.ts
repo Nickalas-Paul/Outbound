@@ -71,7 +71,7 @@ async function start(): Promise<void> {
   const redisOk = await connectRedis();
 
   app.listen(PORT, () => {
-    console.log(`GEXIS API listening on port ${PORT}`);
+    console.log(`Outbound API listening on port ${PORT}`);
     console.log(`[startup] Database connection: ${dbOk ? 'OK' : 'FAILED'}`);
     console.log(`[startup] Redis connection: ${redisOk ? 'OK' : 'FAILED'}`);
   });

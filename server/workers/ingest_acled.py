@@ -155,7 +155,7 @@ def fetch_events(token: str, start: date, end: date) -> list[dict[str, Any]]:
     headers = {
         "Authorization": f"Bearer {token}",
         "Accept": "application/json",
-        "User-Agent": "GEXIS-MVP/0.1 (data-engine)",
+        "User-Agent": "Outbound-MVP/0.1 (data-engine)",
     }
     fields = (
         "event_id_cnty|event_date|event_type|sub_event_type|country|iso|"

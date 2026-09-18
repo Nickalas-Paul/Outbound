@@ -1,7 +1,7 @@
 import {
   MVI_DIMENSION_DISPLAY,
   type DimensionKey,
-} from '@gexis/gexis-core';
+} from '@outbound/core';
 import { useMemo } from 'react';
 import { Platform, StyleSheet, Text, View } from 'react-native';
 

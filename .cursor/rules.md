@@ -1,4 +1,4 @@
-# GEXIS Project Rules
+# Outbound Project Rules
 
 ## Workflow Discipline
 - ALWAYS audit before implementing. Every task starts with a diagnostic prompt that analyzes the current state of the repo before any code is written or modified.
@@ -9,8 +9,8 @@
 - Monorepo managed by Turborepo
 - Universal client: Expo Router (single codebase for web + native)
 - Server: Express API with PostgreSQL + PostGIS
-- Shared packages: @gexis/api-client, @gexis/gexis-core, @gexis/ui
-- Map rendering has one controlled divergence: react-map-gl (web) and @rnmapbox/maps (native), both consuming shared config from gexis-core
+- Shared packages: @outbound/api-client, @outbound/core, @outbound/ui
+- Map rendering has one controlled divergence: react-map-gl (web) and @rnmapbox/maps (native), both consuming shared config from core
 
 ## Principles
 - AI is a tool in the pipeline, not the product

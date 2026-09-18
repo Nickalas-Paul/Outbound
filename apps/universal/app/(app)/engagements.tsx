@@ -2,7 +2,7 @@ import {
   ENGAGEMENT_STATUS_LABELS,
   type EngagementStatus,
   type EngagementWithContext,
-} from '@gexis/gexis-core';
+} from '@outbound/core';
 import { Link, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
 import {

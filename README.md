@@ -1,4 +1,4 @@
-# GEXIS — Global Expansion Intelligence System
+# Outbound — Global Expansion Intelligence System
 
 B2B geospatial market-entry intelligence platform with country-level risk scoring across 166 countries.
 

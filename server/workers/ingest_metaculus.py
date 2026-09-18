@@ -73,7 +73,7 @@ def api_token() -> Optional[str]:
 def auth_headers(token: str) -> dict[str, str]:
     return {
         "Authorization": f"Token {token}",
-        "User-Agent": "GEXIS-MVP/0.1 (data-engine)",
+        "User-Agent": "Outbound-MVP/0.1 (data-engine)",
         "Accept": "application/json",
     }
 

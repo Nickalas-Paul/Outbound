@@ -22,7 +22,7 @@ export function MarketingNav({ theme = 'light' }: Props) {
     <View style={[styles.nav, dark && styles.navDark]}>
       <Link href="/" asChild>
         <Pressable>
-          <Text style={[styles.brand, dark && styles.brandDark]}>GEXIS</Text>
+          <Text style={[styles.brand, dark && styles.brandDark]}>Outbound</Text>
         </Pressable>
       </Link>
       <View style={styles.links}>

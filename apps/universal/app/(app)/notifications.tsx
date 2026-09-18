@@ -1,4 +1,4 @@
-import { type AppNotification } from '@gexis/gexis-core';
+import { type AppNotification } from '@outbound/core';
 import { Link, router, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
 import {

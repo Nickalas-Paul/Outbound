@@ -108,7 +108,7 @@ function WebSidebarShell() {
     <View style={styles.shell}>
       <View style={styles.sidebar}>
         <View style={styles.brandRow}>
-          <Text style={styles.brand}>GEXIS</Text>
+          <Text style={styles.brand}>Outbound</Text>
           <TierBadge />
           <NotificationBell />
         </View>
@@ -160,7 +160,7 @@ function NativeTabsShell() {
         ]}
       >
         <View style={styles.nativeBrandRow}>
-          <Text style={styles.nativeBrand}>GEXIS</Text>
+          <Text style={styles.nativeBrand}>Outbound</Text>
           <TierBadge />
         </View>
         <View style={styles.nativeActions}>

@@ -1,4 +1,4 @@
-# GEXIS Data Workers
+# Outbound Data Workers
 
 Phase 7.5 — institutional indicators, trend projections, and Layer 2 market signals for the Market Viability Index.
 
@@ -7,7 +7,7 @@ Phase 7.5 — institutional indicators, trend projections, and Layer 2 market si
 - Python 3.10+
 - Packages: `pip install -r requirements.txt`
 - `DATABASE_URL` in the repo-root `.env` (PostGIS-enabled Postgres)
-- API on `http://localhost:3001` when running signal workers that call the notification hook (override with `GEXIS_API_URL` / `API_URL`)
+- API on `http://localhost:3001` when running signal workers that call the notification hook (override with `OUTBOUND_API_URL` / `API_URL`)
 
 ## Workers
 

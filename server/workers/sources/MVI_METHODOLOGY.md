@@ -2,7 +2,7 @@
 
 *Last updated: Phase 7.5 — data engine hardening (scoring + Layer 2 signals)*
 
-This document describes how GEXIS calculates the Market Viability Index. It is written for product users and feeds the public methodology page (`/docs/methodology`).
+This document describes how Outbound calculates the Market Viability Index. It is written for product users and feeds the public methodology page (`/docs/methodology`).
 
 ## What the MVI measures
 
@@ -158,7 +158,7 @@ Signals surface in the explorer UI (drill-down, geography detail, top-matches do
 
 `data_freshness` is the **oldest calendar year** among indicators that actually contributed to a country’s score, stored as January 1 of that year (UTC).
 
-This reflects source vintage, not the date GEXIS last ran the workers. Re-running ingestion or scoring updates `calculated_at`; freshness only moves when newer source years enter the inputs.
+This reflects source vintage, not the date Outbound last ran the workers. Re-running ingestion or scoring updates `calculated_at`; freshness only moves when newer source years enter the inputs.
 
 ## Missing data behavior
 

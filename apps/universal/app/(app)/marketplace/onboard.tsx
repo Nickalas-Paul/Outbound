@@ -10,7 +10,7 @@ import {
   type AgentCategory,
   type IndustryVerticalKey,
   type ResponseTime,
-} from '@gexis/gexis-core';
+} from '@outbound/core';
 import { Link, router } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import {

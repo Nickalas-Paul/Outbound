@@ -2,7 +2,7 @@ import {
   type AgentCategory,
   type ResponseTime,
   type ShortlistEntry,
-} from '@gexis/gexis-core';
+} from '@outbound/core';
 
 import { ApiError, getApiUrl } from '@/services/api';
 import { getStoredAccessToken } from '@/services/tokenStorage';
