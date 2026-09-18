@@ -366,7 +366,7 @@ def seed_gdelt_signals(cursor, iso_map: dict[str, str]) -> int:
             "isos": ["DEU", "FRA"],
             "signal_type": "regulatory_change",
             "title": "EU advances new business regulation and compliance requirements for exporters",
-            "description": "Seed: regulatory reform affecting EU market entry.",
+            "description": "Seed: regulatory reform affecting EU travel conditions.",
             "direction": "neutral",
             "dims": ["regulatoryEase"],
         },

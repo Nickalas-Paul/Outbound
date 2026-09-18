@@ -3,7 +3,7 @@ Ingest World Bank education indicators into raw_indicators (global coverage).
 
 API: https://api.worldbank.org/v2/country/all/indicator/{code}?format=json&per_page=500&date={range}
 
-Supersedes the OECD-filtered tertiary series in ingest_oecd.py for scoring
+Supersedes the legacy OECD-filtered tertiary series for scoring
 config migration (later step). Source label is `education`.
 """
 

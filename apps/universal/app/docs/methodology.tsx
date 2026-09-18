@@ -53,9 +53,9 @@ export default function MethodologyScreen() {
   return (
     <MarketingShell theme="dark">
       <View style={styles.header}>
-        <Text style={styles.title}>TVI Methodology</Text>
+        <Text style={styles.title}>Outbound TVI Methodology</Text>
         <Text style={styles.subtitle}>
-          How we score markets — transparent, auditable, deterministic
+          How we score destinations — transparent, auditable, deterministic
         </Text>
         <Text style={styles.version}>
           Scoring engine v{TVI_SCORING_VERSION_LABEL} · {dimensionCount} dimensions
@@ -65,7 +65,7 @@ export default function MethodologyScreen() {
       <Section title="Overview">
         <Body>
           The Travel Viability Index (TVI) is a 0–100 score that summarizes how
-          attractive a geography is for market entry. Higher scores mean stronger
+          attractive a geography is for travel. Higher scores mean stronger
           overall viability on the dimensions we track today.
         </Body>
         <Body>

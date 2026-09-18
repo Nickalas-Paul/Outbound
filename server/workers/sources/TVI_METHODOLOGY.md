@@ -6,7 +6,7 @@ This document describes how Outbound calculates the Travel Viability Index. It i
 
 ## What the TVI measures
 
-The Travel Viability Index is a **0–100** score that summarizes how attractive a geography is for market entry. Higher scores mean stronger overall viability on the dimensions we track today.
+The Travel Viability Index is a **0–100** score that summarizes how attractive a geography is for travel. Higher scores mean stronger overall viability on the dimensions we track today.
 
 **Seven dimensions** contribute to the overall score:
 

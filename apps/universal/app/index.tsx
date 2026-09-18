@@ -6,9 +6,9 @@ export default function LandingScreen() {
   return (
     <MarketingShell>
       <Text style={styles.route}>Route: /</Text>
-      <Text style={styles.headline}>See where to expand.</Text>
+      <Text style={styles.headline}>Outbound</Text>
       <Text style={styles.subcopy}>
-        Outbound geospatial market intelligence - landing placeholder.
+        Travel intelligence and concierge - landing placeholder.
       </Text>
     </MarketingShell>
   );

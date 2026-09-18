@@ -22,7 +22,7 @@ Status values use the Source Status Key at the bottom of this document.
 |--------|---------|------------|--------|---------|--------|
 | Education / UNESCO via WDI | World Bank Indicators API `date=2010:2024` | `SE.TER.CUAT.BA.ZS`, `SE.TER.ENRR`, `SL.TLF.ADVN.ZS`, `SE.XPD.TOTL.GD.ZS` | JSON | Annual | **Active** — worker: `ingest_education.py` (~196 countries) |
 | ILO via WDI | World Bank Indicators API | `SL.TLF.CACT.ZS`, `SL.UEM.TOTL.ZS` | JSON | Annual | **Active** — worker: `ingest_ilo.py` (~181 countries) |
-| OECD / WB education proxy | Legacy OECD-member tertiary series | `oecd_tertiary_attainment` | JSON | Annual | **Superseded** — worker `ingest_oecd.py` remains for historical rows; scoring uses `education` + `ilo`. STEM share (`oecd_stem_share`) is no longer inserted (source unreliable). |
+| OECD / WB education proxy | Legacy OECD-member tertiary series | `oecd_tertiary_attainment` | JSON | Annual | **Superseded** — `ingest_oecd.py` removed; historical `oecd` rows may remain. Scoring uses `education` + `ilo`. STEM share (`oecd_stem_share`) is no longer inserted (source unreliable). |
 
 ### TVI Dimension: Tax Environment (`dimensions.taxEnvironment`)
 | Source | URL/API | Indicators | Format | Refresh | Status |

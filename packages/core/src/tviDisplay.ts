@@ -110,7 +110,7 @@ export const TVI_DIMENSION_DISPLAY: DimensionDisplay[] = [
   {
     key: 'taxEnvironment',
     label: 'Tax Environment',
-    description: 'Corporate tax competitiveness for market entry',
+    description: 'Corporate tax competitiveness for travelers and operators',
     indicatorCodes: ['corp_tax_rate'],
     indicators: [
       {
