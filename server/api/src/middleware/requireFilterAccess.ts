@@ -5,7 +5,7 @@ import {
   isGatingEnabled,
   type FilterKey,
   type SubscriptionTier,
-} from '@gexis/gexis-core';
+} from '@outbound/core';
 import { Request, Response, NextFunction } from 'express';
 
 /** Map API body / nested filter field names onto canonical FilterKey values. */

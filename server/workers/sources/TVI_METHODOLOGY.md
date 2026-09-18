@@ -1,12 +1,12 @@
-# Market Viability Index (MVI) Methodology
+# Travel Viability Index (TVI) Methodology
 
 *Last updated: Phase 7.5 — data engine hardening (scoring + Layer 2 signals)*
 
-This document describes how GEXIS calculates the Market Viability Index. It is written for product users and feeds the public methodology page (`/docs/methodology`).
+This document describes how Outbound calculates the Travel Viability Index. It is written for product users and feeds the public methodology page (`/docs/methodology`).
 
-## What the MVI measures
+## What the TVI measures
 
-The Market Viability Index is a **0–100** score that summarizes how attractive a geography is for market entry. Higher scores mean stronger overall viability on the dimensions we track today.
+The Travel Viability Index is a **0–100** score that summarizes how attractive a geography is for travel. Higher scores mean stronger overall viability on the dimensions we track today.
 
 **Seven dimensions** contribute to the overall score:
 
@@ -107,7 +107,7 @@ Six indicators (broadband, mobile, electricity, air transport, plus internet use
 
 ### Trajectory (composite)
 
-Trajectory is computed from `trend_scores` after the six base dimensions are scored. It summarizes trend direction and annualized rate across base dimensions into a 0–100 momentum score. It does not replace any base dimension; it is an additional input to the overall MVI (and is re-weighted per industry vertical).
+Trajectory is computed from `trend_scores` after the six base dimensions are scored. It summarizes trend direction and annualized rate across base dimensions into a 0–100 momentum score. It does not replace any base dimension; it is an additional input to the overall TVI (and is re-weighted per industry vertical).
 
 ## How the overall score is computed
 
@@ -142,7 +142,7 @@ There is **no proxy confidence cap**. Proxy language for Talent Density was remo
 
 ## Market signals (Layer 2)
 
-Real-time **market signals** from prediction markets (Polymarket) and news events (GDELT) inform **2-year and 5-year projections**. They do **not** replace base dimension scores or the current MVI overall.
+Real-time **market signals** from prediction markets (Polymarket) and news events (GDELT) inform **2-year and 5-year projections**. They do **not** replace base dimension scores or the current TVI overall.
 
 At a high level:
 
@@ -158,7 +158,7 @@ Signals surface in the explorer UI (drill-down, geography detail, top-matches do
 
 `data_freshness` is the **oldest calendar year** among indicators that actually contributed to a country’s score, stored as January 1 of that year (UTC).
 
-This reflects source vintage, not the date GEXIS last ran the workers. Re-running ingestion or scoring updates `calculated_at`; freshness only moves when newer source years enter the inputs.
+This reflects source vintage, not the date Outbound last ran the workers. Re-running ingestion or scoring updates `calculated_at`; freshness only moves when newer source years enter the inputs.
 
 ## Missing data behavior
 
@@ -204,7 +204,7 @@ python ingest_events.py           # also calls notification hook
 
 # Score
 python compute_trends.py
-python compute_mvi.py
+python compute_tvi.py
 ```
 
 Re-running the engine with the same `raw_indicators` produces the **same** base scores (deterministic). Projection endpoints can change when active `market_signals` change.
@@ -214,5 +214,5 @@ Re-running the engine with the same `raw_indicators` produces the **same** base 
 1. **Transparent** — every score can be traced to `(source, indicator, year)` tuples in `mvi_scores.sources`.
 2. **Honest about gaps** — nulls and confidence flags beat false precision.
 3. **Configurable** — indicator maps and weights live in `scoring_config.py`; the engine does not hardcode them.
-4. **Canonical naming** — dimension keys match the TypeScript `MVIScore.dimensions` contract (`dimensions`, never `dimension_scores`).
+4. **Canonical naming** — dimension keys match the TypeScript `TVIScore.dimensions` contract (`dimensions`, never `dimension_scores`).
 5. **Signals as overlays** — Layer 2 events adjust forward views; they do not rewrite institutional dimension scores.

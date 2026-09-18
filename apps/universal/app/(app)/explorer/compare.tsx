@@ -1,4 +1,4 @@
-import { MVI_DIMENSION_DISPLAY } from '@gexis/gexis-core';
+import { TVI_DIMENSION_DISPLAY } from '@outbound/core';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import {
@@ -19,7 +19,7 @@ import {
   useCompareSelection,
 } from '@/hooks/useCompareSelection';
 import { useTierAccess } from '@/hooks/useTierAccess';
-import { mviScoreColor } from '@/lib/mviColors';
+import { tviScoreColor } from '@/lib/tviColors';
 import { getApiUrl } from '@/services/api';
 import {
   getGeographyDetail,
@@ -266,15 +266,15 @@ export default function CompareMarketsScreen() {
                         </Text>
                         <Text
                           style={[
-                            styles.mviScore,
+                            styles.tviScore,
                             {
-                              color: mviScoreColor(col.data.mvi?.overall ?? null),
+                              color: tviScoreColor(col.data.tvi?.overall ?? null),
                             },
                           ]}
                         >
-                          MVI:{' '}
-                          {col.data.mvi?.overall != null
-                            ? Math.round(col.data.mvi.overall)
+                          TVI:{' '}
+                          {col.data.tvi?.overall != null
+                            ? Math.round(col.data.tvi.overall)
                             : '—'}
                         </Text>
                         <View style={styles.confRow}>
@@ -283,13 +283,13 @@ export default function CompareMarketsScreen() {
                               styles.confDot,
                               {
                                 backgroundColor: confidenceColor(
-                                  col.data.mvi?.confidence
+                                  col.data.tvi?.confidence
                                 ),
                               },
                             ]}
                           />
                           <Text style={styles.confText}>
-                            {(col.data.mvi?.confidence ?? 'n/a').replace(/^\w/, (c) =>
+                            {(col.data.tvi?.confidence ?? 'n/a').replace(/^\w/, (c) =>
                               c.toUpperCase()
                             )}
                           </Text>
@@ -301,10 +301,10 @@ export default function CompareMarketsScreen() {
               </View>
 
               {/* Dimension rows (7 including Trajectory) */}
-              {MVI_DIMENSION_DISPLAY.map((dim) => {
+              {TVI_DIMENSION_DISPLAY.map((dim) => {
                 const scores = columns.map((col) =>
                   col.status === 'ok'
-                    ? (col.data.mvi?.dimensions?.[dim.key] ?? null)
+                    ? (col.data.tvi?.dimensions?.[dim.key] ?? null)
                     : null
                 );
                 const leaders = leaderIndexes(scores);
@@ -317,7 +317,7 @@ export default function CompareMarketsScreen() {
                     <View style={styles.dimRow}>
                       {columns.map((col, idx) => {
                         const score = scores[idx];
-                        const color = mviScoreColor(score);
+                        const color = tviScoreColor(score);
                         const pct =
                           score != null ? Math.max(0, Math.min(100, score)) : 0;
                         const isLeader = leaders.has(idx);
@@ -594,7 +594,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
     ...mono,
   },
-  mviScore: {
+  tviScore: {
     fontSize: 22,
     fontWeight: '700',
     marginTop: 8,

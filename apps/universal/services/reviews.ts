@@ -1,4 +1,4 @@
-import { type AgentReview } from '@gexis/gexis-core';
+import { type AgentReview } from '@outbound/core';
 
 import { ApiError, getApiUrl } from '@/services/api';
 import { getStoredAccessToken } from '@/services/tokenStorage';

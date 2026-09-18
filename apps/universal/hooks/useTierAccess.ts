@@ -6,7 +6,7 @@ import {
   isGatingEnabled,
   type FilterKey,
   type SubscriptionTier,
-} from '@gexis/gexis-core';
+} from '@outbound/core';
 
 import { useAuth } from '@/services/auth';
 

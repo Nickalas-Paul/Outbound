@@ -9,7 +9,7 @@ import {
   type AgentCard,
   type AgentCategory,
   type ResponseTime,
-} from '@gexis/gexis-core';
+} from '@outbound/core';
 import { Router, Request, Response } from 'express';
 import { pool } from '../config/database';
 import { apiError, apiResponse } from '../utils/response';

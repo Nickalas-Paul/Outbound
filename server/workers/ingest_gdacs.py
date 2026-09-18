@@ -64,7 +64,7 @@ def fetch_events(start: date, end: date) -> list[dict[str, Any]]:
     )
     response = requests.get(
         url,
-        headers={"Accept": "application/json", "User-Agent": "gexis-mvp/1.0"},
+        headers={"Accept": "application/json", "User-Agent": "outbound-mvp/1.0"},
         timeout=REQUEST_TIMEOUT_SEC,
     )
     response.raise_for_status()

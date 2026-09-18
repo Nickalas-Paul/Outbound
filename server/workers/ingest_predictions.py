@@ -385,7 +385,7 @@ def fetch_search(keyword: str) -> list[dict[str, Any]]:
             response = requests.get(
                 GAMMA_SEARCH_URL,
                 params={"q": keyword},
-                headers={"User-Agent": "GEXIS-MVP/0.1 (data-engine)"},
+                headers={"User-Agent": "Outbound-MVP/0.1 (data-engine)"},
                 timeout=REQUEST_TIMEOUT_SEC,
             )
             response.raise_for_status()
@@ -424,7 +424,7 @@ def fetch_active_events_markets() -> list[dict[str, Any]]:
                     "order": "volume",
                     "ascending": "false",
                 },
-                headers={"User-Agent": "GEXIS-MVP/0.1 (data-engine)"},
+                headers={"User-Agent": "Outbound-MVP/0.1 (data-engine)"},
                 timeout=REQUEST_TIMEOUT_SEC,
             )
             response.raise_for_status()

@@ -16,7 +16,7 @@ import {
   type AgentCategory,
   type AgentReview,
   type ResponseTime,
-} from '@gexis/gexis-core';
+} from '@outbound/core';
 import { Router, Request, Response } from 'express';
 import { pool } from '../config/database';
 import { requireAuth } from '../middleware/auth';

@@ -1,7 +1,7 @@
 import { Platform } from 'react-native';
 
-const REFRESH_KEY = 'gexis_refresh_token';
-const ACCESS_KEY = 'gexis_access_token';
+const REFRESH_KEY = 'outbound_refresh_token';
+const ACCESS_KEY = 'outbound_access_token';
 
 let memoryAccessToken: string | null = null;
 let memoryRefreshToken: string | null = null;

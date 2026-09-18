@@ -43,7 +43,7 @@ export type GeographyListItem = {
   } | null;
   population: number | null;
   gdpPpp: number | null;
-  mvi: {
+  tvi: {
     overall: number | null;
     dimensions: {
       marketSizeAndGrowth: number | null;
@@ -161,7 +161,7 @@ export type QuickFacts = {
   currency: string | null;
 };
 
-export type MviSourceRef = {
+export type TviSourceRef = {
   year: number;
   source: string;
   indicator: string;
@@ -183,7 +183,7 @@ export type GeographyDetail = {
   population: number | null;
   gdpPpp: number | null;
   geometry: GeoJSON.Geometry | null;
-  mvi: {
+  tvi: {
     overall: number | null;
     dimensions: {
       marketSizeAndGrowth: number | null;
@@ -198,12 +198,12 @@ export type GeographyDetail = {
     dataFreshness: string | null;
     calculatedAt: string | null;
     vertical: string;
-    sources: MviSourceRef[];
+    sources: TviSourceRef[];
   } | null;
   quickFacts: QuickFacts | null;
 };
 
-/** Fetch single geography with full MVI breakdown and Quick Facts. */
+/** Fetch single geography with full TVI breakdown and Quick Facts. */
 export async function getGeographyDetail(
   id: string,
   vertical?: string
@@ -217,8 +217,8 @@ export async function getGeographyDetail(
   const json = await parseJson<ApiEnvelope<GeographyDetail>>(response);
   const data = json.data;
   // Normalize sources array (API may omit on sparse rows)
-  if (data.mvi && !Array.isArray(data.mvi.sources)) {
-    data.mvi.sources = [];
+  if (data.tvi && !Array.isArray(data.tvi.sources)) {
+    data.tvi.sources = [];
   }
   return data;
 }

@@ -2,7 +2,7 @@
  * Display helpers for Layer 2 market signals in the explorer UI.
  */
 
-import type { MarketSignal, SignalDirection } from '@gexis/gexis-core';
+import type { MarketSignal, SignalDirection } from '@outbound/core';
 
 const DIM_SHORT: Record<string, string> = {
   marketSizeAndGrowth: 'Market',
@@ -110,11 +110,9 @@ export function sourceDisplayLabel(source: string): string {
   const map: Record<string, string> = {
     polymarket: 'Polymarket',
     kalshi: 'Kalshi',
-    metaculus: 'Metaculus',
     gdelt: 'GDELT',
     gdelt_seed: 'GDELT',
     seed: 'Seed',
-    acled: 'ACLED',
     gdacs: 'GDACS',
     ecb_fx: 'ECB',
     opensanctions: 'OpenSanctions',

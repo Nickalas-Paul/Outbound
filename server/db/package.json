@@ -1,5 +1,5 @@
 {
-  "name": "gexis-db",
+  "name": "outbound-db",
   "version": "0.1.0",
   "private": true,
   "scripts": {

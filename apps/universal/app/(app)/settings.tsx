@@ -1,4 +1,5 @@
-import { Link } from 'expo-router';
+// MARKETPLACE: commented out for Outbound — preserved for future vendor/guide marketplace
+// import { Link } from 'expo-router';
 import { useState } from 'react';
 import {
   ActivityIndicator,
@@ -124,7 +125,8 @@ export default function SettingsScreen() {
           </View>
         ) : null}
 
-        <View style={styles.card}>
+        {/* MARKETPLACE: commented out for Outbound — preserved for future vendor/guide marketplace */}
+        {/* <View style={styles.card}>
           <Text style={styles.cardLabel}>MARKETPLACE</Text>
           <Link href="/engagements" asChild>
             <Pressable style={styles.linkRow}>
@@ -136,7 +138,7 @@ export default function SettingsScreen() {
               <Text style={styles.linkText}>Notifications</Text>
             </Pressable>
           </Link>
-        </View>
+        </View> */}
 
         <Pressable
           style={styles.logoutBtn}

@@ -1,3 +1,40 @@
+import { StyleSheet, Text, View } from 'react-native';
+
+// MARKETPLACE: commented out for Outbound — preserved for future vendor/guide marketplace
+// Original screen implementation preserved in the block comment below.
+
+export default function MarketplaceComingSoon() {
+  return (
+    <View style={styles.wrap}>
+      <Text style={styles.title}>Agent Profile</Text>
+      <Text style={styles.body}>Coming soon.</Text>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  wrap: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 24,
+    backgroundColor: '#f7f7f5',
+  },
+  title: {
+    fontSize: 22,
+    fontWeight: '700',
+    marginBottom: 8,
+    color: '#1a1a1a',
+  },
+  body: {
+    fontSize: 15,
+    opacity: 0.65,
+    color: '#1a1a1a',
+  },
+});
+
+/*
+ORIGINAL IMPLEMENTATION (preserved):
 import {
   INDUSTRY_VERTICAL_LABELS,
   RESPONSE_TIME_LABELS,
@@ -6,7 +43,7 @@ import {
   type AgentReview,
   type IndustryVerticalKey,
   type ResponseTime,
-} from '@gexis/gexis-core';
+} from '@outbound/core';
 import { Link, router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
@@ -422,7 +459,7 @@ export default function AgentProfileScreen() {
 
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Coverage areas</Text>
-              {/* TODO: Coverage mini-map — deferred to Step 10 polish */}
+              {/* TODO: Coverage mini-map — deferred to Step 10 polish * /}
               {coverageNames.length > 0 ? (
                 <View style={styles.chipRow}>
                   {coverageNames.map((name) => (
@@ -984,3 +1021,5 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
 });
+
+*/

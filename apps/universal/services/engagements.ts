@@ -1,4 +1,4 @@
-import { type AgentEngagement, type EngagementWithContext } from '@gexis/gexis-core';
+import { type AgentEngagement, type EngagementWithContext } from '@outbound/core';
 
 import { ApiError, getApiUrl } from '@/services/api';
 import { getStoredAccessToken } from '@/services/tokenStorage';

@@ -1,5 +1,5 @@
 /**
- * Market signal types — Layer 2 event/prediction overlays on MVI scores.
+ * Market signal types — Layer 2 event/prediction overlays on TVI scores.
  */
 
 export type SignalDirection = "positive" | "negative" | "neutral";

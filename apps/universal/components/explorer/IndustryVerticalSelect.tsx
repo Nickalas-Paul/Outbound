@@ -69,19 +69,19 @@ export default function IndustryVerticalSelect({ value, onChange, locked = false
   // Inject dark scrollbar styles once on web
   useEffect(() => {
     if (Platform.OS !== 'web') return;
-    const id = 'gexis-industry-vertical-scrollbar';
+    const id = 'outbound-industry-vertical-scrollbar';
     if (document.getElementById(id)) return;
     const el = document.createElement('style');
     el.id = id;
     el.textContent = `
-      [data-gexis-vertical-scroll="1"]::-webkit-scrollbar { width: 6px; }
-      [data-gexis-vertical-scroll="1"]::-webkit-scrollbar-track {
+      [data-outbound-vertical-scroll="1"]::-webkit-scrollbar { width: 6px; }
+      [data-outbound-vertical-scroll="1"]::-webkit-scrollbar-track {
         background: #0e0e16; border-radius: 3px;
       }
-      [data-gexis-vertical-scroll="1"]::-webkit-scrollbar-thumb {
+      [data-outbound-vertical-scroll="1"]::-webkit-scrollbar-thumb {
         background: #3a3a52; border-radius: 3px;
       }
-      [data-gexis-vertical-scroll="1"]::-webkit-scrollbar-thumb:hover {
+      [data-outbound-vertical-scroll="1"]::-webkit-scrollbar-thumb:hover {
         background: #55557a;
       }
     `;
@@ -121,7 +121,7 @@ export default function IndustryVerticalSelect({ value, onChange, locked = false
             nestedScrollEnabled
             keyboardShouldPersistTaps="handled"
             // @ts-expect-error RN web data attribute for scrollbar CSS
-            dataSet={{ gexisVerticalScroll: '1' }}
+            dataSet={{ outboundVerticalScroll: '1' }}
           >
             {filtered.map((opt) => {
               const selected = opt.key === value;

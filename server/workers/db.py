@@ -1,4 +1,4 @@
-"""Database helpers for GEXIS data workers."""
+"""Database helpers for Outbound data workers."""
 
 from __future__ import annotations
 

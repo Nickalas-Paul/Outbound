@@ -1,5 +1,5 @@
 {
-  "name": "gexis",
+  "name": "outbound",
   "private": true,
   "workspaces": [
     "apps/*",

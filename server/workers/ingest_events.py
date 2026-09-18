@@ -196,7 +196,7 @@ def fetch_gdelt(query: str) -> list[dict[str, Any]]:
         "format": "json",
         "timespan": "7d",
     }
-    headers = {"User-Agent": "GEXIS-MVP/0.1 (data-engine)"}
+    headers = {"User-Agent": "Outbound-MVP/0.1 (data-engine)"}
 
     for attempt in range(2):
         response = requests.get(
@@ -366,7 +366,7 @@ def seed_gdelt_signals(cursor, iso_map: dict[str, str]) -> int:
             "isos": ["DEU", "FRA"],
             "signal_type": "regulatory_change",
             "title": "EU advances new business regulation and compliance requirements for exporters",
-            "description": "Seed: regulatory reform affecting EU market entry.",
+            "description": "Seed: regulatory reform affecting EU travel conditions.",
             "direction": "neutral",
             "dims": ["regulatoryEase"],
         },

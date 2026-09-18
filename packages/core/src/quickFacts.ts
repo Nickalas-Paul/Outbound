@@ -1,6 +1,6 @@
 /**
  * Static Quick Facts: language and currency by ISO 3166-1 alpha-3.
- * Display-only — does not feed MVI scoring.
+ * Display-only — does not feed TVI scoring.
  */
 
 export interface CountryQuickFacts {

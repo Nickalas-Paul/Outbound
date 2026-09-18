@@ -2,7 +2,7 @@
  * Industry vertical keys and labels (Phase 7).
  *
  * Shared vocabulary for server and client. Scoring weights remain in
- * server/api/src/config/mvi.ts (and server/workers/scoring_config.py).
+ * server/api/src/config/tvi.ts (and server/workers/scoring_config.py).
  */
 
 export const INDUSTRY_VERTICAL_KEYS = [

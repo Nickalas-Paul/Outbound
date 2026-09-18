@@ -175,7 +175,7 @@ def upsert_signal(
 def ingest() -> None:
     response = requests.get(
         RSS_URL,
-        headers={"User-Agent": "gexis-mvp/1.0", "Accept": "application/rss+xml, text/xml"},
+        headers={"User-Agent": "outbound-mvp/1.0", "Accept": "application/rss+xml, text/xml"},
         timeout=REQUEST_TIMEOUT_SEC,
     )
     response.raise_for_status()
