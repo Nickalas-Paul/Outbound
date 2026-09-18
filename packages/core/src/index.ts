@@ -3,10 +3,10 @@ export interface Geography {
   name: string;
   regionType: "country" | "state" | "metro" | "municipality";
   geometry: GeoJSON.Geometry;
-  mviScore?: number;
+  tviScore?: number;
 }
 
-export interface MVIScore {
+export interface TVIScore {
   overall: number;
   dimensions: {
     marketSizeAndGrowth: number;
@@ -21,7 +21,7 @@ export interface MVIScore {
   lastUpdated: string;
 }
 
-export const MVI_VERSION = "0.1.0";
+export const TVI_VERSION = "0.1.0";
 
 export {
   DEFAULT_MAP_STYLE,
@@ -36,10 +36,10 @@ export {
 } from "./quickFacts";
 
 export {
-  MVI_DIMENSION_DISPLAY,
+  TVI_DIMENSION_DISPLAY,
   SOURCE_DISPLAY_NAMES,
-  MVI_SOURCE_CATALOG,
-  MVI_SCORING_VERSION_LABEL,
+  TVI_SOURCE_CATALOG,
+  TVI_SCORING_VERSION_LABEL,
   getDimensionDisplay,
   sourceDisplayName,
   formatNormalization,
@@ -50,7 +50,7 @@ export {
   type IndicatorDirection,
   type IndicatorNormalization,
   type SourceCatalogEntry,
-} from "./mviDisplay";
+} from "./tviDisplay";
 
 export {
   ALL_FILTER_KEYS,

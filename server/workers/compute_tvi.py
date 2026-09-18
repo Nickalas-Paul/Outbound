@@ -1,18 +1,18 @@
 """
-MVI scoring engine.
+TVI scoring engine.
 
 Reads raw_indicators + scoring_config, writes mvi_scores for industry_vertical
 'all_industries'. Deterministic: same inputs produce the same scores.
 
 Dependency order:
     1. python compute_trends.py   # writes trend_scores used for Trajectory
-    2. python compute_mvi.py      # this module — reads trend_scores
+    2. python compute_tvi.py      # this module — reads trend_scores
 
 Trajectory is a composite 7th dimension derived from trend_scores (direction /
 annualized_rate of the six base dimensions), not from raw_indicators.
 
 Usage:
-    python compute_mvi.py
+    python compute_tvi.py
 """
 
 from __future__ import annotations
@@ -44,12 +44,12 @@ def configure_logging() -> None:
         format="%(asctime)s %(levelname)s [%(name)s] %(message)s",
         handlers=[
             logging.StreamHandler(sys.stdout),
-            logging.FileHandler(LOGS_DIR / "compute_mvi.log", encoding="utf-8"),
+            logging.FileHandler(LOGS_DIR / "compute_tvi.log", encoding="utf-8"),
         ],
     )
 
 
-logger = logging.getLogger("compute_mvi")
+logger = logging.getLogger("compute_tvi")
 
 
 def round_score(value: float) -> int:
@@ -195,7 +195,7 @@ def compute_confidence(
     return "low"
 
 
-def upsert_mvi_score(
+def upsert_tvi_score(
     cursor,
     geography_id: str,
     overall_score: int | None,
@@ -392,7 +392,7 @@ def compute_all() -> None:
             # Stable source ordering for determinism of JSONB content
             sources_used.sort(key=lambda s: (s["source"], s["indicator"], s["year"]))
 
-            upsert_mvi_score(
+            upsert_tvi_score(
                 cursor,
                 geography_id=geo_id,
                 overall_score=overall_score,
@@ -428,7 +428,7 @@ if __name__ == "__main__":
     configure_logging()
     try:
         compute_all()
-        logger.info("compute_mvi completed successfully")
+        logger.info("compute_tvi completed successfully")
     except Exception:
-        logger.exception("compute_mvi failed")
+        logger.exception("compute_tvi failed")
         sys.exit(1)

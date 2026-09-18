@@ -21,10 +21,10 @@ def trigger_signal_notifications(timeout: float = 30.0) -> None:
     """
     POST /api/signals/process-notifications on the local API.
 
-    Uses GEXIS_API_URL or API_URL when set; otherwise http://localhost:3001.
+    Uses OUTBOUND_API_URL or API_URL when set; otherwise http://localhost:3001.
     """
     base = (
-        os.getenv("GEXIS_API_URL")
+        os.getenv("OUTBOUND_API_URL")
         or os.getenv("API_URL")
         or DEFAULT_API_BASE
     ).rstrip("/")

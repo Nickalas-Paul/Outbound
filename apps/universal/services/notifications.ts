@@ -1,4 +1,4 @@
-import { type AppNotification } from '@gexis/gexis-core';
+import { type AppNotification } from '@outbound/core';
 
 import { ApiError, getApiUrl } from '@/services/api';
 import { getStoredAccessToken } from '@/services/tokenStorage';

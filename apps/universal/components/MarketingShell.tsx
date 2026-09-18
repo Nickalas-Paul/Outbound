@@ -38,7 +38,7 @@ export function MarketingShell({ children, theme = 'light' }: MarketingShellProp
       edges={['top', 'left', 'right', 'bottom']}
     >
       <View style={[styles.nativeHeader, dark && styles.nativeHeaderDark]}>
-        <Text style={[styles.brand, dark && styles.brandDark]}>GEXIS</Text>
+        <Text style={[styles.brand, dark && styles.brandDark]}>Outbound</Text>
       </View>
       <ScrollView
         style={styles.nativeScroll}

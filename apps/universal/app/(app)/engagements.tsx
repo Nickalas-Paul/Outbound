@@ -1,8 +1,45 @@
+import { StyleSheet, Text, View } from 'react-native';
+
+// MARKETPLACE: commented out for Outbound — preserved for future vendor/guide marketplace
+// Original screen implementation preserved in the block comment below.
+
+export default function MarketplaceComingSoon() {
+  return (
+    <View style={styles.wrap}>
+      <Text style={styles.title}>Engagements</Text>
+      <Text style={styles.body}>Coming soon.</Text>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  wrap: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 24,
+    backgroundColor: '#f7f7f5',
+  },
+  title: {
+    fontSize: 22,
+    fontWeight: '700',
+    marginBottom: 8,
+    color: '#1a1a1a',
+  },
+  body: {
+    fontSize: 15,
+    opacity: 0.65,
+    color: '#1a1a1a',
+  },
+});
+
+/*
+ORIGINAL IMPLEMENTATION (preserved):
 import {
   ENGAGEMENT_STATUS_LABELS,
   type EngagementStatus,
   type EngagementWithContext,
-} from '@gexis/gexis-core';
+} from '@outbound/core';
 import { Link, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
 import {
@@ -442,3 +479,5 @@ const styles = StyleSheet.create({
   declineBtnText: { color: '#842029', fontSize: 13, fontWeight: '700' },
   link: { fontSize: 14, color: '#0b57d0', fontWeight: '600' },
 });
+
+*/

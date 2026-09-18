@@ -1,9 +1,9 @@
 import {
-  MVI_DIMENSION_DISPLAY,
+  TVI_DIMENSION_DISPLAY,
   sourceDisplayName,
   type DimensionKey,
   type MarketSignal,
-} from '@gexis/gexis-core';
+} from '@outbound/core';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
@@ -21,7 +21,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import TrendAnalysisSection from '@/components/explorer/TrendAnalysisSection';
-import { mviScoreColor } from '@/lib/mviColors';
+import { tviScoreColor } from '@/lib/tviColors';
 import {
   directionLabel,
   formatProbabilityPct,
@@ -41,7 +41,7 @@ import {
   getGeographyDetail,
   getGeographyTrends,
   type GeographyDetail,
-  type MviSourceRef,
+  type TviSourceRef,
   type QuickFacts,
   type TrendData,
 } from '@/services/geographies';
@@ -140,16 +140,16 @@ function QuickFactsPanel({
 
   return (
     <View style={[styles.qfPanel, compact ? styles.qfPanelCompact : null]}>
-      {/* TODO: Mini-map (Mapbox dark-v11, country polygon filled with MVI color).
+      {/* TODO: Mini-map (Mapbox dark-v11, country polygon filled with TVI color).
           Deferred — Quick Facts data display is the priority for this step. */}
       <View
         style={[
           styles.miniMapPlaceholder,
-          { borderColor: mviScoreColor(overall) },
+          { borderColor: tviScoreColor(overall) },
         ]}
       >
         <View
-          style={[styles.miniMapSwatch, { backgroundColor: mviScoreColor(overall) }]}
+          style={[styles.miniMapSwatch, { backgroundColor: tviScoreColor(overall) }]}
         />
         <Text style={styles.miniMapLabel}>MAP PREVIEW</Text>
       </View>
@@ -179,15 +179,15 @@ function QuickFactsPanel({
 
 function sourcesForDimension(
   key: DimensionKey,
-  allSources: MviSourceRef[]
-): MviSourceRef[] {
-  const meta = MVI_DIMENSION_DISPLAY.find((d) => d.key === key);
+  allSources: TviSourceRef[]
+): TviSourceRef[] {
+  const meta = TVI_DIMENSION_DISPLAY.find((d) => d.key === key);
   if (!meta) return [];
   const codes = new Set(meta.indicatorCodes);
   return allSources.filter((s) => codes.has(s.indicator));
 }
 
-function uniqueSourceLabels(sources: MviSourceRef[]): string[] {
+function uniqueSourceLabels(sources: TviSourceRef[]): string[] {
   const seen = new Set<string>();
   const labels: string[] = [];
   for (const s of sources) {
@@ -212,11 +212,11 @@ function DimensionCard({
   description: string;
   score: number | null;
   confidence: string | null;
-  sources: MviSourceRef[];
+  sources: TviSourceRef[];
   onSourcePress: () => void;
 }) {
   const [expanded, setExpanded] = useState(false);
-  const color = mviScoreColor(score);
+  const color = tviScoreColor(score);
   const pct = score != null ? Math.max(0, Math.min(100, score)) : 0;
   const sourceLabels = uniqueSourceLabels(sources);
 
@@ -265,7 +265,7 @@ function DimensionCard({
                 onSourcePress();
               }}
               accessibilityRole="link"
-              accessibilityLabel={`${tag} — MVI methodology`}
+              accessibilityLabel={`${tag} — TVI methodology`}
             >
               <Text style={styles.tagText}>{tag}</Text>
             </Pressable>
@@ -367,9 +367,9 @@ export default function GeographyDetailScreen() {
     };
   }, [geographyId, vertical]);
 
-  const overall = data?.mvi?.overall ?? null;
-  const overallColor = mviScoreColor(overall);
-  const allSources = data?.mvi?.sources ?? [];
+  const overall = data?.tvi?.overall ?? null;
+  const overallColor = tviScoreColor(overall);
+  const allSources = data?.tvi?.sources ?? [];
   const sourceCount = useMemo(() => {
     const set = new Set(allSources.map((s) => s.source));
     return set.size;
@@ -432,7 +432,7 @@ export default function GeographyDetailScreen() {
                 <Text style={[styles.overallScore, { color: overallColor }]}>
                   {overall != null ? Math.round(overall) : '—'}
                 </Text>
-                <Text style={styles.overallLabel}>Market Viability Index</Text>
+                <Text style={styles.overallLabel}>Travel Viability Index</Text>
               </View>
 
               <View style={styles.pillsRow}>
@@ -440,18 +440,18 @@ export default function GeographyDetailScreen() {
                   <View
                     style={[
                       styles.confDot,
-                      { backgroundColor: confidenceColor(data.mvi?.confidence) },
+                      { backgroundColor: confidenceColor(data.tvi?.confidence) },
                     ]}
                   />
                   <Text style={styles.pillText}>
-                    {(data.mvi?.confidence ?? 'n/a').replace(/^\w/, (c) =>
+                    {(data.tvi?.confidence ?? 'n/a').replace(/^\w/, (c) =>
                       c.toUpperCase()
                     )}
                   </Text>
                 </View>
                 <View style={styles.pill}>
                   <Text style={styles.pillText}>
-                    Last refresh: {formatRefreshDate(data.mvi?.dataFreshness ?? data.mvi?.calculatedAt)}
+                    Last refresh: {formatRefreshDate(data.tvi?.dataFreshness ?? data.tvi?.calculatedAt)}
                   </Text>
                 </View>
                 <View style={styles.pill}>
@@ -477,8 +477,8 @@ export default function GeographyDetailScreen() {
               ) : null}
 
               <View style={styles.dimStack}>
-                {MVI_DIMENSION_DISPLAY.map((dim) => {
-                  const score = data.mvi?.dimensions?.[dim.key] ?? null;
+                {TVI_DIMENSION_DISPLAY.map((dim) => {
+                  const score = data.tvi?.dimensions?.[dim.key] ?? null;
                   const dimSources = sourcesForDimension(dim.key, allSources);
                   return (
                     <DimensionCard
@@ -487,7 +487,7 @@ export default function GeographyDetailScreen() {
                       label={dim.label}
                       description={dim.description}
                       score={score}
-                      confidence={data.mvi?.confidence ?? null}
+                      confidence={data.tvi?.confidence ?? null}
                       sources={dimSources}
                       onSourcePress={() => router.push('/docs/methodology')}
                     />
@@ -574,7 +574,7 @@ export default function GeographyDetailScreen() {
 
               <TrendAnalysisSection
                 trendData={trendData}
-                trajectoryScore={data.mvi?.dimensions?.trajectory ?? null}
+                trajectoryScore={data.tvi?.dimensions?.trajectory ?? null}
                 loading={trendsLoading}
               />
 
@@ -688,7 +688,8 @@ export default function GeographyDetailScreen() {
                     </View>
                   ) : null}
                 </View>
-                <Pressable
+                {/* MARKETPLACE: commented out for Outbound — preserved for future vendor/guide marketplace */}
+                {/* <Pressable
                   style={[styles.actionBtn, styles.actionBtnGhost]}
                   onPress={() =>
                     router.push(
@@ -697,7 +698,7 @@ export default function GeographyDetailScreen() {
                   }
                 >
                   <Text style={styles.actionTextGhost}>View agents →</Text>
-                </Pressable>
+                </Pressable> */}
               </View>
             </View>
 

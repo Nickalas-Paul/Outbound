@@ -1,4 +1,4 @@
-"""Shared configuration for GEXIS data workers."""
+"""Shared configuration for Outbound data workers."""
 
 from __future__ import annotations
 

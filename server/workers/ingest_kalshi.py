@@ -223,7 +223,7 @@ def fetch_markets_page(
     response = requests.get(
         MARKETS_URL,
         params=params,
-        headers={"User-Agent": "GEXIS-MVP/0.1 (data-engine)"},
+        headers={"User-Agent": "Outbound-MVP/0.1 (data-engine)"},
         timeout=REQUEST_TIMEOUT_SEC,
     )
     response.raise_for_status()

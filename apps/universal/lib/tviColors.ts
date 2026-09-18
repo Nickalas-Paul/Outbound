@@ -1,14 +1,14 @@
-/** MVI choropleth palette — cool-to-warm, mapped to observed score range. */
+/** TVI choropleth palette — cool-to-warm, mapped to observed score range. */
 
-export const MVI_NULL_FILL = '#1a1a2e';
-export const MVI_BORDER = '#2a2a3e';
-export const MVI_BORDER_HOVER = '#c8c8d8';
+export const TVI_NULL_FILL = '#1a1a2e';
+export const TVI_BORDER = '#2a2a3e';
+export const TVI_BORDER_HOVER = '#c8c8d8';
 
-/** Observed Phase-4 score band (compute_mvi ~20–75; keep slight pad from Phase 3). */
-export const MVI_SCORE_MIN = 18;
-export const MVI_SCORE_MAX = 76;
+/** Observed Phase-4 score band (compute_tvi ~20–75; keep slight pad from Phase 3). */
+export const TVI_SCORE_MIN = 18;
+export const TVI_SCORE_MAX = 76;
 
-export const MVI_COLOR_STOPS: Array<[number, string]> = [
+export const TVI_COLOR_STOPS: Array<[number, string]> = [
   [18, '#1e3a5f'],
   [32, '#1a6b5a'],
   [47, '#7a7a2e'],
@@ -16,19 +16,19 @@ export const MVI_COLOR_STOPS: Array<[number, string]> = [
   [76, '#d93025'],
 ];
 
-export function mviScoreColor(score: number | null | undefined): string {
-  if (score == null || Number.isNaN(score)) return MVI_NULL_FILL;
-  const s = Math.max(MVI_SCORE_MIN, Math.min(MVI_SCORE_MAX, score));
-  for (let i = 0; i < MVI_COLOR_STOPS.length - 1; i++) {
-    const [aScore, aColor] = MVI_COLOR_STOPS[i];
-    const [bScore, bColor] = MVI_COLOR_STOPS[i + 1];
+export function tviScoreColor(score: number | null | undefined): string {
+  if (score == null || Number.isNaN(score)) return TVI_NULL_FILL;
+  const s = Math.max(TVI_SCORE_MIN, Math.min(TVI_SCORE_MAX, score));
+  for (let i = 0; i < TVI_COLOR_STOPS.length - 1; i++) {
+    const [aScore, aColor] = TVI_COLOR_STOPS[i];
+    const [bScore, bColor] = TVI_COLOR_STOPS[i + 1];
     if (s <= bScore) {
       if (s <= aScore) return aColor;
       const t = (s - aScore) / (bScore - aScore);
       return lerpHex(aColor, bColor, t);
     }
   }
-  return MVI_COLOR_STOPS[MVI_COLOR_STOPS.length - 1][1];
+  return TVI_COLOR_STOPS[TVI_COLOR_STOPS.length - 1][1];
 }
 
 function lerpHex(a: string, b: string, t: number): string {
@@ -49,9 +49,9 @@ function toHex(n: number): string {
 }
 
 /** Mapbox fill-color expression for GeoJSON property `overall`. */
-export function mviFillColorExpression(): unknown[] {
+export function tviFillColorExpression(): unknown[] {
   const interpolate: unknown[] = ['interpolate', ['linear'], ['get', 'overall']];
-  for (const [score, color] of MVI_COLOR_STOPS) {
+  for (const [score, color] of TVI_COLOR_STOPS) {
     interpolate.push(score, color);
   }
   return [
@@ -62,7 +62,7 @@ export function mviFillColorExpression(): unknown[] {
       ['==', ['get', 'overall'], null],
       ['==', ['typeof', ['get', 'overall']], 'null'],
     ],
-    MVI_NULL_FILL,
+    TVI_NULL_FILL,
     interpolate,
   ];
 }
@@ -72,7 +72,7 @@ export function mviFillColorExpression(): unknown[] {
  * Prefer `typeof === number` over bare null compares / coalesce — JSON null
  * still counts as `has`, and bare `null` in expressions is unreliable on native.
  */
-export function mviFillColorExpressionNative(): unknown[] {
+export function tviFillColorExpressionNative(): unknown[] {
   return [
     'case',
     ['==', ['typeof', ['get', 'overallScore']], 'number'],
@@ -91,10 +91,10 @@ export function mviFillColorExpressionNative(): unknown[] {
       76,
       '#d93025',
     ],
-    MVI_NULL_FILL,
+    TVI_NULL_FILL,
   ];
 }
 
-export const MVI_LEGEND_GRADIENT = `linear-gradient(90deg, ${MVI_COLOR_STOPS.map(
+export const TVI_LEGEND_GRADIENT = `linear-gradient(90deg, ${TVI_COLOR_STOPS.map(
   ([, c]) => c
 ).join(', ')})`;

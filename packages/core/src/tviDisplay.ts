@@ -1,7 +1,7 @@
 /**
- * Client-facing MVI display metadata.
+ * Client-facing TVI display metadata.
  * Keep labels/descriptions/indicators aligned with:
- *   - server/api/src/config/mvi.ts
+ *   - server/api/src/config/tvi.ts
  *   - server/workers/scoring_config.py
  *
  * Adding a dimension here (e.g. Trajectory) automatically surfaces it on
@@ -42,7 +42,7 @@ export type DimensionDisplay = {
   isComposite?: boolean;
 };
 
-export const MVI_DIMENSION_DISPLAY: DimensionDisplay[] = [
+export const TVI_DIMENSION_DISPLAY: DimensionDisplay[] = [
   {
     key: 'marketSizeAndGrowth',
     label: 'Market Size & Growth',
@@ -110,7 +110,7 @@ export const MVI_DIMENSION_DISPLAY: DimensionDisplay[] = [
   {
     key: 'taxEnvironment',
     label: 'Tax Environment',
-    description: 'Corporate tax competitiveness for market entry',
+    description: 'Corporate tax competitiveness for travelers and operators',
     indicatorCodes: ['corp_tax_rate'],
     indicators: [
       {
@@ -268,7 +268,7 @@ export type SourceCatalogEntry = {
 };
 
 /** Active source catalog for methodology / docs surfaces. */
-export const MVI_SOURCE_CATALOG: SourceCatalogEntry[] = [
+export const TVI_SOURCE_CATALOG: SourceCatalogEntry[] = [
   {
     key: 'world_bank',
     name: 'World Bank Open Data / WGI',
@@ -306,14 +306,14 @@ export const MVI_SOURCE_CATALOG: SourceCatalogEntry[] = [
   },
 ];
 
-export const MVI_SCORING_VERSION_LABEL = '0.1.0';
+export const TVI_SCORING_VERSION_LABEL = '0.1.0';
 
 export function sourceDisplayName(sourceKey: string): string {
   return SOURCE_DISPLAY_NAMES[sourceKey] ?? sourceKey;
 }
 
 export function getDimensionDisplay(key: string): DimensionDisplay | undefined {
-  return MVI_DIMENSION_DISPLAY.find((d) => d.key === key);
+  return TVI_DIMENSION_DISPLAY.find((d) => d.key === key);
 }
 
 export function formatNormalization(n: IndicatorNormalization): string {

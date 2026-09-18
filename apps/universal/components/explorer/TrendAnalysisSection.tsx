@@ -1,16 +1,16 @@
 import {
-  MVI_DIMENSION_DISPLAY,
+  TVI_DIMENSION_DISPLAY,
   type DimensionKey,
-} from '@gexis/gexis-core';
+} from '@outbound/core';
 import { useMemo } from 'react';
 import { Platform, StyleSheet, Text, View } from 'react-native';
 
-import { mviScoreColor } from '@/lib/mviColors';
+import { tviScoreColor } from '@/lib/tviColors';
 import type { DimensionTrend, TrendData } from '@/services/geographies';
 
 import TrendSparkline from './TrendSparkline';
 
-const BASE_DIMS = MVI_DIMENSION_DISPLAY.filter((d) => !d.isComposite);
+const BASE_DIMS = TVI_DIMENSION_DISPLAY.filter((d) => !d.isComposite);
 
 function directionMeta(direction: DimensionTrend['direction']): {
   arrow: string;
@@ -57,7 +57,7 @@ function DimensionTrendCard({
   dimKey: DimensionKey;
   trend: DimensionTrend | null;
 }) {
-  const color = mviScoreColor(trend?.currentScore ?? null) ?? '#5b8def';
+  const color = tviScoreColor(trend?.currentScore ?? null) ?? '#5b8def';
 
   if (!trend) {
     return (

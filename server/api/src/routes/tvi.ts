@@ -1,7 +1,7 @@
 /**
- * MVI metadata routes (public).
+ * TVI metadata routes (public).
  *
- * Display config: ../config/mvi.ts
+ * Display config: ../config/tvi.ts
  * Computation config: server/workers/scoring_config.py
  * Keep indicator keys/weights in sync manually.
  */
@@ -9,10 +9,10 @@
 import { Router, Request, Response } from 'express';
 import { pool } from '../config/database';
 import {
-  MVI_DIMENSIONS,
-  MVI_SCORING_VERSION,
+  TVI_DIMENSIONS,
+  TVI_SCORING_VERSION,
   SOURCE_CATALOG,
-} from '../config/mvi';
+} from '../config/tvi';
 import { apiError, apiResponse } from '../utils/response';
 
 const router = Router();
@@ -48,7 +48,7 @@ router.get('/dimensions', async (_req: Request, res: Response) => {
       });
     }
 
-    const data = MVI_DIMENSIONS.map((dim) => {
+    const data = TVI_DIMENSIONS.map((dim) => {
       const indicators = dim.indicators.map((ind) => {
         const stats = coverageMap.get(`${ind.source}::${ind.code}`);
         return {
@@ -78,11 +78,11 @@ router.get('/dimensions', async (_req: Request, res: Response) => {
     res.json(
       apiResponse(data, {
         totalDimensions: data.length,
-        scoringVersion: MVI_SCORING_VERSION,
+        scoringVersion: TVI_SCORING_VERSION,
       })
     );
   } catch (err) {
-    console.error('[mvi] dimensions error:', err);
+    console.error('[tvi] dimensions error:', err);
     res.status(500).json(apiError('Internal server error'));
   }
 });
@@ -148,7 +148,7 @@ router.get('/sources', async (_req: Request, res: Response) => {
       })
     );
   } catch (err) {
-    console.error('[mvi] sources error:', err);
+    console.error('[tvi] sources error:', err);
     res.status(500).json(apiError('Internal server error'));
   }
 });

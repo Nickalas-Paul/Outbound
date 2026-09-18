@@ -1,3 +1,40 @@
+import { StyleSheet, Text, View } from 'react-native';
+
+// MARKETPLACE: commented out for Outbound — preserved for future vendor/guide marketplace
+// Original screen implementation preserved in the block comment below.
+
+export default function MarketplaceComingSoon() {
+  return (
+    <View style={styles.wrap}>
+      <Text style={styles.title}>Marketplace</Text>
+      <Text style={styles.body}>Coming soon.</Text>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  wrap: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 24,
+    backgroundColor: '#f7f7f5',
+  },
+  title: {
+    fontSize: 22,
+    fontWeight: '700',
+    marginBottom: 8,
+    color: '#1a1a1a',
+  },
+  body: {
+    fontSize: 15,
+    opacity: 0.65,
+    color: '#1a1a1a',
+  },
+});
+
+/*
+ORIGINAL IMPLEMENTATION (preserved):
 import {
   AGENT_CATEGORY_KEYS,
   AGENT_CATEGORY_LABELS,
@@ -5,7 +42,7 @@ import {
   INDUSTRY_VERTICAL_LABELS,
   type AgentCategory,
   type IndustryVerticalKey,
-} from '@gexis/gexis-core';
+} from '@outbound/core';
 import { Link, router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
@@ -728,3 +765,5 @@ const styles = StyleSheet.create({
     color: '#4a4a4a',
   },
 });
+
+*/

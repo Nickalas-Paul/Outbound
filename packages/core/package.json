@@ -1,5 +1,5 @@
 {
-  "name": "@gexis/gexis-core",
+  "name": "@outbound/core",
   "version": "0.1.0",
   "private": true,
   "main": "dist/index.js",

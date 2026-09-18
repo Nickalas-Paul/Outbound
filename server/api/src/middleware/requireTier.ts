@@ -2,7 +2,7 @@ import {
   canAccessFeature,
   isGatingEnabled,
   type SubscriptionTier,
-} from '@gexis/gexis-core';
+} from '@outbound/core';
 import { Request, Response, NextFunction } from 'express';
 
 const TIER_RANK: Record<SubscriptionTier, number> = {

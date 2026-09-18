@@ -1,11 +1,11 @@
 import {
-  MVI_DIMENSION_DISPLAY,
-  MVI_SCORING_VERSION_LABEL,
-  MVI_SOURCE_CATALOG,
+  TVI_DIMENSION_DISPLAY,
+  TVI_SCORING_VERSION_LABEL,
+  TVI_SOURCE_CATALOG,
   formatDirection,
   formatNormalization,
   sourceDisplayName,
-} from '@gexis/gexis-core';
+} from '@outbound/core';
 import type { ReactNode } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
@@ -48,24 +48,24 @@ function SourcePill({ sourceKey }: { sourceKey: string }) {
 }
 
 export default function MethodologyScreen() {
-  const dimensionCount = MVI_DIMENSION_DISPLAY.length;
+  const dimensionCount = TVI_DIMENSION_DISPLAY.length;
 
   return (
     <MarketingShell theme="dark">
       <View style={styles.header}>
-        <Text style={styles.title}>MVI Methodology</Text>
+        <Text style={styles.title}>Outbound TVI Methodology</Text>
         <Text style={styles.subtitle}>
-          How we score markets — transparent, auditable, deterministic
+          How we score destinations — transparent, auditable, deterministic
         </Text>
         <Text style={styles.version}>
-          Scoring engine v{MVI_SCORING_VERSION_LABEL} · {dimensionCount} dimensions
+          Scoring engine v{TVI_SCORING_VERSION_LABEL} · {dimensionCount} dimensions
         </Text>
       </View>
 
       <Section title="Overview">
         <Body>
-          The Market Viability Index (MVI) is a 0–100 score that summarizes how
-          attractive a geography is for market entry. Higher scores mean stronger
+          The Travel Viability Index (TVI) is a 0–100 score that summarizes how
+          attractive a geography is for travel. Higher scores mean stronger
           overall viability on the dimensions we track today.
         </Body>
         <Body>
@@ -86,7 +86,7 @@ export default function MethodologyScreen() {
           zeros.
         </Body>
 
-        {MVI_DIMENSION_DISPLAY.map((dim) => {
+        {TVI_DIMENSION_DISPLAY.map((dim) => {
           const uniqueSources = Array.from(
             new Set(dim.indicators.map((i) => i.source))
           );
@@ -154,7 +154,7 @@ export default function MethodologyScreen() {
           some indicators are missing.
         </Bullet>
 
-        <Text style={styles.subHeading}>Overall MVI</Text>
+        <Text style={styles.subHeading}>Overall TVI</Text>
         <Bullet>
           Default vertical (“All Industries”) weights the seven dimensions equally
           (~1/7 each), including Trajectory.
@@ -172,7 +172,7 @@ export default function MethodologyScreen() {
         <Body>
           Industry verticals (Technology & SaaS, Financial Services, Manufacturing,
           and others) reweight dimensions at query time. Dimension scores are stored
-          once under equal-weight; the overall MVI is recomputed on the fly for the
+          once under equal-weight; the overall TVI is recomputed on the fly for the
           selected vertical — same underlying dimensions, different emphasis.
           Some verticals emphasize Trajectory (e.g. tech) or de-emphasize it
           (e.g. manufacturing).
@@ -181,7 +181,7 @@ export default function MethodologyScreen() {
 
       <Section title="Trajectory Dimension">
         <Body>
-          Trajectory is the seventh MVI dimension. It is a composite score derived
+          Trajectory is the seventh TVI dimension. It is a composite score derived
           from the trend momentum of the other six base dimensions — not from a
           separate raw indicator feed.
         </Body>
@@ -280,7 +280,7 @@ export default function MethodologyScreen() {
           when newer source years enter the inputs.
         </Body>
 
-        {MVI_SOURCE_CATALOG.map((src) => (
+        {TVI_SOURCE_CATALOG.map((src) => (
           <View key={src.key} style={styles.sourceCard}>
             <View style={styles.sourceHeader}>
               <SourcePill sourceKey={src.key} />
@@ -293,7 +293,7 @@ export default function MethodologyScreen() {
         ))}
       </Section>
 
-      <Section title="What MVI Does Not Do">
+      <Section title="What TVI Does Not Do">
         <Bullet>
           Not a recommendation engine — scores describe measured conditions, they do
           not tell you where to expand.

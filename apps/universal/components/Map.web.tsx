@@ -1,4 +1,4 @@
-import { DEFAULT_MAP_STYLE, DEFAULT_MAP_VIEWPORT } from '@gexis/gexis-core';
+import { DEFAULT_MAP_STYLE, DEFAULT_MAP_VIEWPORT } from '@outbound/core';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import MapGL, {
@@ -11,10 +11,10 @@ import MapGL, {
 import 'mapbox-gl/dist/mapbox-gl.css';
 
 import {
-  MVI_BORDER,
-  MVI_BORDER_HOVER,
-  mviFillColorExpression,
-} from '@/lib/mviColors';
+  TVI_BORDER,
+  TVI_BORDER_HOVER,
+  tviFillColorExpression,
+} from '@/lib/tviColors';
 import {
   geometryCentroid,
   type GeographyFeatureProperties,
@@ -23,9 +23,9 @@ import {
 import type { MapProps } from './Map.types';
 
 const token = process.env.EXPO_PUBLIC_MAPBOX_TOKEN;
-const FILL_LAYER_ID = 'mvi-choropleth-fill';
-const LINE_LAYER_ID = 'mvi-choropleth-line';
-const SOURCE_ID = 'mvi-geographies';
+const FILL_LAYER_ID = 'tvi-choropleth-fill';
+const LINE_LAYER_ID = 'tvi-choropleth-line';
+const SOURCE_ID = 'tvi-geographies';
 
 export default function Map({
   style,
@@ -41,7 +41,7 @@ export default function Map({
   const [viewState, setViewState] = useState(DEFAULT_MAP_VIEWPORT);
   const [cursor, setCursor] = useState<'default' | 'pointer'>('default');
 
-  const fillColor = useMemo(() => mviFillColorExpression(), []);
+  const fillColor = useMemo(() => tviFillColorExpression(), []);
 
   const fillOpacityExpression = useMemo(() => {
     const matchedList = matchedIsoCodes ? Array.from(matchedIsoCodes) : null;
@@ -82,8 +82,8 @@ export default function Map({
         ['boolean', ['feature-state', 'hover'], false],
         ['==', ['get', 'isoCode'], selectedIsoCode ?? ''],
       ],
-      MVI_BORDER_HOVER,
-      MVI_BORDER,
+      TVI_BORDER_HOVER,
+      TVI_BORDER,
     ],
     [selectedIsoCode]
   );

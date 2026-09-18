@@ -1,4 +1,4 @@
-# GEXIS Project Rules
+# Outbound Project Rules
 
 ## Workflow Discipline
 - ALWAYS audit before implementing. Every task starts with a diagnostic prompt that analyzes the current state of the repo before any code is written or modified.
@@ -9,8 +9,9 @@
 - Monorepo managed by Turborepo
 - Universal client: Expo Router (single codebase for web + native)
 - Server: Express API with PostgreSQL + PostGIS
-- Shared packages: @gexis/api-client, @gexis/gexis-core, @gexis/ui
-- Map rendering has one controlled divergence: react-map-gl (web) and @rnmapbox/maps (native), both consuming shared config from gexis-core
+- Shared packages: @outbound/api-client, @outbound/core, @outbound/ui
+- Map rendering has one controlled divergence: react-map-gl (web) and @rnmapbox/maps (native), both consuming shared config from core
+- Product direction: travel intelligence and concierge (TVI scoring), not B2B market-entry tooling
 
 ## Principles
 - AI is a tool in the pipeline, not the product
@@ -18,13 +19,14 @@
 - Transparency: users can trace why any score is what it is
 - No black-box scoring
 - Free tier is genuine, not degraded
-- No duplicated logic between web and native (the Astradio anti-pattern)
+- No duplicated logic between web and native
 
 ## Code Standards
 - TypeScript everywhere (client + server)
 - Python for data ingestion workers only
 - OpenAPI spec maintained from day one
 - All environment variables documented in .env.example
+- Auth uses JWT + Argon2id (no Passport/session stack)
 
 ## Encoding
 - All source files are UTF-8, LF line endings, no BOM
