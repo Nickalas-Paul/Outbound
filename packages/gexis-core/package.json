@@ -1,0 +1,17 @@
+{
+  "name": "@gexis/gexis-core",
+  "version": "0.1.0",
+  "private": true,
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "lint": "echo \"No lint configured\"",
+    "test": "echo \"No tests yet\""
+  },
+  "devDependencies": {
+    "typescript": "^5.7.0",
+    "@types/geojson": "^7946.0.16"
+  },
+  "react-native": "src/index.ts"
+}

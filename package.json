@@ -1,0 +1,25 @@
+{
+  "name": "gexis",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*",
+    "server/*"
+  ],
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "test": "turbo run test"
+  },
+  "devDependencies": {
+    "expo": "~56.0.19",
+    "turbo": "latest",
+    "typescript": "5.9.3"
+  },
+  "packageManager": "npm@10.9.2",
+  "overrides": {
+    "mapbox-gl": "3.20.0",
+    "typescript": "5.9.3"
+  }
+}

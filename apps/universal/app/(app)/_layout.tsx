@@ -1,0 +1,366 @@
+import { Link, Redirect, Slot, Tabs, usePathname } from 'expo-router';
+import { useEffect, useState } from 'react';
+import {
+  ActivityIndicator,
+  Platform,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+  useWindowDimensions,
+} from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+import { CompareProvider } from '@/hooks/useCompareSelection';
+import { useTierAccess } from '@/hooks/useTierAccess';
+import { useAuth } from '@/services/auth';
+import { getUnreadCount } from '@/services/notifications';
+
+const APP_LINKS = [
+  { href: '/explorer' as const, label: 'Explorer' },
+  { href: '/marketplace' as const, label: 'Marketplace' },
+  { href: '/engagements' as const, label: 'Engagements' },
+  { href: '/settings' as const, label: 'Settings' },
+];
+
+function TierBadge() {
+  const { gatingEnabled, currentTier } = useTierAccess();
+
+  if (!gatingEnabled) {
+    return (
+      <View style={[styles.badge, styles.badgeBeta]}>
+        <Text style={styles.badgeText}>BETA</Text>
+      </View>
+    );
+  }
+
+  if (currentTier === 'pro') {
+    return (
+      <View style={[styles.badge, styles.badgePro]}>
+        <Text style={[styles.badgeText, styles.badgeTextOnColor]}>PRO</Text>
+      </View>
+    );
+  }
+
+  if (currentTier === 'marketplace') {
+    return (
+      <View style={[styles.badge, styles.badgeMarketplace]}>
+        <Text style={[styles.badgeText, styles.badgeTextOnColor]}>MARKETPLACE</Text>
+      </View>
+    );
+  }
+
+  return (
+    <View style={[styles.badge, styles.badgeFree]}>
+      <Text style={styles.badgeText}>FREE</Text>
+    </View>
+  );
+}
+
+function NotificationBell() {
+  const { isAuthenticated } = useAuth();
+  const pathname = usePathname();
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setCount(0);
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      try {
+        const n = await getUnreadCount();
+        if (!cancelled) setCount(n);
+      } catch {
+        // non-fatal
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [isAuthenticated, pathname]);
+
+  return (
+    <Link href="/notifications" asChild>
+      <Pressable
+        testID="notification-bell"
+        style={styles.bellWrap}
+        accessibilityLabel="Notifications"
+      >
+        <Text style={styles.bellIcon}>🔔</Text>
+        {count > 0 ? (
+          <View style={styles.bellBadge} testID="notification-badge">
+            <Text style={styles.bellBadgeText}>
+              {count > 99 ? '99+' : String(count)}
+            </Text>
+          </View>
+        ) : null}
+      </Pressable>
+    </Link>
+  );
+}
+
+function WebSidebarShell() {
+  const { user, logout } = useAuth();
+
+  return (
+    <View style={styles.shell}>
+      <View style={styles.sidebar}>
+        <View style={styles.brandRow}>
+          <Text style={styles.brand}>GEXIS</Text>
+          <TierBadge />
+          <NotificationBell />
+        </View>
+        <Text style={styles.shellLabel}>App shell (sidebar)</Text>
+        {user ? <Text style={styles.userEmail}>{user.email}</Text> : null}
+        {APP_LINKS.map((item) => (
+          <Link key={item.href} href={item.href} asChild>
+            <Pressable style={styles.navItem}>
+              <Text style={styles.navText}>{item.label}</Text>
+            </Pressable>
+          </Link>
+        ))}
+        <Link href="/notifications" asChild>
+          <Pressable style={styles.navItem}>
+            <Text style={styles.navText}>Notifications</Text>
+          </Pressable>
+        </Link>
+        <Link href="/" asChild>
+          <Pressable style={styles.navItem}>
+            <Text style={styles.navTextMuted}>Marketing home</Text>
+          </Pressable>
+        </Link>
+        <Pressable
+          style={styles.navItem}
+          onPress={() => {
+            void logout();
+          }}
+        >
+          <Text style={styles.navTextMuted}>Log out</Text>
+        </Pressable>
+      </View>
+      <View style={styles.content}>
+        <Slot />
+      </View>
+    </View>
+  );
+}
+
+function NativeTabsShell() {
+  const insets = useSafeAreaInsets();
+  const { logout } = useAuth();
+
+  return (
+    <View style={styles.nativeWrap}>
+      <View
+        style={[
+          styles.nativeBadgeBar,
+          { paddingTop: Math.max(insets.top, 8) },
+        ]}
+      >
+        <View style={styles.nativeBrandRow}>
+          <Text style={styles.nativeBrand}>GEXIS</Text>
+          <TierBadge />
+        </View>
+        <View style={styles.nativeActions}>
+          <NotificationBell />
+          <Pressable onPress={() => void logout()} hitSlop={8}>
+            <Text style={styles.navTextMuted}>Log out</Text>
+          </Pressable>
+        </View>
+      </View>
+      <Tabs
+        screenOptions={{
+          headerShown: false,
+          tabBarActiveTintColor: '#1a1a1a',
+          tabBarInactiveTintColor: '#6b6b6b',
+          tabBarStyle: {
+            paddingBottom: Math.max(insets.bottom, 8),
+            height: 56 + Math.max(insets.bottom, 8),
+            backgroundColor: '#ffffff',
+            borderTopColor: '#e2e2de',
+          },
+          tabBarLabelStyle: {
+            fontSize: 12,
+            fontWeight: '600',
+          },
+        }}
+      >
+        <Tabs.Screen name="explorer" options={{ title: 'Explorer' }} />
+        <Tabs.Screen name="marketplace" options={{ title: 'Marketplace' }} />
+        <Tabs.Screen name="engagements" options={{ title: 'Engagements' }} />
+        <Tabs.Screen name="settings" options={{ title: 'Settings' }} />
+        <Tabs.Screen
+          name="notifications"
+          options={{ href: null, title: 'Notifications' }}
+        />
+      </Tabs>
+    </View>
+  );
+}
+
+export default function AppShellLayout() {
+  const { width } = useWindowDimensions();
+  const useSidebar = Platform.OS === 'web' && width >= 768;
+  const { isAuthenticated, isLoading } = useAuth();
+
+  if (isLoading) {
+    return (
+      <View style={styles.loading}>
+        <ActivityIndicator size="large" color="#1a1a1a" />
+        <Text style={styles.loadingText}>Checking session...</Text>
+      </View>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <Redirect href="/login" />;
+  }
+
+  const shell = useSidebar ? <WebSidebarShell /> : <NativeTabsShell />;
+
+  return <CompareProvider>{shell}</CompareProvider>;
+}
+
+const styles = StyleSheet.create({
+  shell: {
+    flex: 1,
+    flexDirection: 'row',
+    backgroundColor: '#f7f7f5',
+  },
+  sidebar: {
+    width: 220,
+    padding: 20,
+    gap: 8,
+    borderRightWidth: 1,
+    borderRightColor: '#e2e2de',
+    backgroundColor: '#ffffff',
+  },
+  brandRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 4,
+    flexWrap: 'wrap',
+  },
+  brand: {
+    fontSize: 18,
+    fontWeight: '700',
+  },
+  badge: {
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 999,
+  },
+  badgeBeta: {
+    backgroundColor: '#e8eef8',
+  },
+  badgeFree: {
+    backgroundColor: '#e5e5e5',
+  },
+  badgePro: {
+    backgroundColor: '#3b82f6',
+  },
+  badgeMarketplace: {
+    backgroundColor: '#10b981',
+  },
+  badgeText: {
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 0.6,
+    color: '#1a1a1a',
+  },
+  badgeTextOnColor: {
+    color: '#ffffff',
+  },
+  bellWrap: {
+    position: 'relative',
+    padding: 4,
+    marginLeft: 'auto',
+  },
+  bellIcon: {
+    fontSize: 16,
+  },
+  bellBadge: {
+    position: 'absolute',
+    top: -2,
+    right: -4,
+    minWidth: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: '#c62828',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 3,
+  },
+  bellBadgeText: {
+    color: '#ffffff',
+    fontSize: 9,
+    fontWeight: '700',
+  },
+  shellLabel: {
+    fontSize: 12,
+    opacity: 0.55,
+    marginBottom: 12,
+  },
+  userEmail: {
+    fontSize: 12,
+    opacity: 0.7,
+    marginBottom: 8,
+  },
+  navItem: {
+    paddingVertical: 10,
+    paddingHorizontal: 8,
+    borderRadius: 6,
+  },
+  navText: {
+    fontSize: 15,
+    fontWeight: '500',
+  },
+  navTextMuted: {
+    fontSize: 14,
+    opacity: 0.6,
+  },
+  content: {
+    flex: 1,
+  },
+  loading: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 12,
+    backgroundColor: '#f7f7f5',
+  },
+  loadingText: {
+    fontSize: 14,
+    opacity: 0.65,
+  },
+  nativeWrap: {
+    flex: 1,
+  },
+  nativeBadgeBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingBottom: 8,
+    backgroundColor: '#ffffff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#e2e2de',
+  },
+  nativeBrandRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  nativeActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  nativeBrand: {
+    fontSize: 16,
+    fontWeight: '700',
+  },
+});
