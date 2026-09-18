@@ -1,8 +1,8 @@
 /**
- * MVI display metadata for the API.
+ * TVI display metadata for the API.
  *
  * COUPLING NOTE: Indicator weights / keys must stay aligned with
- * server/workers/scoring_config.py (source of truth for compute_mvi.py).
+ * server/workers/scoring_config.py (source of truth for compute_tvi.py).
  * This file is the source of truth for client-facing labels and descriptions.
  * Sync manually when either side changes.
  */
@@ -13,7 +13,7 @@ import {
   type IndustryVerticalKey,
 } from '@outbound/core';
 
-export const MVI_SCORING_VERSION = '0.1.0';
+export const TVI_SCORING_VERSION = '0.1.0';
 
 export type DimensionKey =
   | 'marketSizeAndGrowth'
@@ -41,7 +41,7 @@ export interface DimensionMeta {
   isComposite?: boolean;
 }
 
-export const MVI_DIMENSIONS: DimensionMeta[] = [
+export const TVI_DIMENSIONS: DimensionMeta[] = [
   {
     key: 'marketSizeAndGrowth',
     label: 'Market Size & Growth',
@@ -318,8 +318,8 @@ export const SOURCE_CATALOG: Record<
   },
 };
 
-/** DB key used by compute_mvi.py / mvi_scores.industry_vertical (equal-weight batch). */
-export const STORED_MVI_VERTICAL = 'all_industries';
+/** DB key used by compute_tvi.py / mvi_scores.industry_vertical (equal-weight batch). */
+export const STORED_TVI_VERTICAL = 'all_industries';
 
 export type DimensionWeights = Record<DimensionKey, number>;
 
@@ -330,7 +330,7 @@ export interface IndustryVertical {
 }
 
 /**
- * Industry vertical weight profiles for on-the-fly overall MVI recomputation.
+ * Industry vertical weight profiles for on-the-fly overall TVI recomputation.
  * COUPLING: TypeScript vertical keys/labels now live in @outbound/core (verticals.ts).
  * Weights remain here. Keep in sync with server/workers/scoring_config.py INDUSTRY_VERTICALS.
  * Dimension scores are stored once (equal-weight); overall is reweighted at query time.

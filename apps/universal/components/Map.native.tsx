@@ -3,7 +3,7 @@ import MapboxGL from '@rnmapbox/maps';
 import { useEffect, useMemo, useRef } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
-import { MVI_BORDER, mviFillColorExpressionNative } from '@/lib/mviColors';
+import { TVI_BORDER, tviFillColorExpressionNative } from '@/lib/tviColors';
 import {
   geometryCentroid,
   type GeographyFeatureProperties,
@@ -12,9 +12,9 @@ import {
 import type { MapProps } from './Map.types';
 
 const token = process.env.EXPO_PUBLIC_MAPBOX_TOKEN;
-const SOURCE_ID = 'mvi-geographies';
-const FILL_LAYER_ID = 'mvi-choropleth-fill';
-const LINE_LAYER_ID = 'mvi-choropleth-line';
+const SOURCE_ID = 'tvi-geographies';
+const FILL_LAYER_ID = 'tvi-choropleth-fill';
+const LINE_LAYER_ID = 'tvi-choropleth-line';
 
 if (token) {
   void MapboxGL.setAccessToken(token);
@@ -29,7 +29,7 @@ export default function Map({
   onGeographyClick,
 }: MapProps) {
   const cameraRef = useRef<MapboxGL.Camera>(null);
-  const fillColor = useMemo(() => mviFillColorExpressionNative(), []);
+  const fillColor = useMemo(() => tviFillColorExpressionNative(), []);
 
   const fillOpacity = useMemo(() => {
     const matchedList = matchedIsoCodes ? Array.from(matchedIsoCodes) : null;
@@ -143,7 +143,7 @@ export default function Map({
               console.log(
                 '[Map.native] tapped',
                 normalized.name,
-                'MVI',
+                'TVI',
                 normalized.overall
               );
               onGeographyClick?.(normalized, centroid);
@@ -159,7 +159,7 @@ export default function Map({
             <MapboxGL.LineLayer
               id={LINE_LAYER_ID}
               style={{
-                lineColor: MVI_BORDER,
+                lineColor: TVI_BORDER,
                 lineWidth: lineWidth as never,
               }}
             />

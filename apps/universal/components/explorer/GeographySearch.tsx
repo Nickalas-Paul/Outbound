@@ -8,7 +8,7 @@ import {
   View,
 } from 'react-native';
 
-import { mviScoreColor } from '@/lib/mviColors';
+import { tviScoreColor } from '@/lib/tviColors';
 import type { GeographyFeatureCollection } from '@/services/geographies';
 
 export type SearchResult = {
@@ -105,7 +105,7 @@ export default function GeographySearch({ geojson, onSelect, style }: Props) {
       {open && results.length > 0 ? (
         <View style={styles.dropdown}>
           {results.map((r) => {
-            const color = mviScoreColor(r.overall);
+            const color = tviScoreColor(r.overall);
             return (
               <Pressable
                 key={r.id}

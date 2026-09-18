@@ -15,7 +15,7 @@ import shortlistRoutes from './routes/shortlist';
 import notificationRoutes from './routes/notifications';
 import exportRoutes from './routes/exports';
 import geographyRoutes from './routes/geographies';
-import mviRoutes from './routes/mvi';
+import tviRoutes from './routes/tvi';
 import savedSearchRoutes from './routes/savedSearches';
 import signalRoutes from './routes/signals';
 import devRoutes from './routes/dev';
@@ -52,7 +52,7 @@ app.get('/readyz', (_req, res) => {
 
 app.use('/api/auth', authRoutes);
 app.use('/api/geographies', geographyRoutes);
-app.use('/api/mvi', mviRoutes);
+app.use('/api/tvi', tviRoutes);
 app.use('/api/signals', signalRoutes);
 app.use('/api/exports', exportRoutes);
 app.use('/api/saved-searches', savedSearchRoutes);

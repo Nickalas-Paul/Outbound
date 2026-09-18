@@ -1,5 +1,5 @@
 /**
- * Geography + MVI score routes (public).
+ * Geography + TVI score routes (public).
  *
  * Static paths (/search, /geojson, /filter) MUST be registered before /:id.
  */
@@ -11,19 +11,19 @@ import {
   computeWeightedOverall,
   DEFAULT_VERTICAL,
   DimensionKey,
-  MVI_DIMENSIONS,
-  MVI_SCORING_VERSION,
+  TVI_DIMENSIONS,
+  TVI_SCORING_VERSION,
   resolveVerticalKey,
-  STORED_MVI_VERTICAL,
-} from '../config/mvi';
+  STORED_TVI_VERTICAL,
+} from '../config/tvi';
 import { optionalAuth } from '../middleware/optionalAuth';
 import { requireFilterAccess } from '../middleware/requireFilterAccess';
 import { requireTier } from '../middleware/requireTier';
 import { apiError, apiResponse } from '../utils/response';
 
-const DIMENSION_KEYS: DimensionKey[] = MVI_DIMENSIONS.map((d) => d.key);
+const DIMENSION_KEYS: DimensionKey[] = TVI_DIMENSIONS.map((d) => d.key);
 /** Base dimensions that have trend vectors (excludes composite Trajectory). */
-const TREND_DIMENSION_KEYS: DimensionKey[] = MVI_DIMENSIONS.filter(
+const TREND_DIMENSION_KEYS: DimensionKey[] = TVI_DIMENSIONS.filter(
   (d) => !d.isComposite
 ).map((d) => d.key);
 
@@ -93,7 +93,7 @@ const router = Router();
 
 type Confidence = 'high' | 'medium' | 'low';
 
-interface MviDimensions {
+interface TviDimensions {
   marketSizeAndGrowth: number | null;
   talentDensity: number | null;
   taxEnvironment: number | null;
@@ -119,7 +119,7 @@ interface DbGeoRow {
   bbox_north: number | null;
   geometry_geojson?: string | null;
   overall_score: string | null;
-  dimensions: MviDimensions | null;
+  dimensions: TviDimensions | null;
   confidence: Confidence | null;
   data_freshness: Date | null;
   calculated_at: Date | null;
@@ -168,7 +168,7 @@ function formatDateOnly(value: Date | string | null | undefined): string | null 
   return d.toISOString().slice(0, 10);
 }
 
-function buildMvi(
+function buildTvi(
   row: DbGeoRow,
   includeSources: boolean,
   verticalKey: string
@@ -177,7 +177,7 @@ function buildMvi(
     return null;
   }
   const weighted = computeWeightedOverall(row.dimensions, verticalKey);
-  const mvi: Record<string, unknown> = {
+  const tvi: Record<string, unknown> = {
     overall:
       weighted ??
       (row.overall_score != null ? Number(row.overall_score) : null),
@@ -190,9 +190,9 @@ function buildMvi(
     vertical: verticalKey || DEFAULT_VERTICAL,
   };
   if (includeSources) {
-    mvi.sources = row.sources ?? [];
+    tvi.sources = row.sources ?? [];
   }
-  return mvi;
+  return tvi;
 }
 
 interface QuickFactsPayload {
@@ -343,7 +343,7 @@ function mapGeography(
         : null,
     population,
     gdpPpp,
-    mvi: buildMvi(row, Boolean(opts.includeSources), vertical),
+    tvi: buildTvi(row, Boolean(opts.includeSources), vertical),
   };
 
   if (opts.quickFacts) {
@@ -369,7 +369,7 @@ async function metaCounts(): Promise<{ total: number; scored: number }> {
      AND m.industry_vertical = $1
     WHERE g.region_type = 'country'
     `,
-    [STORED_MVI_VERTICAL]
+    [STORED_TVI_VERTICAL]
   );
   return {
     total: Number(result.rows[0]?.total ?? 0),
@@ -389,7 +389,7 @@ router.get('/', async (req: Request, res: Response) => {
         ? req.query.region_type.trim()
         : 'country';
 
-    const params: unknown[] = [STORED_MVI_VERTICAL, regionType];
+    const params: unknown[] = [STORED_TVI_VERTICAL, regionType];
     const where: string[] = ['g.region_type = $2'];
 
     if (req.query.min_score != null && String(req.query.min_score).length) {
@@ -433,7 +433,7 @@ router.get('/', async (req: Request, res: Response) => {
         total: counts.total,
         scored: counts.scored,
         vertical,
-        dataVersion: MVI_SCORING_VERSION,
+        dataVersion: TVI_SCORING_VERSION,
         returned: data.length,
       })
     );
@@ -464,7 +464,7 @@ router.get('/search', async (req: Request, res: Response) => {
       return;
     }
 
-    const params: unknown[] = [STORED_MVI_VERTICAL];
+    const params: unknown[] = [STORED_TVI_VERTICAL];
     let spatialClause = '';
 
     if (hasBbox) {
@@ -522,7 +522,7 @@ router.get('/search', async (req: Request, res: Response) => {
       apiResponse(data, {
         total: data.length,
         vertical,
-        dataVersion: MVI_SCORING_VERSION,
+        dataVersion: TVI_SCORING_VERSION,
       })
     );
   } catch (err) {
@@ -566,7 +566,7 @@ router.get('/geojson', optionalAuth, async (req: Request, res: Response) => {
       iso_code: string | null;
       population: string | null;
       overall_score: string | null;
-      dimensions: MviDimensions | null;
+      dimensions: TviDimensions | null;
       confidence: string | null;
       geometry_geojson: string | null;
     }>(
@@ -588,13 +588,13 @@ router.get('/geojson', optionalAuth, async (req: Request, res: Response) => {
         AND g.geometry IS NOT NULL
       ORDER BY g.name ASC
       `,
-      [STORED_MVI_VERTICAL]
+      [STORED_TVI_VERTICAL]
     );
 
     const projectedByGeo = horizon ? await loadProjectedByGeo(horizon) : null;
 
     const features = result.rows.map((row) => {
-      const dims = row.dimensions ?? ({} as MviDimensions);
+      const dims = row.dimensions ?? ({} as TviDimensions);
       const overallDims = horizon
         ? applyProjectedDimensions(dims, projectedByGeo?.get(row.id))
         : dims;
@@ -630,7 +630,7 @@ router.get('/geojson', optionalAuth, async (req: Request, res: Response) => {
       features,
       meta: {
         vertical,
-        dataVersion: MVI_SCORING_VERSION,
+        dataVersion: TVI_SCORING_VERSION,
         horizon: horizon ?? null,
       },
     });
@@ -687,7 +687,7 @@ router.post('/filter', optionalAuth, requireFilterAccess, async (req: Request, r
     if (Number.isNaN(limit) || limit < 1) limit = 50;
     if (limit > 200) limit = 200;
 
-    const params: unknown[] = [STORED_MVI_VERTICAL];
+    const params: unknown[] = [STORED_TVI_VERTICAL];
     const where: string[] = [`g.region_type = 'country'`];
 
     const addNumFilter = (value: unknown, sql: string) => {
@@ -812,16 +812,16 @@ router.post('/filter', optionalAuth, requireFilterAccess, async (req: Request, r
 
     let data = result.rows.map((row) => {
       const mapped = mapGeography(row, { vertical });
-      if (!horizon || !mapped.mvi) return mapped;
+      if (!horizon || !mapped.tvi) return mapped;
       const dims = applyProjectedDimensions(
-        (mapped.mvi as { dimensions?: MviDimensions | null }).dimensions,
+        (mapped.tvi as { dimensions?: TviDimensions | null }).dimensions,
         projectedByGeo?.get(row.id)
       );
       const overall = computeWeightedOverall(dims, vertical);
       return {
         ...mapped,
-        mvi: {
-          ...(mapped.mvi as Record<string, unknown>),
+        tvi: {
+          ...(mapped.tvi as Record<string, unknown>),
           dimensions: dims,
           overall,
         },
@@ -833,7 +833,7 @@ router.post('/filter', optionalAuth, requireFilterAccess, async (req: Request, r
         item: (typeof data)[number],
         key: DimensionKey
       ): number | null => {
-        const dims = (item.mvi as { dimensions?: Record<string, number | null> } | null)
+        const dims = (item.tvi as { dimensions?: Record<string, number | null> } | null)
           ?.dimensions;
         const v = dims?.[key];
         return v == null ? null : Number(v);
@@ -869,8 +869,8 @@ router.post('/filter', optionalAuth, requireFilterAccess, async (req: Request, r
     if (sortField === 'overall') {
       const dir = sortDir === 'ASC' ? 1 : -1;
       data = [...data].sort((a, b) => {
-        const ao = (a.mvi as { overall?: number | null } | null)?.overall;
-        const bo = (b.mvi as { overall?: number | null } | null)?.overall;
+        const ao = (a.tvi as { overall?: number | null } | null)?.overall;
+        const bo = (b.tvi as { overall?: number | null } | null)?.overall;
         if (ao == null && bo == null) return 0;
         if (ao == null) return 1;
         if (bo == null) return -1;
@@ -884,7 +884,7 @@ router.post('/filter', optionalAuth, requireFilterAccess, async (req: Request, r
         total: data.length,
         vertical,
         horizon: horizon ?? null,
-        dataVersion: MVI_SCORING_VERSION,
+        dataVersion: TVI_SCORING_VERSION,
         limit,
         filterMode: horizon
           ? 'projected_dimensions_plus_raw_corp_tax'
@@ -1044,7 +1044,7 @@ router.get('/:id', async (req: Request, res: Response) => {
       WHERE ${isIso ? 'upper(g.iso_code) = upper($2)' : 'g.id = $2::uuid'}
       LIMIT 1
       `,
-      [STORED_MVI_VERTICAL, isIso ? id.toUpperCase() : id]
+      [STORED_TVI_VERTICAL, isIso ? id.toUpperCase() : id]
     );
 
     if (result.rows.length === 0) {

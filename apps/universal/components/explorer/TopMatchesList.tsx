@@ -1,6 +1,6 @@
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { mviScoreColor } from '@/lib/mviColors';
+import { tviScoreColor } from '@/lib/tviColors';
 import type { GeographyListItem } from '@/services/geographies';
 
 type Props = {
@@ -19,7 +19,7 @@ export default function TopMatchesList({
   signalCounts,
   style,
 }: Props) {
-  const scored = items.filter((g) => g.mvi?.overall != null);
+  const scored = items.filter((g) => g.tvi?.overall != null);
 
   return (
     <View style={StyleSheet.flatten([styles.wrap, style])}>
@@ -29,8 +29,8 @@ export default function TopMatchesList({
       </View>
       <ScrollView style={styles.list} contentContainerStyle={styles.listContent}>
         {scored.map((item) => {
-          const score = item.mvi?.overall ?? null;
-          const color = mviScoreColor(score);
+          const score = item.tvi?.overall ?? null;
+          const color = tviScoreColor(score);
           const selected = item.isoCode === selectedIsoCode;
           const iso = (item.isoCode ?? '').toUpperCase();
           const hasSignals = iso ? (signalCounts?.[iso] ?? 0) > 0 : false;

@@ -2,7 +2,7 @@
 Trend computation engine.
 
 Reads historical raw_indicators, builds per-dimension 0–100 score series
-(using the same normalization + weight redistribution as compute_mvi), fits
+(using the same normalization + weight redistribution as compute_tvi), fits
 linear trends, and upserts projections into trend_scores.
 
 Usage:
@@ -486,7 +486,7 @@ def normalize_indicator_panel(
     direction: str,
 ) -> dict[str, dict[int, float]]:
     """
-    Global-panel min-max normalize (same transform + direction as compute_mvi).
+    Global-panel min-max normalize (same transform + direction as compute_tvi).
     Returns {geography_id: {year: normalized_0_100}}.
     """
     if not rows:

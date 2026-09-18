@@ -1,6 +1,6 @@
 # Outbound Data Workers
 
-Phase 7.5 — institutional indicators, trend projections, and Layer 2 market signals for the Market Viability Index.
+Phase 7.5 — institutional indicators, trend projections, and Layer 2 market signals for the Travel Viability Index.
 
 ## Prerequisites
 
@@ -29,13 +29,13 @@ Phase 7.5 — institutional indicators, trend projections, and Layer 2 market si
 | `ingest_predictions.py` | Polymarket → `market_signals` (+ notification hook) |
 | `ingest_events.py` | GDELT / seed events → `market_signals` (+ notification hook) |
 | `compute_trends.py` | OLS trends, 2yr/5yr projections, signal adjustments |
-| `compute_mvi.py` | Batch MVI scoring (`mvi_scores`) |
+| `compute_tvi.py` | Batch TVI scoring (`mvi_scores`) |
 
 ## Run order
 
 1. **Ingest workers** — any order among `ingest_*` / seed scripts.
 2. **`compute_trends.py`** — builds `trend_scores` and applies active signal adjustments to projections.
-3. **`compute_mvi.py`** — writes `mvi_scores` (including composite Trajectory).
+3. **`compute_tvi.py`** — writes `mvi_scores` (including composite Trajectory).
 
 Signal workers (`ingest_predictions.py`, `ingest_events.py`) may run on a separate cadence. After writing signals they call `POST /api/signals/process-notifications` via `notify_signals.py` so verified agents covering those geographies get `market_event` notifications. Notification failures are logged and do not fail ingestion.
 
@@ -43,5 +43,5 @@ Signal workers (`ingest_predictions.py`, `ingest_events.py`) may run on a separa
 
 - DB: `config.py` / root `.env` (`DATABASE_URL`)
 - Weights & indicators: `scoring_config.py`
-- Product methodology: `sources/MVI_METHODOLOGY.md`
+- Product methodology: `sources/TVI_METHODOLOGY.md`
 - Source catalog: `sources/DATA_SOURCES.md`

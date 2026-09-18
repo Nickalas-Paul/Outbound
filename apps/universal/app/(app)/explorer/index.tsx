@@ -19,7 +19,7 @@ import GeographyDrillDown from '@/components/explorer/GeographyDrillDown';
 import GeographySearch, {
   type SearchResult,
 } from '@/components/explorer/GeographySearch';
-import MviLegend from '@/components/explorer/MviLegend';
+import TviLegend from '@/components/explorer/TviLegend';
 import TopMatchesList from '@/components/explorer/TopMatchesList';
 import type { MapFlyToTarget } from '@/components/Map.types';
 import {
@@ -235,7 +235,7 @@ export default function ExplorerScreen() {
             ) : null}
 
             <View style={styles.legendWrap} pointerEvents="none">
-              <MviLegend />
+              <TviLegend />
             </View>
 
             {loading ? (

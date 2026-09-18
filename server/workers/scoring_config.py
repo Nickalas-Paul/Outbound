@@ -1,10 +1,10 @@
 """
-MVI Scoring Configuration
+TVI Scoring Configuration
 ========================
 Edit this file to add/remove indicators, change weights, or adjust normalization.
 The scoring engine reads this config — it does not hardcode indicator mappings.
 
-Dimension keys match MVIScore.dimensions in packages/core/src/index.ts.
+Dimension keys match TVIScore.dimensions in packages/core/src/index.ts.
 Source names must match raw_indicators.source values from the ingestion workers.
 """
 
@@ -271,7 +271,7 @@ DIMENSIONS = {
         ],
     },
     # Composite momentum dimension — no raw indicators; derived from trend_scores
-    # in compute_mvi.py after the six base dimensions are scored.
+    # in compute_tvi.py after the six base dimensions are scored.
     "trajectory": {
         "label": "Trajectory",
         "description": (
@@ -302,8 +302,8 @@ def _with_trajectory(weights: dict[str, float], trajectory_mult: float) -> dict[
     return out
 
 
-# Industry vertical weight profiles (API applies these on query; compute_mvi stores equal-weight).
-# COUPLING: keep in sync with server/api/src/config/mvi.ts INDUSTRY_VERTICALS.
+# Industry vertical weight profiles (API applies these on query; compute_tvi stores equal-weight).
+# COUPLING: keep in sync with server/api/src/config/tvi.ts INDUSTRY_VERTICALS.
 # Trajectory multipliers: tech_saas/telecom 1.3, manufacturing/energy 0.7, else 1.0.
 INDUSTRY_VERTICALS = {
     "all": {
@@ -462,7 +462,7 @@ INDUSTRY_VERTICALS = {
     },
 }
 
-# Legacy equal-weight map used by compute_mvi batch (DB industry_vertical key).
+# Legacy equal-weight map used by compute_tvi batch (DB industry_vertical key).
 VERTICAL_WEIGHTS = {
     "all_industries": INDUSTRY_VERTICALS["all"]["weights"],
 }

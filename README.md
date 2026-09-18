@@ -19,7 +19,7 @@ A full-stack data pipeline that aggregates geopolitical, economic, and regulator
 
 ## What It Does
 
-- **Country Risk Scoring:** Aggregates indicators across categories (political stability, regulatory environment, economic volatility, sanctions exposure, natural disaster risk) into a composite Market Viability Index (MVI) for each country.
+- **Country Risk Scoring:** Aggregates indicators across categories (political stability, regulatory environment, economic volatility, sanctions exposure, natural disaster risk) into a composite Travel Viability Index (TVI) for each country.
 - **Interactive Heatmap:** Color-coded global visualization allowing comparative assessment across regions and indicator categories.
 - **Agent Signal Notifications:** Automated monitoring layer that flags material changes in country risk profiles.
 - **Export:** Server-side PDF and CSV generation for downstream reporting and stakeholder presentations.

@@ -28,7 +28,7 @@ import {
 import { getGeographySignals } from '@/services/signals';
 
 const DIMENSIONS: Array<{
-  key: keyof NonNullable<NonNullable<GeographyListItem['mvi']>['dimensions']>;
+  key: keyof NonNullable<NonNullable<GeographyListItem['tvi']>['dimensions']>;
   label: string;
   color: string;
 }> = [
@@ -105,8 +105,8 @@ export default function GeographyDrillDown({
 
   if (!geographyIdOrIso) return null;
 
-  const overall = data?.mvi?.overall ?? null;
-  const dims = data?.mvi?.dimensions;
+  const overall = data?.tvi?.overall ?? null;
+  const dims = data?.tvi?.dimensions;
   const region = (data?.region ?? '').toUpperCase();
   const geoKey = data?.isoCode ?? data?.id ?? geographyIdOrIso;
 
@@ -141,16 +141,16 @@ export default function GeographyDrillDown({
               {overall != null ? Math.round(overall) : '—'}
             </Text>
             <View>
-              <Text style={styles.scoreUnit}>/100 MVI</Text>
+              <Text style={styles.scoreUnit}>/100 TVI</Text>
               <View style={styles.confRow}>
                 <View
                   style={StyleSheet.flatten([
                     styles.confDot,
-                    { backgroundColor: confidenceColor(data.mvi?.confidence) },
+                    { backgroundColor: confidenceColor(data.tvi?.confidence) },
                   ])}
                 />
                 <Text style={styles.confLabel}>
-                  {(data.mvi?.confidence ?? 'unknown').toUpperCase()} CONFIDENCE
+                  {(data.tvi?.confidence ?? 'unknown').toUpperCase()} CONFIDENCE
                 </Text>
               </View>
             </View>

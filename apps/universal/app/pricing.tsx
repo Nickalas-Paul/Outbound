@@ -33,7 +33,7 @@ const TIERS: TierCard[] = [
     features: [
       { text: '203-country heatmap', included: true },
       { text: '3 filter dimensions', included: true },
-      { text: 'Full MVI methodology docs', included: true },
+      { text: 'Full TVI methodology docs', included: true },
       { text: 'Country-level drill-down', included: true },
       { text: 'Municipal-level data', included: false },
       { text: 'Exports & saved searches', included: false },
@@ -49,7 +49,7 @@ const TIERS: TierCard[] = [
     popular: true,
     features: [
       { text: 'Everything in Free', included: true },
-      { text: 'All 7 MVI dimensions + filters', included: true },
+      { text: 'All 7 TVI dimensions + filters', included: true },
       { text: 'Time horizon projections', included: true },
       { text: 'CSV/PDF exports', included: true },
       { text: 'Saved searches & alerts', included: true },
@@ -69,7 +69,7 @@ const TIERS: TierCard[] = [
       { text: 'Engagement tracking', included: true },
       { text: 'Transaction handling', included: true },
       { text: 'Priority support', included: true },
-      { text: 'Custom MVI weighting', included: true },
+      { text: 'Custom TVI weighting', included: true },
     ],
     cta: 'Contact sales',
     action: 'placeholder',
@@ -172,7 +172,7 @@ export default function PricingScreen() {
         ) : null}
 
         <Text style={styles.footer}>
-          Annual billing saves 20%. All plans include full MVI methodology
+          Annual billing saves 20%. All plans include full TVI methodology
           documentation.
         </Text>
       </View>
