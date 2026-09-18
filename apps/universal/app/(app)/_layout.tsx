@@ -1,5 +1,4 @@
-import { Link, Redirect, Slot, Tabs, usePathname } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { Link, Redirect, Slot, Tabs } from 'expo-router';
 import {
   ActivityIndicator,
   Platform,
@@ -14,12 +13,16 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CompareProvider } from '@/hooks/useCompareSelection';
 import { useTierAccess } from '@/hooks/useTierAccess';
 import { useAuth } from '@/services/auth';
-import { getUnreadCount } from '@/services/notifications';
+// MARKETPLACE: commented out for Outbound — preserved for future vendor/guide marketplace
+// import { useEffect, useState } from 'react';
+// import { usePathname } from 'expo-router';
+// import { getUnreadCount } from '@/services/notifications';
 
 const APP_LINKS = [
   { href: '/explorer' as const, label: 'Explorer' },
-  { href: '/marketplace' as const, label: 'Marketplace' },
-  { href: '/engagements' as const, label: 'Engagements' },
+  // MARKETPLACE: commented out for Outbound — preserved for future vendor/guide marketplace
+  // { href: '/marketplace' as const, label: 'Marketplace' },
+  // { href: '/engagements' as const, label: 'Engagements' },
   { href: '/settings' as const, label: 'Settings' },
 ];
 
@@ -57,6 +60,8 @@ function TierBadge() {
   );
 }
 
+// MARKETPLACE: commented out for Outbound — preserved for future vendor/guide marketplace
+/*
 function NotificationBell() {
   const { isAuthenticated } = useAuth();
   const pathname = usePathname();
@@ -100,6 +105,7 @@ function NotificationBell() {
     </Link>
   );
 }
+*/
 
 function WebSidebarShell() {
   const { user, logout } = useAuth();
@@ -110,7 +116,8 @@ function WebSidebarShell() {
         <View style={styles.brandRow}>
           <Text style={styles.brand}>Outbound</Text>
           <TierBadge />
-          <NotificationBell />
+          {/* MARKETPLACE: commented out for Outbound — preserved for future vendor/guide marketplace */}
+          {/* <NotificationBell /> */}
         </View>
         <Text style={styles.shellLabel}>App shell (sidebar)</Text>
         {user ? <Text style={styles.userEmail}>{user.email}</Text> : null}
@@ -121,11 +128,12 @@ function WebSidebarShell() {
             </Pressable>
           </Link>
         ))}
-        <Link href="/notifications" asChild>
+        {/* MARKETPLACE: commented out for Outbound — preserved for future vendor/guide marketplace */}
+        {/* <Link href="/notifications" asChild>
           <Pressable style={styles.navItem}>
             <Text style={styles.navText}>Notifications</Text>
           </Pressable>
-        </Link>
+        </Link> */}
         <Link href="/" asChild>
           <Pressable style={styles.navItem}>
             <Text style={styles.navTextMuted}>Marketing home</Text>
@@ -164,7 +172,8 @@ function NativeTabsShell() {
           <TierBadge />
         </View>
         <View style={styles.nativeActions}>
-          <NotificationBell />
+          {/* MARKETPLACE: commented out for Outbound — preserved for future vendor/guide marketplace */}
+          {/* <NotificationBell /> */}
           <Pressable onPress={() => void logout()} hitSlop={8}>
             <Text style={styles.navTextMuted}>Log out</Text>
           </Pressable>
@@ -188,8 +197,16 @@ function NativeTabsShell() {
         }}
       >
         <Tabs.Screen name="explorer" options={{ title: 'Explorer' }} />
-        <Tabs.Screen name="marketplace" options={{ title: 'Marketplace' }} />
-        <Tabs.Screen name="engagements" options={{ title: 'Engagements' }} />
+        {/* MARKETPLACE: commented out for Outbound — preserved for future vendor/guide marketplace */}
+        {/* Hide from tab bar but keep routes registered for deep links / Coming Soon screens */}
+        <Tabs.Screen
+          name="marketplace"
+          options={{ href: null, title: 'Marketplace' }}
+        />
+        <Tabs.Screen
+          name="engagements"
+          options={{ href: null, title: 'Engagements' }}
+        />
         <Tabs.Screen name="settings" options={{ title: 'Settings' }} />
         <Tabs.Screen
           name="notifications"

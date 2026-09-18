@@ -5,7 +5,8 @@ import { useAuth } from '@/services/auth';
 
 const LINKS = [
   { href: '/explorer' as const, label: 'Product' },
-  { href: '/marketplace' as const, label: 'Marketplace' },
+  // MARKETPLACE: commented out for Outbound — preserved for future vendor/guide marketplace
+  // { href: '/marketplace' as const, label: 'Marketplace' },
   { href: '/pricing' as const, label: 'Pricing' },
   { href: '/docs/methodology' as const, label: 'Docs' },
 ];

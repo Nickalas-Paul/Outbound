@@ -688,7 +688,8 @@ export default function GeographyDetailScreen() {
                     </View>
                   ) : null}
                 </View>
-                <Pressable
+                {/* MARKETPLACE: commented out for Outbound — preserved for future vendor/guide marketplace */}
+                {/* <Pressable
                   style={[styles.actionBtn, styles.actionBtnGhost]}
                   onPress={() =>
                     router.push(
@@ -697,7 +698,7 @@ export default function GeographyDetailScreen() {
                   }
                 >
                   <Text style={styles.actionTextGhost}>View agents →</Text>
-                </Pressable>
+                </Pressable> */}
               </View>
             </View>
 

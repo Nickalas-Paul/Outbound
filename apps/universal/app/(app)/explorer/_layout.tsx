@@ -6,7 +6,9 @@ export default function ExplorerLayout() {
       <Stack.Screen name="index" />
       <Stack.Screen name="compare" />
       <Stack.Screen name="[geographyId]" />
-      <Stack.Screen name="[geographyId]/agents" />
+      {/* MARKETPLACE: commented out for Outbound — preserved for future vendor/guide marketplace */}
+      {/* Route file kept as Coming Soon placeholder if deep-linked */}
+      <Stack.Screen name="[geographyId]/agents" options={{ title: 'Agents' }} />
     </Stack>
   );
 }

@@ -8,11 +8,12 @@ import rateLimit from 'express-rate-limit';
 import { databaseReady, verifyDatabaseConnection } from './config/database';
 import { connectRedis, redisReady } from './config/redis';
 import authRoutes from './routes/auth';
-import agentRoutes from './routes/agents';
-import marketplaceRoutes from './routes/marketplace';
-import engagementRoutes from './routes/engagements';
-import shortlistRoutes from './routes/shortlist';
-import notificationRoutes from './routes/notifications';
+// MARKETPLACE: commented out for Outbound — preserved for future vendor/guide marketplace
+// import agentRoutes from './routes/agents';
+// import marketplaceRoutes from './routes/marketplace';
+// import engagementRoutes from './routes/engagements';
+// import shortlistRoutes from './routes/shortlist';
+// import notificationRoutes from './routes/notifications';
 import exportRoutes from './routes/exports';
 import geographyRoutes from './routes/geographies';
 import tviRoutes from './routes/tvi';
@@ -56,11 +57,12 @@ app.use('/api/tvi', tviRoutes);
 app.use('/api/signals', signalRoutes);
 app.use('/api/exports', exportRoutes);
 app.use('/api/saved-searches', savedSearchRoutes);
-app.use('/api/agents', agentRoutes);
-app.use('/api/marketplace', marketplaceRoutes);
-app.use('/api/engagements', engagementRoutes);
-app.use('/api/shortlist', shortlistRoutes);
-app.use('/api/notifications', notificationRoutes);
+// MARKETPLACE: commented out for Outbound — preserved for future vendor/guide marketplace
+// app.use('/api/agents', agentRoutes);
+// app.use('/api/marketplace', marketplaceRoutes);
+// app.use('/api/engagements', engagementRoutes);
+// app.use('/api/shortlist', shortlistRoutes);
+// app.use('/api/notifications', notificationRoutes);
 
 if (process.env.NODE_ENV !== 'production') {
   app.use('/api/dev', devRoutes);

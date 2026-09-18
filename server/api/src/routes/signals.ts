@@ -4,7 +4,8 @@
 
 import { Router, Request, Response } from 'express';
 import { pool } from '../config/database';
-import { createNotification } from '../services/notifications';
+// MARKETPLACE: commented out for Outbound — preserved for future vendor/guide marketplace
+// import { createNotification } from '../services/notifications';
 import { apiError, apiResponse, toCamelCase } from '../utils/response';
 
 const router = Router();
@@ -147,10 +148,11 @@ router.get('/summary', async (_req: Request, res: Response) => {
   }
 });
 
-/**
+// MARKETPLACE: commented out for Outbound — preserved for future vendor/guide marketplace
+/*
  * POST /api/signals/process-notifications
  * Internal hook: notify verified agents covering geographies with recent signals.
- */
+ *
 router.post('/process-notifications', async (_req: Request, res: Response) => {
   try {
     const signalsResult = await pool.query<{
@@ -252,5 +254,6 @@ router.post('/process-notifications', async (_req: Request, res: Response) => {
     res.status(500).json(apiError('Internal server error'));
   }
 });
+*/
 
 export default router;

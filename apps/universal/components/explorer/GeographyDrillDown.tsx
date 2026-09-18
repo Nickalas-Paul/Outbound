@@ -309,7 +309,8 @@ export default function GeographyDrillDown({
                     : 'Add to compare'}
               </Text>
             </Pressable>
-            <Pressable
+            {/* MARKETPLACE: commented out for Outbound — preserved for future vendor/guide marketplace */}
+            {/* <Pressable
               style={StyleSheet.flatten([
                 styles.actionBtn,
                 styles.actionBtnSecondary,
@@ -321,7 +322,7 @@ export default function GeographyDrillDown({
               }
             >
               <Text style={styles.actionTextSecondary}>View agents →</Text>
-            </Pressable>
+            </Pressable> */}
           </View>
         </ScrollView>
       ) : null}
