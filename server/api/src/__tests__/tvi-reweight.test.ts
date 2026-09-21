@@ -117,4 +117,19 @@ describe('computeWeightedOverall — golden fixtures', () => {
     expect(weights.trajectory).toBeGreaterThan(weightsMult1.trajectory);
     expect(overall).toBeGreaterThan(overallMult1!);
   });
+
+  it('returns null when fewer than MIN_DIMENSIONS_FOR_OVERALL dimensions are scored', () => {
+    const sparse: Partial<Record<DimensionKey, number | null>> = {
+      tourismInfrastructure: null,
+      accessibility: null,
+      costIndex: null,
+      safetyAndEntry: 100,
+      travelInfrastructure: null,
+      crowding: null,
+      trajectory: 50,
+    };
+
+    expect(computeWeightedOverallWithWeights(sparse, EQUAL_WEIGHTS)).toBeNull();
+    expect(computeWeightedOverall(sparse, 'family')).toBeNull();
+  });
 });

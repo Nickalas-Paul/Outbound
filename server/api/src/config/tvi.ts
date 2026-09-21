@@ -53,25 +53,31 @@ export const TVI_DIMENSIONS: DimensionMeta[] = [
         source: 'world_bank',
         code: 'ST.INT.ARVL',
         name: 'International tourism, number of arrivals',
-        weight: 0.35,
+        weight: 0.3,
       },
       {
         source: 'world_bank',
         code: 'IS.AIR.DPRT',
         name: 'Air transport, registered carrier departures worldwide',
-        weight: 0.25,
+        weight: 0.2,
       },
       {
         source: 'world_bank',
         code: 'ST.INT.TVLX.CD',
         name: 'International tourism, expenditures (current US$)',
-        weight: 0.25,
+        weight: 0.2,
       },
       {
         source: 'world_bank_derived',
         code: 'tourism_receipts_per_arrival',
         name: 'Tourism receipts per arrival',
-        weight: 0.15,
+        weight: 0.1,
+      },
+      {
+        source: 'unesco',
+        code: 'unesco_site_count',
+        name: 'UNESCO World Heritage site count',
+        weight: 0.2,
       },
     ],
   },
@@ -79,12 +85,12 @@ export const TVI_DIMENSIONS: DimensionMeta[] = [
     key: 'accessibility',
     label: 'Accessibility & Ease of Travel',
     description:
-      'Visa openness, digital connectivity, and environmental quality that affect how easily travelers can visit and navigate a destination',
+      'Visa openness, digital connectivity, and English proficiency that affect how easily travelers can visit and navigate a destination',
     indicators: [
       {
         source: 'ef_epi',
         code: 'ef_epi_score',
-        name: 'Environmental Performance Index score',
+        name: 'EF English Proficiency Index score',
         weight: 0.3,
       },
       {
@@ -149,25 +155,31 @@ export const TVI_DIMENSIONS: DimensionMeta[] = [
         source: 'state_dept_advisory',
         code: 'travel_advisory_level',
         name: 'US State Department travel advisory level',
-        weight: 0.3,
+        weight: 0.22,
+      },
+      {
+        source: 'fcdo',
+        code: 'fcdo_advisory_level',
+        name: 'UK FCDO travel advisory level',
+        weight: 0.18,
       },
       {
         source: 'world_bank',
         code: 'RL.PER.RNK',
         name: 'Rule of Law (WGI Percentile)',
-        weight: 0.2,
+        weight: 0.18,
       },
       {
         source: 'transparency',
         code: 'CC.PER.RNK',
         name: 'Control of Corruption (WGI score)',
-        weight: 0.2,
+        weight: 0.15,
       },
       {
         source: 'world_bank',
         code: 'PV.PER.RNK',
         name: 'Political Stability / Absence of Violence (WGI Percentile)',
-        weight: 0.2,
+        weight: 0.17,
       },
       {
         source: 'visa_index',
@@ -260,9 +272,19 @@ export const SOURCE_CATALOG: Record<
     refreshCadence: 'Annual',
   },
   ef_epi: {
-    name: 'Yale Environmental Performance Index',
-    url: 'https://epi.yale.edu/',
-    refreshCadence: 'Biennial',
+    name: 'EF English Proficiency Index',
+    url: 'https://www.ef.com/epi/',
+    refreshCadence: 'Annual',
+  },
+  unesco: {
+    name: 'UNESCO World Heritage List',
+    url: 'https://whc.unesco.org/en/list/',
+    refreshCadence: 'Annual',
+  },
+  fcdo: {
+    name: 'UK FCDO travel advice',
+    url: 'https://www.gov.uk/foreign-travel-advice',
+    refreshCadence: 'Continuous',
   },
   visa_index: {
     name: 'Visa / passport openness indexes',
@@ -460,6 +482,9 @@ export function getProfileWeights(profileKey: string): DimensionWeights {
  * Weighted overall from stored dimension scores using an explicit weight map.
  * Renormalizes over non-null dimensions (same math as query-time reweighting).
  */
+/** Matches compute_tvi.py MIN_DIMENSIONS_FOR_OVERALL — sparse geos stay unscored. */
+export const MIN_DIMENSIONS_FOR_OVERALL = 3;
+
 export function computeWeightedOverallWithWeights(
   dimensions: Partial<Record<DimensionKey, number | null>> | null | undefined,
   weights: DimensionWeights
@@ -467,6 +492,7 @@ export function computeWeightedOverallWithWeights(
   if (!dimensions) return null;
   let numerator = 0;
   let denominator = 0;
+  let scored = 0;
   (Object.keys(weights) as DimensionKey[]).forEach((key) => {
     const raw = dimensions[key];
     if (raw == null) return;
@@ -475,7 +501,9 @@ export function computeWeightedOverallWithWeights(
     const w = weights[key];
     numerator += value * w;
     denominator += w;
+    scored += 1;
   });
+  if (scored < MIN_DIMENSIONS_FOR_OVERALL) return null;
   if (denominator <= 0) return null;
   return Math.round((numerator / denominator) * 100) / 100;
 }

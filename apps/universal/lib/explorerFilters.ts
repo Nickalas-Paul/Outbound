@@ -7,7 +7,7 @@ export type ExplorerFilterState = {
   profile: string;
   horizon: TimeHorizon;
   minPopulation: number;
-  maxCorpTaxRate: number;
+  minCostIndex: number;
   minAccessibility: number;
   maxCrowding: number;
   minSafetyAndEntry: number;
@@ -17,7 +17,7 @@ export const DEFAULT_FILTERS: ExplorerFilterState = {
   profile: DEFAULT_TRAVELER_PROFILE,
   horizon: 'current',
   minPopulation: 0,
-  maxCorpTaxRate: 50,
+  minCostIndex: 0,
   minAccessibility: 0,
   maxCrowding: 100,
   minSafetyAndEntry: 0,
@@ -25,7 +25,7 @@ export const DEFAULT_FILTERS: ExplorerFilterState = {
 
 export const FILTER_LIMITS = {
   minPopulation: { min: 0, max: 100_000_000, step: 1_000_000 },
-  maxCorpTaxRate: { min: 0, max: 50, step: 1 },
+  minCostIndex: { min: 0, max: 100, step: 1 },
   minAccessibility: { min: 0, max: 100, step: 1 },
   maxCrowding: { min: 0, max: 100, step: 1 },
   minSafetyAndEntry: { min: 0, max: 100, step: 1 },
@@ -58,9 +58,7 @@ export function formatMaxScore(value: number): string {
 export function toApiFilters(state: ExplorerFilterState): GeographyFilters {
   const filters: GeographyFilters = {};
   if (state.minPopulation > 0) filters.minPopulation = state.minPopulation;
-  if (state.maxCorpTaxRate < FILTER_LIMITS.maxCorpTaxRate.max) {
-    filters.maxCorpTaxRate = state.maxCorpTaxRate;
-  }
+  if (state.minCostIndex > 0) filters.minCostIndex = state.minCostIndex;
   if (state.minAccessibility > 0) filters.minAccessibility = state.minAccessibility;
   if (state.maxCrowding < 100) {
     filters.maxCrowding = state.maxCrowding;
@@ -74,7 +72,7 @@ export function filtersEqual(a: ExplorerFilterState, b: ExplorerFilterState): bo
     a.profile === b.profile &&
     a.horizon === b.horizon &&
     a.minPopulation === b.minPopulation &&
-    a.maxCorpTaxRate === b.maxCorpTaxRate &&
+    a.minCostIndex === b.minCostIndex &&
     a.minAccessibility === b.minAccessibility &&
     a.maxCrowding === b.maxCrowding &&
     a.minSafetyAndEntry === b.minSafetyAndEntry
@@ -110,7 +108,7 @@ export function parseFiltersFromParams(
     profile: normalizeProfileKey(one('profile') ?? one('vertical')),
     horizon,
     minPopulation: num('minPopulation', DEFAULT_FILTERS.minPopulation),
-    maxCorpTaxRate: num('maxCorpTaxRate', DEFAULT_FILTERS.maxCorpTaxRate),
+    minCostIndex: num('minCostIndex', DEFAULT_FILTERS.minCostIndex),
     minAccessibility: num('minAccessibility', DEFAULT_FILTERS.minAccessibility),
     maxCrowding: num(
       'maxCrowding',
@@ -133,8 +131,8 @@ export function filtersToQueryRecord(
   if (state.minPopulation !== DEFAULT_FILTERS.minPopulation) {
     out.minPopulation = String(state.minPopulation);
   }
-  if (state.maxCorpTaxRate !== DEFAULT_FILTERS.maxCorpTaxRate) {
-    out.maxCorpTaxRate = String(state.maxCorpTaxRate);
+  if (state.minCostIndex !== DEFAULT_FILTERS.minCostIndex) {
+    out.minCostIndex = String(state.minCostIndex);
   }
   if (state.minAccessibility !== DEFAULT_FILTERS.minAccessibility) {
     out.minAccessibility = String(state.minAccessibility);
@@ -151,7 +149,10 @@ export function filtersToQueryRecord(
 /** Portable JSONB shape stored in saved_searches.filters. */
 export type SavedFilterPayload = {
   population?: number;
+  /** @deprecated replaced by minCostIndex */
   maxCorpTaxRate?: number;
+  minCostIndex?: number;
+  costIndex?: number;
   safetyAndEntry?: number;
   accessibility?: number;
   crowding?: number;
@@ -172,7 +173,7 @@ export function stateToSavedFilters(
 ): SavedFilterPayload {
   return {
     population: state.minPopulation,
-    maxCorpTaxRate: state.maxCorpTaxRate,
+    minCostIndex: state.minCostIndex,
     safetyAndEntry: state.minSafetyAndEntry,
     accessibility: state.minAccessibility,
     crowding: state.maxCrowding,
@@ -212,10 +213,10 @@ export function savedFiltersToState(
     profile,
     horizon,
     minPopulation: numField(f, ['population', 'minPopulation'], DEFAULT_FILTERS.minPopulation),
-    maxCorpTaxRate: numField(
+    minCostIndex: numField(
       f,
-      ['maxCorpTaxRate'],
-      DEFAULT_FILTERS.maxCorpTaxRate
+      ['minCostIndex', 'costIndex'],
+      DEFAULT_FILTERS.minCostIndex
     ),
     minAccessibility: numField(
       f,

@@ -79,7 +79,7 @@ export function useExplorerFilters() {
       vertical: undefined,
       horizon: query.horizon ?? undefined,
       minPopulation: query.minPopulation ?? undefined,
-      maxCorpTaxRate: query.maxCorpTaxRate ?? undefined,
+      minCostIndex: query.minCostIndex ?? undefined,
       minAccessibility: query.minAccessibility ?? undefined,
       maxCrowding: query.maxCrowding ?? undefined,
       minSafetyAndEntry: query.minSafetyAndEntry ?? undefined,

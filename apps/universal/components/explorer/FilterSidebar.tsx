@@ -12,7 +12,6 @@ import {
   FILTER_LIMITS,
   formatMaxScore,
   formatMinScore,
-  formatPercentCap,
   formatPopulation,
   type ExplorerFilterState,
   type TimeHorizon,
@@ -253,16 +252,16 @@ export default function FilterSidebar({ filters, onChange, onReset, style }: Pro
       </FilterRow>
 
       <FilterRow
-        label="Corp. Tax Rate Cap"
-        valueLabel={formatPercentCap(filters.maxCorpTaxRate)}
+        label="Cost Index Min."
+        valueLabel={formatMinScore(filters.minCostIndex)}
       >
         <RangeSlider
-          value={filters.maxCorpTaxRate}
-          min={FILTER_LIMITS.maxCorpTaxRate.min}
-          max={FILTER_LIMITS.maxCorpTaxRate.max}
-          step={FILTER_LIMITS.maxCorpTaxRate.step}
+          value={filters.minCostIndex}
+          min={FILTER_LIMITS.minCostIndex.min}
+          max={FILTER_LIMITS.minCostIndex.max}
+          step={FILTER_LIMITS.minCostIndex.step}
           accent="#e0a03a"
-          onChange={(maxCorpTaxRate) => onChange({ maxCorpTaxRate })}
+          onChange={(minCostIndex) => onChange({ minCostIndex })}
         />
       </FilterRow>
 

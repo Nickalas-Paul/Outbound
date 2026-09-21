@@ -12,7 +12,9 @@ import { Request, Response, NextFunction } from 'express';
 const BODY_KEY_TO_FILTER: Record<string, FilterKey> = {
   population: 'population',
   minPopulation: 'population',
-  maxCorpTaxRate: 'maxCorpTaxRate',
+  maxCorpTaxRate: 'costIndex',
+  minCostIndex: 'costIndex',
+  costIndex: 'costIndex',
   safetyAndEntry: 'safetyAndEntry',
   minSafetyAndEntry: 'safetyAndEntry',
   accessibility: 'accessibility',

@@ -9,7 +9,7 @@ export type SubscriptionTier = 'free' | 'pro' | 'marketplace';
 /** Filter dimension keys (5 total; Free unlocks 3). */
 export type FilterKey =
   | 'population'
-  | 'maxCorpTaxRate'
+  | 'costIndex'
   | 'safetyAndEntry'
   | 'accessibility'
   | 'crowding';
@@ -27,13 +27,13 @@ export type TierFeature =
 
 export const FREE_FILTER_KEYS: readonly FilterKey[] = [
   'population',
-  'maxCorpTaxRate',
+  'costIndex',
   'safetyAndEntry',
 ] as const;
 
 export const ALL_FILTER_KEYS: readonly FilterKey[] = [
   'population',
-  'maxCorpTaxRate',
+  'costIndex',
   'safetyAndEntry',
   'accessibility',
   'crowding',

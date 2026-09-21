@@ -1,0 +1,1594 @@
+[
+  {
+    "country_iso3": "AFG",
+    "total_sites": 2,
+    "cultural": 2,
+    "natural": 0,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "AGO",
+    "total_sites": 1,
+    "cultural": 1,
+    "natural": 0,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "ALB",
+    "total_sites": 4,
+    "cultural": 2,
+    "natural": 1,
+    "mixed": 1,
+    "year": 2024
+  },
+  {
+    "country_iso3": "AND",
+    "total_sites": 1,
+    "cultural": 1,
+    "natural": 0,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "ARE",
+    "total_sites": 1,
+    "cultural": 1,
+    "natural": 0,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "ARG",
+    "total_sites": 11,
+    "cultural": 6,
+    "natural": 5,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "ARM",
+    "total_sites": 3,
+    "cultural": 3,
+    "natural": 0,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "ASM",
+    "total_sites": 0,
+    "cultural": 0,
+    "natural": 0,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "ATA",
+    "total_sites": 0,
+    "cultural": 0,
+    "natural": 0,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "ATG",
+    "total_sites": 0,
+    "cultural": 0,
+    "natural": 0,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "AUS",
+    "total_sites": 20,
+    "cultural": 4,
+    "natural": 12,
+    "mixed": 4,
+    "year": 2024
+  },
+  {
+    "country_iso3": "AUT",
+    "total_sites": 12,
+    "cultural": 11,
+    "natural": 1,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "AZE",
+    "total_sites": 3,
+    "cultural": 2,
+    "natural": 1,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "BDI",
+    "total_sites": 0,
+    "cultural": 0,
+    "natural": 0,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "BEL",
+    "total_sites": 13,
+    "cultural": 12,
+    "natural": 1,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "BEN",
+    "total_sites": 2,
+    "cultural": 1,
+    "natural": 1,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "BFA",
+    "total_sites": 2,
+    "cultural": 1,
+    "natural": 1,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "BGD",
+    "total_sites": 3,
+    "cultural": 2,
+    "natural": 1,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "BGR",
+    "total_sites": 10,
+    "cultural": 7,
+    "natural": 2,
+    "mixed": 1,
+    "year": 2024
+  },
+  {
+    "country_iso3": "BHR",
+    "total_sites": 2,
+    "cultural": 2,
+    "natural": 0,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "BHS",
+    "total_sites": 0,
+    "cultural": 0,
+    "natural": 0,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "BIH",
+    "total_sites": 4,
+    "cultural": 3,
+    "natural": 1,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "BLR",
+    "total_sites": 4,
+    "cultural": 3,
+    "natural": 1,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "BLZ",
+    "total_sites": 1,
+    "cultural": 0,
+    "natural": 1,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "BOL",
+    "total_sites": 7,
+    "cultural": 6,
+    "natural": 1,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "BRA",
+    "total_sites": 23,
+    "cultural": 15,
+    "natural": 7,
+    "mixed": 1,
+    "year": 2024
+  },
+  {
+    "country_iso3": "BRB",
+    "total_sites": 1,
+    "cultural": 1,
+    "natural": 0,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "BRN",
+    "total_sites": 0,
+    "cultural": 0,
+    "natural": 0,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "BTN",
+    "total_sites": 0,
+    "cultural": 0,
+    "natural": 0,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "BWA",
+    "total_sites": 2,
+    "cultural": 1,
+    "natural": 1,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "CAF",
+    "total_sites": 2,
+    "cultural": 0,
+    "natural": 2,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "CAN",
+    "total_sites": 20,
+    "cultural": 9,
+    "natural": 10,
+    "mixed": 1,
+    "year": 2024
+  },
+  {
+    "country_iso3": "CHE",
+    "total_sites": 13,
+    "cultural": 9,
+    "natural": 3,
+    "mixed": 1,
+    "year": 2024
+  },
+  {
+    "country_iso3": "CHL",
+    "total_sites": 7,
+    "cultural": 6,
+    "natural": 1,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "CHN",
+    "total_sites": 57,
+    "cultural": 39,
+    "natural": 14,
+    "mixed": 4,
+    "year": 2024
+  },
+  {
+    "country_iso3": "CIV",
+    "total_sites": 4,
+    "cultural": 2,
+    "natural": 2,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "CMR",
+    "total_sites": 2,
+    "cultural": 1,
+    "natural": 1,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "COD",
+    "total_sites": 5,
+    "cultural": 0,
+    "natural": 5,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "COG",
+    "total_sites": 1,
+    "cultural": 0,
+    "natural": 1,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "COL",
+    "total_sites": 9,
+    "cultural": 6,
+    "natural": 2,
+    "mixed": 1,
+    "year": 2024
+  },
+  {
+    "country_iso3": "COM",
+    "total_sites": 0,
+    "cultural": 0,
+    "natural": 0,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "CPV",
+    "total_sites": 1,
+    "cultural": 1,
+    "natural": 0,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "CRI",
+    "total_sites": 4,
+    "cultural": 1,
+    "natural": 3,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "CUB",
+    "total_sites": 9,
+    "cultural": 7,
+    "natural": 2,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "CUW",
+    "total_sites": 0,
+    "cultural": 0,
+    "natural": 0,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "CYP",
+    "total_sites": 3,
+    "cultural": 3,
+    "natural": 0,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "CZE",
+    "total_sites": 14,
+    "cultural": 14,
+    "natural": 0,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "DEU",
+    "total_sites": 52,
+    "cultural": 49,
+    "natural": 3,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "DJI",
+    "total_sites": 0,
+    "cultural": 0,
+    "natural": 0,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "DMA",
+    "total_sites": 1,
+    "cultural": 0,
+    "natural": 1,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "DNK",
+    "total_sites": 10,
+    "cultural": 7,
+    "natural": 3,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "DOM",
+    "total_sites": 1,
+    "cultural": 1,
+    "natural": 0,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "DZA",
+    "total_sites": 7,
+    "cultural": 6,
+    "natural": 1,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "ECU",
+    "total_sites": 5,
+    "cultural": 3,
+    "natural": 2,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "EGY",
+    "total_sites": 7,
+    "cultural": 6,
+    "natural": 1,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "ERI",
+    "total_sites": 1,
+    "cultural": 1,
+    "natural": 0,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "ESH",
+    "total_sites": 0,
+    "cultural": 0,
+    "natural": 0,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "ESP",
+    "total_sites": 49,
+    "cultural": 43,
+    "natural": 4,
+    "mixed": 2,
+    "year": 2024
+  },
+  {
+    "country_iso3": "EST",
+    "total_sites": 2,
+    "cultural": 2,
+    "natural": 0,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "ETH",
+    "total_sites": 9,
+    "cultural": 8,
+    "natural": 1,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "FIN",
+    "total_sites": 7,
+    "cultural": 6,
+    "natural": 1,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "FJI",
+    "total_sites": 1,
+    "cultural": 1,
+    "natural": 0,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "FLK",
+    "total_sites": 0,
+    "cultural": 0,
+    "natural": 0,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "FRA",
+    "total_sites": 49,
+    "cultural": 42,
+    "natural": 6,
+    "mixed": 1,
+    "year": 2024
+  },
+  {
+    "country_iso3": "GAB",
+    "total_sites": 2,
+    "cultural": 0,
+    "natural": 2,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "GBR",
+    "total_sites": 33,
+    "cultural": 28,
+    "natural": 4,
+    "mixed": 1,
+    "year": 2024
+  },
+  {
+    "country_iso3": "GEO",
+    "total_sites": 4,
+    "cultural": 3,
+    "natural": 1,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "GHA",
+    "total_sites": 2,
+    "cultural": 2,
+    "natural": 0,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "GIN",
+    "total_sites": 1,
+    "cultural": 0,
+    "natural": 1,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "GMB",
+    "total_sites": 2,
+    "cultural": 2,
+    "natural": 0,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "GNB",
+    "total_sites": 0,
+    "cultural": 0,
+    "natural": 0,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "GNQ",
+    "total_sites": 0,
+    "cultural": 0,
+    "natural": 0,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "GRC",
+    "total_sites": 19,
+    "cultural": 17,
+    "natural": 0,
+    "mixed": 2,
+    "year": 2024
+  },
+  {
+    "country_iso3": "GRD",
+    "total_sites": 0,
+    "cultural": 0,
+    "natural": 0,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "GRL",
+    "total_sites": 0,
+    "cultural": 0,
+    "natural": 0,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "GTM",
+    "total_sites": 3,
+    "cultural": 2,
+    "natural": 1,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "GUM",
+    "total_sites": 0,
+    "cultural": 0,
+    "natural": 0,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "GUY",
+    "total_sites": 0,
+    "cultural": 0,
+    "natural": 0,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "HKG",
+    "total_sites": 0,
+    "cultural": 0,
+    "natural": 0,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "HND",
+    "total_sites": 2,
+    "cultural": 1,
+    "natural": 1,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "HRV",
+    "total_sites": 10,
+    "cultural": 8,
+    "natural": 2,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "HTI",
+    "total_sites": 1,
+    "cultural": 1,
+    "natural": 0,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "HUN",
+    "total_sites": 8,
+    "cultural": 7,
+    "natural": 1,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "IDN",
+    "total_sites": 10,
+    "cultural": 6,
+    "natural": 4,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "IND",
+    "total_sites": 42,
+    "cultural": 34,
+    "natural": 7,
+    "mixed": 1,
+    "year": 2024
+  },
+  {
+    "country_iso3": "IRL",
+    "total_sites": 2,
+    "cultural": 2,
+    "natural": 0,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "IRN",
+    "total_sites": 27,
+    "cultural": 25,
+    "natural": 2,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "IRQ",
+    "total_sites": 6,
+    "cultural": 5,
+    "natural": 1,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "ISL",
+    "total_sites": 2,
+    "cultural": 1,
+    "natural": 1,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "ISR",
+    "total_sites": 9,
+    "cultural": 9,
+    "natural": 0,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "ITA",
+    "total_sites": 59,
+    "cultural": 53,
+    "natural": 5,
+    "mixed": 1,
+    "year": 2024
+  },
+  {
+    "country_iso3": "JAM",
+    "total_sites": 1,
+    "cultural": 1,
+    "natural": 0,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "JOR",
+    "total_sites": 6,
+    "cultural": 5,
+    "natural": 1,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "JPN",
+    "total_sites": 25,
+    "cultural": 20,
+    "natural": 5,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "KAZ",
+    "total_sites": 6,
+    "cultural": 3,
+    "natural": 3,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "KEN",
+    "total_sites": 7,
+    "cultural": 4,
+    "natural": 3,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "KGZ",
+    "total_sites": 3,
+    "cultural": 1,
+    "natural": 2,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "KHM",
+    "total_sites": 4,
+    "cultural": 3,
+    "natural": 1,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "KNA",
+    "total_sites": 0,
+    "cultural": 0,
+    "natural": 0,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "KOR",
+    "total_sites": 15,
+    "cultural": 13,
+    "natural": 2,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "KWT",
+    "total_sites": 0,
+    "cultural": 0,
+    "natural": 0,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "LAO",
+    "total_sites": 3,
+    "cultural": 2,
+    "natural": 1,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "LBN",
+    "total_sites": 6,
+    "cultural": 5,
+    "natural": 1,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "LBR",
+    "total_sites": 0,
+    "cultural": 0,
+    "natural": 0,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "LBY",
+    "total_sites": 5,
+    "cultural": 5,
+    "natural": 0,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "LCA",
+    "total_sites": 1,
+    "cultural": 0,
+    "natural": 1,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "LIE",
+    "total_sites": 0,
+    "cultural": 0,
+    "natural": 0,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "LKA",
+    "total_sites": 8,
+    "cultural": 6,
+    "natural": 2,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "LSO",
+    "total_sites": 1,
+    "cultural": 1,
+    "natural": 0,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "LTU",
+    "total_sites": 5,
+    "cultural": 4,
+    "natural": 1,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "LUX",
+    "total_sites": 1,
+    "cultural": 1,
+    "natural": 0,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "LVA",
+    "total_sites": 2,
+    "cultural": 2,
+    "natural": 0,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "MAR",
+    "total_sites": 9,
+    "cultural": 8,
+    "natural": 1,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "MCO",
+    "total_sites": 0,
+    "cultural": 0,
+    "natural": 0,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "MDA",
+    "total_sites": 1,
+    "cultural": 1,
+    "natural": 0,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "MDG",
+    "total_sites": 3,
+    "cultural": 1,
+    "natural": 2,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "MDV",
+    "total_sites": 0,
+    "cultural": 0,
+    "natural": 0,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "MEX",
+    "total_sites": 35,
+    "cultural": 27,
+    "natural": 6,
+    "mixed": 2,
+    "year": 2024
+  },
+  {
+    "country_iso3": "MKD",
+    "total_sites": 1,
+    "cultural": 0,
+    "natural": 1,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "MLI",
+    "total_sites": 4,
+    "cultural": 3,
+    "natural": 1,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "MLT",
+    "total_sites": 3,
+    "cultural": 3,
+    "natural": 0,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "MMR",
+    "total_sites": 2,
+    "cultural": 2,
+    "natural": 0,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "MNE",
+    "total_sites": 4,
+    "cultural": 3,
+    "natural": 1,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "MNG",
+    "total_sites": 5,
+    "cultural": 3,
+    "natural": 2,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "MOZ",
+    "total_sites": 1,
+    "cultural": 1,
+    "natural": 0,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "MRT",
+    "total_sites": 2,
+    "cultural": 1,
+    "natural": 1,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "MUS",
+    "total_sites": 2,
+    "cultural": 2,
+    "natural": 0,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "MWI",
+    "total_sites": 2,
+    "cultural": 1,
+    "natural": 1,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "MYS",
+    "total_sites": 4,
+    "cultural": 2,
+    "natural": 2,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "NAM",
+    "total_sites": 2,
+    "cultural": 0,
+    "natural": 2,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "NCL",
+    "total_sites": 1,
+    "cultural": 0,
+    "natural": 1,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "NER",
+    "total_sites": 1,
+    "cultural": 0,
+    "natural": 1,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "NGA",
+    "total_sites": 2,
+    "cultural": 2,
+    "natural": 0,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "NIC",
+    "total_sites": 2,
+    "cultural": 2,
+    "natural": 0,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "NLD",
+    "total_sites": 12,
+    "cultural": 11,
+    "natural": 1,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "NOR",
+    "total_sites": 8,
+    "cultural": 7,
+    "natural": 1,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "NPL",
+    "total_sites": 4,
+    "cultural": 2,
+    "natural": 2,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "NZL",
+    "total_sites": 3,
+    "cultural": 0,
+    "natural": 3,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "OMN",
+    "total_sites": 5,
+    "cultural": 4,
+    "natural": 1,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "PAK",
+    "total_sites": 6,
+    "cultural": 6,
+    "natural": 0,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "PAN",
+    "total_sites": 5,
+    "cultural": 2,
+    "natural": 3,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "PER",
+    "total_sites": 13,
+    "cultural": 9,
+    "natural": 2,
+    "mixed": 2,
+    "year": 2024
+  },
+  {
+    "country_iso3": "PHL",
+    "total_sites": 6,
+    "cultural": 3,
+    "natural": 3,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "PNG",
+    "total_sites": 0,
+    "cultural": 0,
+    "natural": 0,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "POL",
+    "total_sites": 17,
+    "cultural": 15,
+    "natural": 2,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "PRI",
+    "total_sites": 0,
+    "cultural": 0,
+    "natural": 0,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "PRK",
+    "total_sites": 2,
+    "cultural": 2,
+    "natural": 0,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "PRT",
+    "total_sites": 17,
+    "cultural": 16,
+    "natural": 1,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "PRY",
+    "total_sites": 1,
+    "cultural": 1,
+    "natural": 0,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "PSE",
+    "total_sites": 3,
+    "cultural": 3,
+    "natural": 0,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "PYF",
+    "total_sites": 0,
+    "cultural": 0,
+    "natural": 0,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "QAT",
+    "total_sites": 1,
+    "cultural": 1,
+    "natural": 0,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "ROU",
+    "total_sites": 9,
+    "cultural": 7,
+    "natural": 2,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "RUS",
+    "total_sites": 30,
+    "cultural": 19,
+    "natural": 11,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "RWA",
+    "total_sites": 0,
+    "cultural": 0,
+    "natural": 0,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "SAU",
+    "total_sites": 7,
+    "cultural": 6,
+    "natural": 1,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "SDN",
+    "total_sites": 3,
+    "cultural": 2,
+    "natural": 1,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "SEN",
+    "total_sites": 7,
+    "cultural": 5,
+    "natural": 2,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "SGP",
+    "total_sites": 1,
+    "cultural": 1,
+    "natural": 0,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "SLB",
+    "total_sites": 0,
+    "cultural": 0,
+    "natural": 0,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "SLE",
+    "total_sites": 0,
+    "cultural": 0,
+    "natural": 0,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "SLV",
+    "total_sites": 1,
+    "cultural": 1,
+    "natural": 0,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "SMR",
+    "total_sites": 1,
+    "cultural": 1,
+    "natural": 0,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "SOM",
+    "total_sites": 0,
+    "cultural": 0,
+    "natural": 0,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "SRB",
+    "total_sites": 5,
+    "cultural": 4,
+    "natural": 1,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "SSD",
+    "total_sites": 0,
+    "cultural": 0,
+    "natural": 0,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "STP",
+    "total_sites": 0,
+    "cultural": 0,
+    "natural": 0,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "SUR",
+    "total_sites": 2,
+    "cultural": 1,
+    "natural": 1,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "SVK",
+    "total_sites": 8,
+    "cultural": 6,
+    "natural": 2,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "SVN",
+    "total_sites": 5,
+    "cultural": 3,
+    "natural": 2,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "SWE",
+    "total_sites": 15,
+    "cultural": 13,
+    "natural": 1,
+    "mixed": 1,
+    "year": 2024
+  },
+  {
+    "country_iso3": "SWZ",
+    "total_sites": 0,
+    "cultural": 0,
+    "natural": 0,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "SYC",
+    "total_sites": 2,
+    "cultural": 0,
+    "natural": 2,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "SYR",
+    "total_sites": 6,
+    "cultural": 6,
+    "natural": 0,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "TCD",
+    "total_sites": 2,
+    "cultural": 1,
+    "natural": 1,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "TGO",
+    "total_sites": 1,
+    "cultural": 1,
+    "natural": 0,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "THA",
+    "total_sites": 7,
+    "cultural": 4,
+    "natural": 3,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "TJK",
+    "total_sites": 2,
+    "cultural": 1,
+    "natural": 1,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "TKM",
+    "total_sites": 3,
+    "cultural": 3,
+    "natural": 0,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "TLS",
+    "total_sites": 0,
+    "cultural": 0,
+    "natural": 0,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "TTO",
+    "total_sites": 0,
+    "cultural": 0,
+    "natural": 0,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "TUN",
+    "total_sites": 8,
+    "cultural": 7,
+    "natural": 1,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "TUR",
+    "total_sites": 19,
+    "cultural": 17,
+    "natural": 0,
+    "mixed": 2,
+    "year": 2024
+  },
+  {
+    "country_iso3": "TWN",
+    "total_sites": 0,
+    "cultural": 0,
+    "natural": 0,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "TZA",
+    "total_sites": 7,
+    "cultural": 3,
+    "natural": 4,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "UGA",
+    "total_sites": 3,
+    "cultural": 1,
+    "natural": 2,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "UKR",
+    "total_sites": 8,
+    "cultural": 7,
+    "natural": 1,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "URY",
+    "total_sites": 3,
+    "cultural": 2,
+    "natural": 1,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "USA",
+    "total_sites": 24,
+    "cultural": 13,
+    "natural": 11,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "UZB",
+    "total_sites": 5,
+    "cultural": 4,
+    "natural": 1,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "VAT",
+    "total_sites": 2,
+    "cultural": 2,
+    "natural": 0,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "VCT",
+    "total_sites": 0,
+    "cultural": 0,
+    "natural": 0,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "VEN",
+    "total_sites": 3,
+    "cultural": 2,
+    "natural": 1,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "VNM",
+    "total_sites": 8,
+    "cultural": 5,
+    "natural": 2,
+    "mixed": 1,
+    "year": 2024
+  },
+  {
+    "country_iso3": "XKX",
+    "total_sites": 0,
+    "cultural": 0,
+    "natural": 0,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "YEM",
+    "total_sites": 4,
+    "cultural": 3,
+    "natural": 1,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "ZAF",
+    "total_sites": 10,
+    "cultural": 5,
+    "natural": 4,
+    "mixed": 1,
+    "year": 2024
+  },
+  {
+    "country_iso3": "ZMB",
+    "total_sites": 1,
+    "cultural": 0,
+    "natural": 1,
+    "mixed": 0,
+    "year": 2024
+  },
+  {
+    "country_iso3": "ZWE",
+    "total_sites": 5,
+    "cultural": 3,
+    "natural": 2,
+    "mixed": 0,
+    "year": 2024
+  }
+]

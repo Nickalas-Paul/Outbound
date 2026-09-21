@@ -63,6 +63,8 @@ export type GeographyListItem = {
 
 export type GeographyFilters = {
   minPopulation?: number;
+  minCostIndex?: number;
+  /** @deprecated use minCostIndex */
   maxCorpTaxRate?: number;
   minAccessibility?: number;
   maxCrowding?: number;
