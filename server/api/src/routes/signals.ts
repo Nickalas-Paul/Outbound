@@ -1,5 +1,5 @@
 /**
- * Market signals routes (public Layer 2 data).
+ * Market signals routes (public Layer 2 data — optionalAuth).
  */
 
 import { Router, Request, Response } from 'express';
@@ -12,6 +12,7 @@ import {
 import { pool } from '../config/database';
 // MARKETPLACE: commented out for Outbound — preserved for future vendor/guide marketplace
 // import { createNotification } from '../services/notifications';
+import { optionalAuth } from '../middleware/optionalAuth';
 import { apiError, apiResponse, toCamelCase } from '../utils/response';
 
 const router = Router();
@@ -34,7 +35,7 @@ function parseLimit(raw: unknown): number {
 }
 
 /** GET /api/signals/types — travel signal category catalog. */
-router.get('/types', async (_req: Request, res: Response) => {
+router.get('/types', optionalAuth, async (_req: Request, res: Response) => {
   try {
     const data = SIGNAL_TYPE_KEYS.map((key: SignalType) => ({
       key,
@@ -48,7 +49,7 @@ router.get('/types', async (_req: Request, res: Response) => {
   }
 });
 
-router.get('/', async (req: Request, res: Response) => {
+router.get('/', optionalAuth, async (req: Request, res: Response) => {
   try {
     const geographyRaw = req.query.geographyId;
     if (typeof geographyRaw !== 'string' || !geographyRaw.trim()) {
@@ -138,7 +139,7 @@ router.get('/', async (req: Request, res: Response) => {
  * GET /api/signals/summary
  * Active signal counts keyed by geography ISO3 (only geos with ≥1).
  */
-router.get('/summary', async (_req: Request, res: Response) => {
+router.get('/summary', optionalAuth, async (_req: Request, res: Response) => {
   try {
     const result = await pool.query<{ iso_code: string; count: string }>(
       `

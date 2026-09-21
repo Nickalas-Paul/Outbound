@@ -15,6 +15,7 @@ import {
   stateToSavedFilters,
   type ExplorerFilterState,
 } from '@/lib/explorerFilters';
+import { useAuth } from '@/services/auth';
 
 type Props = {
   filters: ExplorerFilterState;
@@ -22,6 +23,7 @@ type Props = {
 };
 
 export default function SavedSearchesPanel({ filters, onChange }: Props) {
+  const { isAuthenticated } = useAuth();
   const { canSaveSearches, canUseFilter, canUseHorizon, canUseTravelerProfile } =
     useTierAccess();
   const allowed = canSaveSearches();
@@ -40,6 +42,11 @@ export default function SavedSearchesPanel({ filters, onChange }: Props) {
   const [saveError, setSaveError] = useState<string | null>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
+
+  // Guests: do not render (and do not call saved-search APIs).
+  if (!isAuthenticated) {
+    return null;
+  }
 
   const trimmed = name.trim();
   const canSubmit = trimmed.length > 0 && trimmed.length <= 100 && !saving;

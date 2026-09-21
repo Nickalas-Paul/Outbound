@@ -46,7 +46,7 @@ export default function AuthCallbackScreen() {
   }
 
   if (done || isAuthenticated) {
-    return <Redirect href="/explorer" />;
+    return <Redirect href="/" />;
   }
 
   return (

@@ -49,7 +49,7 @@ export function MarketingShell({ children, theme = 'light' }: MarketingShellProp
         keyboardShouldPersistTaps="handled"
       >
         {children}
-        <Link href="/explorer" asChild>
+        <Link href="/" asChild>
           <Pressable style={styles.cta} accessibilityRole="button">
             <Text style={styles.ctaText}>Open Explorer</Text>
           </Pressable>

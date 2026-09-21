@@ -81,7 +81,7 @@ function notificationHref(n: AppNotification): string {
     if (geographyId) {
       return `/explorer/${encodeURIComponent(geographyId)}`;
     }
-    return '/explorer';
+    return '/';
   }
   if (
     n.type === 'engagement_requested' ||

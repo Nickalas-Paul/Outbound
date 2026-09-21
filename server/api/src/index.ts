@@ -19,6 +19,7 @@ import geographyRoutes from './routes/geographies';
 import tviRoutes from './routes/tvi';
 import savedSearchRoutes from './routes/savedSearches';
 import signalRoutes from './routes/signals';
+import intakeRoutes from './routes/intake';
 import devRoutes from './routes/dev';
 
 const app = express();
@@ -34,6 +35,18 @@ app.use(
 );
 app.use(express.json());
 app.use(cookieParser());
+
+/*
+ * Public explorer / intake (optional auth; see per-route middleware):
+ *   GET  /api/geographies/geojson
+ *   POST /api/geographies/filter
+ *   GET  /api/geographies/:id
+ *   GET  /api/geographies/:id/trends
+ *   GET  /api/signals
+ *   GET  /api/signals/summary
+ *   POST /api/intake          — optionalAuth; guests submit trip requests
+ *   GET  /health, GET /readyz
+ */
 
 app.get('/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
@@ -57,6 +70,7 @@ app.use('/api/tvi', tviRoutes);
 app.use('/api/signals', signalRoutes);
 app.use('/api/exports', exportRoutes);
 app.use('/api/saved-searches', savedSearchRoutes);
+app.use('/api/intake', intakeRoutes);
 // MARKETPLACE: commented out for Outbound — preserved for future vendor/guide marketplace
 // app.use('/api/agents', agentRoutes);
 // app.use('/api/marketplace', marketplaceRoutes);

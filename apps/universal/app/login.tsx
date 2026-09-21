@@ -24,7 +24,7 @@ export default function LoginScreen() {
   const [submitting, setSubmitting] = useState(false);
 
   if (!isLoading && isAuthenticated) {
-    return <Redirect href="/explorer" />;
+    return <Redirect href="/" />;
   }
 
   async function onSubmit() {
@@ -42,7 +42,7 @@ export default function LoginScreen() {
     setSubmitting(true);
     try {
       await login(trimmed, password);
-      router.replace('/explorer');
+      router.replace('/');
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Login failed');
     } finally {

@@ -267,7 +267,7 @@ export default function FilterSidebar({ filters, onChange, onReset, style }: Pro
 
       {talentLocked ? (
         <Pressable
-          onPress={() => showPrompt('talent')}
+          onPress={() => showPrompt('accessibility')}
           style={styles.lockedBlock}
         >
           <FilterRow
@@ -285,7 +285,7 @@ export default function FilterSidebar({ filters, onChange, onReset, style }: Pro
               onChange={() => undefined}
             />
           </FilterRow>
-          {promptKey === 'talent' ? (
+          {promptKey === 'accessibility' ? (
             <Text style={styles.upgradePrompt}>{UPGRADE_PROMPT}</Text>
           ) : null}
         </Pressable>
@@ -307,7 +307,7 @@ export default function FilterSidebar({ filters, onChange, onReset, style }: Pro
 
       {competitorLocked ? (
         <Pressable
-          onPress={() => showPrompt('competitor')}
+          onPress={() => showPrompt('crowding')}
           style={styles.lockedBlock}
         >
           <FilterRow
@@ -325,7 +325,7 @@ export default function FilterSidebar({ filters, onChange, onReset, style }: Pro
               onChange={() => undefined}
             />
           </FilterRow>
-          {promptKey === 'competitor' ? (
+          {promptKey === 'crowding' ? (
             <Text style={styles.upgradePrompt}>{UPGRADE_PROMPT}</Text>
           ) : null}
         </Pressable>

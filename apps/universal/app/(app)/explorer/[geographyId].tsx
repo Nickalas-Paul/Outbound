@@ -1,7 +1,8 @@
 import {
-  TVI_DIMENSION_DISPLAY,
+  getOrderedDimensionDisplay,
   sourceDisplayName,
   type DimensionKey,
+  type IndicatorDisplay,
   type MarketSignal,
 } from '@outbound/core';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -21,7 +22,6 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import TrendAnalysisSection from '@/components/explorer/TrendAnalysisSection';
-import { tviScoreColor } from '@/lib/tviColors';
 import {
   directionLabel,
   formatProbabilityPct,
@@ -29,6 +29,7 @@ import {
   shortDimensionList,
   signalAccent,
   signalTypeIcon,
+  signalTypeLabel,
   sourceDisplayLabel,
 } from '@/lib/signalsUi';
 import {
@@ -46,6 +47,8 @@ import {
   type TrendData,
 } from '@/services/geographies';
 import { getGeographySignals } from '@/services/signals';
+import { colors, spacing, typography } from '@/theme/tokens';
+
 function openExportUrl(url: string): void {
   if (Platform.OS === 'web' && typeof window !== 'undefined') {
     window.open(url, '_blank');
@@ -68,10 +71,10 @@ function geographyExportUrl(
 }
 
 function confidenceColor(c: string | null | undefined): string {
-  if (c === 'high') return '#3ecf8e';
-  if (c === 'medium') return '#e0a03a';
-  if (c === 'low') return '#d96b6b';
-  return '#666';
+  if (c === 'high') return colors.success;
+  if (c === 'medium') return colors.warning;
+  if (c === 'low') return colors.error;
+  return colors.textMuted;
 }
 
 function formatRefreshDate(iso: string | null | undefined): string {
@@ -96,92 +99,147 @@ function formatPopulation(n: number | null | undefined): string {
   return String(Math.round(n));
 }
 
-/**
- * Format GDP PPP. IMF WEO values are stored in billions USD.
- * e.g. 5996.2 → "$6.0T", 924.6 → "$924.6B"
- */
-function formatGdpPpp(n: number | null | undefined): string {
-  if (n == null || Number.isNaN(n)) return '—';
-  const billions = n;
-  if (Math.abs(billions) >= 1000) {
-    return `$${(billions / 1000).toFixed(1).replace(/\.0$/, '')}T`;
-  }
-  if (Math.abs(billions) >= 1) {
-    return `$${billions.toFixed(1).replace(/\.0$/, '')}B`;
-  }
-  return `$${(billions * 1000).toFixed(0)}M`;
+type FactTone = 'good' | 'neutral' | 'caution' | 'plain';
+
+function toneColor(tone: FactTone): string | undefined {
+  if (tone === 'good') return colors.success;
+  if (tone === 'neutral') return colors.warning;
+  if (tone === 'caution') return colors.error;
+  return undefined;
 }
 
-function formatCorpTax(n: number | null | undefined): string {
-  if (n == null || Number.isNaN(n)) return '—';
-  return `${n.toFixed(1)}%`;
+function safetyLevel(score: number | null | undefined): { label: string; tone: FactTone } {
+  if (score == null || Number.isNaN(score)) return { label: '—', tone: 'plain' };
+  if (score >= 70) return { label: 'High', tone: 'good' };
+  if (score >= 40) return { label: 'Moderate', tone: 'neutral' };
+  return { label: 'Exercise Caution', tone: 'caution' };
 }
+
+function costLevel(score: number | null | undefined): { label: string; tone: FactTone } {
+  if (score == null || Number.isNaN(score)) return { label: '—', tone: 'plain' };
+  if (score >= 65) return { label: 'Budget-Friendly', tone: 'good' };
+  if (score >= 40) return { label: 'Moderate', tone: 'neutral' };
+  return { label: 'Expensive', tone: 'caution' };
+}
+
+function crowdingLevel(score: number | null | undefined): { label: string; tone: FactTone } {
+  if (score == null || Number.isNaN(score)) return { label: '—', tone: 'plain' };
+  if (score >= 65) return { label: 'Low Crowding', tone: 'good' };
+  if (score >= 40) return { label: 'Moderate', tone: 'neutral' };
+  return { label: 'High Crowding', tone: 'caution' };
+}
+
+function visaAccess(score: number | null | undefined): { label: string; tone: FactTone } {
+  if (score == null || Number.isNaN(score)) return { label: '—', tone: 'plain' };
+  if (score >= 70) return { label: 'Open', tone: 'good' };
+  if (score >= 40) return { label: 'Moderate', tone: 'neutral' };
+  return { label: 'Restricted', tone: 'caution' };
+}
+
+function travelViabilityLabel(score: number | null | undefined): string {
+  if (score == null || Number.isNaN(score)) return 'Travel Viability: —';
+  if (score >= 70) return 'Travel Viability: High';
+  if (score >= 40) return 'Travel Viability: Moderate';
+  return 'Travel Viability: Low';
+}
+
+type DimensionScores = NonNullable<NonNullable<GeographyDetail['tvi']>['dimensions']>;
 
 function QuickFactsPanel({
   facts,
-  overall,
+  dimensions,
   compact,
 }: {
   facts: QuickFacts | null;
-  overall: number | null;
+  dimensions: DimensionScores | null | undefined;
   compact?: boolean;
 }) {
-  const rows: Array<{ label: string; value: string }> = [
-    { label: 'Population', value: formatPopulation(facts?.population) },
-    { label: 'GDP (PPP)', value: formatGdpPpp(facts?.gdpPpp) },
-    { label: 'Corp. Tax Rate', value: formatCorpTax(facts?.corpTaxRate) },
-    {
-      label: 'Ease of Business',
-      value: facts?.easeOfBusiness ?? '—',
-    },
-    { label: 'Language', value: facts?.language ?? '—' },
-    { label: 'Currency', value: facts?.currency ?? '—' },
+  const safety = safetyLevel(dimensions?.safetyAndEntry);
+  const cost = costLevel(dimensions?.costIndex);
+  const crowding = crowdingLevel(dimensions?.crowding);
+  const visa = visaAccess(dimensions?.accessibility);
+
+  const rows: Array<{ label: string; value: string; tone: FactTone }> = [
+    { label: 'Population', value: formatPopulation(facts?.population), tone: 'plain' },
+    { label: 'Safety Level', value: safety.label, tone: safety.tone },
+    { label: 'Cost Level', value: cost.label, tone: cost.tone },
+    { label: 'Tourism Crowding', value: crowding.label, tone: crowding.tone },
+    { label: 'Visa Access', value: visa.label, tone: visa.tone },
+    { label: 'Language', value: facts?.language ?? '—', tone: 'plain' },
+    { label: 'Currency', value: facts?.currency ?? '—', tone: 'plain' },
   ];
 
   return (
     <View style={[styles.qfPanel, compact ? styles.qfPanelCompact : null]}>
-      {/* TODO: Mini-map (Mapbox dark-v11, country polygon filled with TVI color).
-          Deferred — Quick Facts data display is the priority for this step. */}
-      <View
-        style={[
-          styles.miniMapPlaceholder,
-          { borderColor: tviScoreColor(overall) },
-        ]}
-      >
-        <View
-          style={[styles.miniMapSwatch, { backgroundColor: tviScoreColor(overall) }]}
-        />
-        <Text style={styles.miniMapLabel}>MAP PREVIEW</Text>
-      </View>
-
       <Text style={styles.qfHeader}>QUICK FACTS</Text>
       <View style={[styles.qfRows, compact ? styles.qfRowsCompact : null]}>
-        {rows.map((row) => (
-          <View
-            key={row.label}
-            style={[styles.qfRow, compact ? styles.qfRowCompact : null]}
-          >
-            <Text style={styles.qfLabel}>{row.label}</Text>
-            <Text
-              style={[
-                styles.qfValue,
-                row.value === '—' ? styles.qfValueMuted : null,
-              ]}
+        {rows.map((row) => {
+          const tint = toneColor(row.tone);
+          return (
+            <View
+              key={row.label}
+              style={[styles.qfRow, compact ? styles.qfRowCompact : null]}
             >
-              {row.value}
-            </Text>
-          </View>
-        ))}
+              <Text style={styles.qfLabel}>{row.label}</Text>
+              <View style={styles.qfValueRow}>
+                {tint ? (
+                  <View style={[styles.qfToneDot, { backgroundColor: tint }]} />
+                ) : null}
+                <Text
+                  style={[
+                    styles.qfValue,
+                    tint ? { color: tint } : null,
+                    row.value === '—' ? styles.qfValueMuted : null,
+                  ]}
+                >
+                  {row.value}
+                </Text>
+              </View>
+            </View>
+          );
+        })}
       </View>
     </View>
   );
 }
 
+function PlanThisTripCard({
+  countryName,
+  isoCode,
+}: {
+  countryName: string;
+  isoCode: string;
+}) {
+  const router = useRouter();
+  const href = `/plan?destination=${encodeURIComponent(isoCode)}&name=${encodeURIComponent(countryName)}`;
+
+  return (
+    <View style={styles.planCard}>
+      <Text style={styles.planHeading}>Plan a trip to {countryName}</Text>
+      <Text style={styles.planSub}>
+        Get a personalized itinerary based on your travel style
+      </Text>
+      <Pressable
+        style={({ pressed }) =>
+          StyleSheet.flatten([styles.planBtn, pressed && styles.planBtnPressed])
+        }
+        onPress={() => router.push(href as `/plan`)}
+        accessibilityRole="button"
+        accessibilityLabel={`Plan this trip to ${countryName}`}
+      >
+        <Text style={styles.planBtnText}>Plan This Trip</Text>
+      </Pressable>
+    </View>
+  );
+}
+
+const ORDERED_DIMENSIONS = getOrderedDimensionDisplay();
+
 function sourcesForDimension(
   key: DimensionKey,
   allSources: TviSourceRef[]
 ): TviSourceRef[] {
-  const meta = TVI_DIMENSION_DISPLAY.find((d) => d.key === key);
+  const meta = ORDERED_DIMENSIONS.find((d) => d.key === key);
   if (!meta) return [];
   const codes = new Set(meta.indicatorCodes);
   return allSources.filter((s) => codes.has(s.indicator));
@@ -198,6 +256,41 @@ function uniqueSourceLabels(sources: TviSourceRef[]): string[] {
   return labels;
 }
 
+/** Standard dimension cards: high score = good. */
+function dimensionScoreColor(score: number | null | undefined): string {
+  if (score == null || Number.isNaN(score)) return colors.textMuted;
+  if (score >= 65) return colors.success;
+  if (score >= 40) return colors.warning;
+  return colors.error;
+}
+
+/**
+ * Crowding uses lower_is_better inversion in scoring (high score = less crowded).
+ * Display as a crowding meter: fill ≈ 100 − score so full/red = crowded.
+ */
+function crowdingDisplay(score: number | null | undefined): {
+  label: string;
+  color: string;
+  meterPct: number;
+} | null {
+  if (score == null || Number.isNaN(score)) return null;
+  const meterPct = Math.max(0, Math.min(100, 100 - score));
+  if (score >= 65) {
+    return { label: 'Low Crowding', color: colors.success, meterPct };
+  }
+  if (score >= 40) {
+    return { label: 'Moderate Crowding', color: colors.warning, meterPct };
+  }
+  return { label: 'High Crowding', color: colors.error, meterPct };
+}
+
+function indicatorLabel(
+  code: string,
+  indicators: IndicatorDisplay[]
+): string {
+  return indicators.find((i) => i.code === code)?.name ?? code;
+}
+
 function DimensionCard({
   dimKey,
   label,
@@ -205,6 +298,7 @@ function DimensionCard({
   score,
   confidence,
   sources,
+  indicators,
   onSourcePress,
 }: {
   dimKey: string;
@@ -213,11 +307,20 @@ function DimensionCard({
   score: number | null;
   confidence: string | null;
   sources: TviSourceRef[];
+  indicators: IndicatorDisplay[];
   onSourcePress: () => void;
 }) {
   const [expanded, setExpanded] = useState(false);
-  const color = tviScoreColor(score);
-  const pct = score != null ? Math.max(0, Math.min(100, score)) : 0;
+  const isCrowding = dimKey === 'crowding';
+  const crowding = isCrowding ? crowdingDisplay(score) : null;
+  const scoreColor = isCrowding
+    ? crowding?.color ?? colors.textMuted
+    : dimensionScoreColor(score);
+  const barPct = isCrowding
+    ? crowding?.meterPct ?? 0
+    : score != null
+      ? Math.max(0, Math.min(100, score))
+      : 0;
   const sourceLabels = uniqueSourceLabels(sources);
 
   return (
@@ -229,11 +332,24 @@ function DimensionCard({
     >
       <View style={styles.dimTop}>
         <View style={styles.dimTextCol}>
-          <Text style={styles.dimName}>{label}</Text>
-          <Text style={styles.dimDesc}>{description}</Text>
+          <View style={styles.dimNameRow}>
+            <Text style={styles.dimName}>{label}</Text>
+            <MaterialCommunityIcons
+              name={expanded ? 'chevron-up' : 'chevron-down'}
+              size={20}
+              color={colors.textMuted}
+            />
+          </View>
+          {isCrowding && crowding ? (
+            <Text style={[styles.crowdingQual, { color: crowding.color }]}>
+              {crowding.label}
+            </Text>
+          ) : (
+            <Text style={styles.dimDesc}>{description}</Text>
+          )}
         </View>
         <View style={styles.dimScoreCol}>
-          <Text style={[styles.dimScore, { color: score != null ? color : '#666' }]}>
+          <Text style={[styles.dimScore, { color: scoreColor }]}>
             {score != null ? Math.round(score) : '—'}
           </Text>
           <View style={styles.confRow}>
@@ -249,9 +365,17 @@ function DimensionCard({
 
       <View style={styles.barTrack}>
         {score != null ? (
-          <View style={[styles.barFill, { width: `${pct}%`, backgroundColor: color }]} />
+          <View
+            style={[
+              styles.barFill,
+              { width: `${barPct}%`, backgroundColor: scoreColor },
+            ]}
+          />
         ) : null}
       </View>
+      {isCrowding ? (
+        <Text style={styles.barCaption}>Crowding meter · score {score != null ? Math.round(score) : '—'}</Text>
+      ) : null}
 
       {sourceLabels.length > 0 ? (
         <View style={styles.tagRow}>
@@ -260,7 +384,6 @@ function DimensionCard({
               key={`${dimKey}-${tag}`}
               style={styles.tag}
               onPress={(e) => {
-                // Avoid toggling the parent card expand when opening methodology
                 e?.stopPropagation?.();
                 onSourcePress();
               }}
@@ -281,12 +404,20 @@ function DimensionCard({
             <Text style={styles.expandEmpty}>No underlying indicators available.</Text>
           ) : (
             sources.map((s) => (
-              <Text
+              <View
                 key={`${s.source}-${s.indicator}-${s.year}`}
-                style={styles.expandLine}
+                style={styles.expandRow}
               >
-                {sourceDisplayName(s.source)} · {s.indicator} · {s.year}
-              </Text>
+                <View style={styles.expandRowMain}>
+                  <Text style={styles.expandLabel} numberOfLines={2}>
+                    {indicatorLabel(s.indicator, indicators)}
+                  </Text>
+                  <Text style={styles.expandValue}>{s.year}</Text>
+                </View>
+                <Text style={styles.expandSource}>
+                  {sourceDisplayName(s.source)}
+                </Text>
+              </View>
             ))
           )}
         </View>
@@ -314,13 +445,14 @@ export default function GeographyDetailScreen() {
     removeFromCompare,
     isSelected,
     isAtMax,
-    compareHref,
+    buildCompareHref,
   } = useCompareSelection();
 
   const [data, setData] = useState<GeographyDetail | null>(null);
   const [trendData, setTrendData] = useState<TrendData | null>(null);
   const [trendsLoading, setTrendsLoading] = useState(false);
   const [signals, setSignals] = useState<MarketSignal[]>([]);
+  const [signalsLoading, setSignalsLoading] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [exportMenuOpen, setExportMenuOpen] = useState(false);
@@ -337,6 +469,7 @@ export default function GeographyDetailScreen() {
     let cancelled = false;
     setLoading(true);
     setTrendsLoading(true);
+    setSignalsLoading(true);
     setSignals([]);
     setError(null);
     void getGeographyDetail(geographyId, profile)
@@ -362,16 +495,20 @@ export default function GeographyDetailScreen() {
       .finally(() => {
         if (!cancelled) setTrendsLoading(false);
       });
-    void getGeographySignals(geographyId).then((res) => {
-      if (!cancelled) setSignals(res.signals);
-    });
+    void getGeographySignals(geographyId)
+      .then((res) => {
+        if (!cancelled) setSignals(res.signals);
+      })
+      .finally(() => {
+        if (!cancelled) setSignalsLoading(false);
+      });
     return () => {
       cancelled = true;
     };
   }, [geographyId, profile]);
 
   const overall = data?.tvi?.overall ?? null;
-  const overallColor = tviScoreColor(overall);
+  const overallColor = dimensionScoreColor(overall);
   const allSources = data?.tvi?.sources ?? [];
   const sourceCount = useMemo(() => {
     const set = new Set(allSources.map((s) => s.source));
@@ -390,35 +527,28 @@ export default function GeographyDetailScreen() {
         ]}
       >
         <Pressable
-          onPress={() => {
-            if (router.canGoBack()) {
-              router.back();
-            } else {
-              router.push('/explorer');
-            }
-          }}
+          onPress={() => router.push('/')}
           style={styles.backBtn}
           hitSlop={8}
+          accessibilityRole="button"
+          accessibilityLabel="Back to Explorer"
         >
-          <Text style={styles.backText}>← Explorer</Text>
+          <Text style={styles.backText}>← Back to Explorer</Text>
         </Pressable>
 
         {loading ? (
           <View style={styles.center}>
-            <ActivityIndicator color="#fff" size="large" />
-            <Text style={styles.loadingText}>Loading geography…</Text>
+            <ActivityIndicator color={colors.textPrimary} size="large" />
+            <Text style={styles.loadingText}>Loading destination…</Text>
           </View>
         ) : null}
 
         {!loading && error ? (
           <View style={styles.center}>
-            <Text style={styles.errorTitle}>Geography not found</Text>
+            <Text style={styles.errorTitle}>Destination not found</Text>
             <Text style={styles.errorBody}>{error}</Text>
-            <Pressable style={styles.errorBack} onPress={() => {
-              if (router.canGoBack()) router.back();
-              else router.push('/explorer');
-            }}>
-              <Text style={styles.backText}>← Back to explorer</Text>
+            <Pressable style={styles.errorBack} onPress={() => router.push('/')}>
+              <Text style={styles.backText}>← Back to Explorer</Text>
             </Pressable>
           </View>
         ) : null}
@@ -426,61 +556,76 @@ export default function GeographyDetailScreen() {
         {!loading && data ? (
           <View style={[styles.mainRow, isWide ? styles.mainRowWide : null]}>
             <View style={[styles.mainCol, isWide ? styles.mainColWide : null]}>
-              <Text style={styles.region}>
-                {(data.region ?? 'Unknown region').toUpperCase()}
-              </Text>
-              <Text style={styles.country}>{data.name}</Text>
+              <View style={styles.hero}>
+                {data.region ? (
+                  <Text style={styles.region}>{data.region.toUpperCase()}</Text>
+                ) : null}
+                <Text style={styles.country}>{data.name}</Text>
 
-              <View style={styles.overallBlock}>
-                <Text style={[styles.overallScore, { color: overallColor }]}>
-                  {overall != null ? Math.round(overall) : '—'}
-                </Text>
-                <Text style={styles.overallLabel}>Travel Viability Index</Text>
-              </View>
+                <View style={styles.overallBlock}>
+                  <Text style={[styles.overallScore, { color: overallColor }]}>
+                    {overall != null ? Math.round(overall) : '—'}
+                  </Text>
+                  <Text style={styles.overallLabel}>
+                    {travelViabilityLabel(overall)}
+                  </Text>
+                </View>
 
-              <View style={styles.pillsRow}>
-                <View style={styles.pill}>
-                  <View
-                    style={[
-                      styles.confDot,
-                      { backgroundColor: confidenceColor(data.tvi?.confidence) },
-                    ]}
-                  />
-                  <Text style={styles.pillText}>
-                    {(data.tvi?.confidence ?? 'n/a').replace(/^\w/, (c) =>
-                      c.toUpperCase()
-                    )}
-                  </Text>
-                </View>
-                <View style={styles.pill}>
-                  <Text style={styles.pillText}>
-                    Last refresh: {formatRefreshDate(data.tvi?.dataFreshness ?? data.tvi?.calculatedAt)}
-                  </Text>
-                </View>
-                <View style={styles.pill}>
-                  <Text style={styles.pillText}>
-                    Sources: {sourceCount} active
-                  </Text>
-                </View>
-                {signals.length > 0 ? (
-                  <View style={[styles.pill, styles.signalPill]}>
-                    <Text style={styles.signalPillText}>
-                      {signals.length} active signal{signals.length === 1 ? '' : 's'}
+                <View style={styles.pillsRow}>
+                  <View style={styles.pill}>
+                    <View
+                      style={[
+                        styles.confDot,
+                        { backgroundColor: confidenceColor(data.tvi?.confidence) },
+                      ]}
+                    />
+                    <Text style={styles.pillText}>
+                      {(data.tvi?.confidence ?? 'n/a').replace(/^\w/, (c) =>
+                        c.toUpperCase()
+                      )}{' '}
+                      confidence
                     </Text>
                   </View>
-                ) : null}
+                  <View style={styles.pill}>
+                    <Text style={styles.pillText}>
+                      Last refresh:{' '}
+                      {formatRefreshDate(
+                        data.tvi?.dataFreshness ?? data.tvi?.calculatedAt
+                      )}
+                    </Text>
+                  </View>
+                  <View style={styles.pill}>
+                    <Text style={styles.pillText}>
+                      Sources: {sourceCount} active
+                    </Text>
+                  </View>
+                  {signals.length > 0 ? (
+                    <View style={[styles.pill, styles.signalPill]}>
+                      <Text style={styles.signalPillText}>
+                        {signals.length} active signal
+                        {signals.length === 1 ? '' : 's'}
+                      </Text>
+                    </View>
+                  ) : null}
+                </View>
               </View>
 
               {!isWide ? (
-                <QuickFactsPanel
-                  facts={data.quickFacts}
-                  overall={overall}
-                  compact
-                />
+                <>
+                  <QuickFactsPanel
+                    facts={data.quickFacts}
+                    dimensions={data.tvi?.dimensions}
+                    compact
+                  />
+                  <PlanThisTripCard
+                    countryName={data.name}
+                    isoCode={data.isoCode ?? data.id}
+                  />
+                </>
               ) : null}
 
               <View style={styles.dimStack}>
-                {TVI_DIMENSION_DISPLAY.map((dim) => {
+                {ORDERED_DIMENSIONS.map((dim) => {
                   const score = data.tvi?.dimensions?.[dim.key] ?? null;
                   const dimSources = sourcesForDimension(dim.key, allSources);
                   return (
@@ -492,88 +637,127 @@ export default function GeographyDetailScreen() {
                       score={score}
                       confidence={data.tvi?.confidence ?? null}
                       sources={dimSources}
+                      indicators={dim.indicators}
                       onSourcePress={() => router.push('/docs/methodology')}
                     />
                   );
                 })}
               </View>
 
-              {signals.length > 0 ? (
-                <View style={styles.signalsSection}>
-                  <Text style={styles.signalsSectionTitle}>EVENTS & SIGNALS</Text>
-                  {signals.map((sig) => {
-                    const accent = signalAccent(sig.direction);
-                    const prob = formatProbabilityPct(sig.probability);
-                    const dimLabels = shortDimensionList(sig.affectedDimensions);
-                    return (
-                      <View
-                        key={sig.id}
-                        style={[
-                          styles.signalCard,
-                          { backgroundColor: accent.cardBg },
-                        ]}
-                      >
+              <View style={styles.signalsSection}>
+                <Text style={styles.signalsSectionTitle}>Active Signals</Text>
+                {signalsLoading ? (
+                  <View style={styles.sectionState}>
+                    <ActivityIndicator color={colors.accent} size="small" />
+                    <Text style={styles.sectionStateText}>Loading alerts…</Text>
+                  </View>
+                ) : signals.length === 0 ? (
+                  <View style={styles.signalsEmpty}>
+                    <MaterialCommunityIcons
+                      name="shield-check-outline"
+                      size={20}
+                      color={colors.success}
+                    />
+                    <Text style={styles.signalsEmptyText}>No active alerts</Text>
+                    <Text style={styles.signalsEmptySub}>
+                      This destination looks quiet right now.
+                    </Text>
+                  </View>
+                ) : (
+                  <>
+                    {signals.map((sig) => {
+                      const accent = signalAccent(sig.direction);
+                      const prob = formatProbabilityPct(sig.probability);
+                      const dimLabels = shortDimensionList(sig.affectedDimensions);
+                      return (
                         <View
+                          key={sig.id}
                           style={[
-                            styles.signalIconWrap,
-                            { backgroundColor: accent.pillBg },
+                            styles.signalCard,
+                            {
+                              backgroundColor: accent.cardBg,
+                              borderColor: colors.border,
+                            },
                           ]}
                         >
-                          <MaterialCommunityIcons
-                            // Closest MaterialCommunityIcons mapping to Tabler signal icons
-                            name={signalTypeIcon(sig.signalType) as 'information-outline'}
-                            size={16}
-                            color={accent.dot}
-                          />
-                        </View>
-                        <View style={styles.signalCardBody}>
-                          <Text style={styles.signalCardTitle}>{sig.title}</Text>
-                          {sig.description ? (
-                            <Text style={styles.signalCardDesc}>{sig.description}</Text>
-                          ) : null}
-                          <View style={styles.signalTagRow}>
-                            {prob ? (
+                          <View
+                            style={[
+                              styles.signalIconWrap,
+                              { backgroundColor: accent.pillBg },
+                            ]}
+                          >
+                            <MaterialCommunityIcons
+                              name={
+                                signalTypeIcon(sig.signalType) as 'information-outline'
+                              }
+                              size={16}
+                              color={accent.dot}
+                            />
+                          </View>
+                          <View style={styles.signalCardBody}>
+                            <Text style={styles.signalCategory}>
+                              {signalTypeLabel(sig.signalType)}
+                            </Text>
+                            <Text style={styles.signalCardTitle}>{sig.title}</Text>
+                            {sig.description ? (
+                              <Text style={styles.signalCardDesc}>
+                                {sig.description}
+                              </Text>
+                            ) : null}
+                            <View style={styles.signalTagRow}>
                               <View
                                 style={[
                                   styles.signalTag,
                                   { backgroundColor: accent.pillBg },
                                 ]}
                               >
-                                <Text style={[styles.signalTagText, { color: accent.pillText }]}>
-                                  {prob}
-                                </Text>
-                              </View>
-                            ) : (
-                              <View
-                                style={[
-                                  styles.signalTag,
-                                  { backgroundColor: accent.pillBg },
-                                ]}
-                              >
-                                <Text style={[styles.signalTagText, { color: accent.pillText }]}>
+                                <Text
+                                  style={[
+                                    styles.signalTagText,
+                                    { color: accent.pillText },
+                                  ]}
+                                >
                                   {directionLabel(sig.direction)}
                                 </Text>
                               </View>
-                            )}
-                            {dimLabels.map((label) => (
-                              <View key={label} style={styles.signalDimPill}>
-                                <Text style={styles.signalDimPillText}>{label}</Text>
-                              </View>
-                            ))}
+                              {prob ? (
+                                <View
+                                  style={[
+                                    styles.signalTag,
+                                    { backgroundColor: accent.pillBg },
+                                  ]}
+                                >
+                                  <Text
+                                    style={[
+                                      styles.signalTagText,
+                                      { color: accent.pillText },
+                                    ]}
+                                  >
+                                    {prob}
+                                  </Text>
+                                </View>
+                              ) : null}
+                              {dimLabels.map((label) => (
+                                <View key={label} style={styles.signalDimPill}>
+                                  <Text style={styles.signalDimPillText}>{label}</Text>
+                                </View>
+                              ))}
+                            </View>
+                            <Text style={styles.signalMeta}>
+                              {sourceDisplayLabel(sig.source)} ·{' '}
+                              {formatRelativeFetchedAt(sig.fetchedAt)}
+                            </Text>
                           </View>
-                          <Text style={styles.signalMeta}>
-                            {sourceDisplayLabel(sig.source)} ·{' '}
-                            {formatRelativeFetchedAt(sig.fetchedAt)}
-                          </Text>
                         </View>
-                      </View>
-                    );
-                  })}
-                  <Text style={styles.signalsFooter}>
-                    Signals inform 2yr/5yr projections. They don't replace dimension scores.
-                  </Text>
-                </View>
-              ) : null}
+                      );
+                    })}
+                    <Text style={styles.signalsFooter}>
+                      Signals inform 2yr/5yr projections. They don't replace dimension
+                      scores.
+                    </Text>
+                  </>
+                )}
+              </View>
 
               <TrendAnalysisSection
                 trendData={trendData}
@@ -622,7 +806,11 @@ export default function GeographyDetailScreen() {
                 {selected.length >= 2 ? (
                   <Pressable
                     style={[styles.actionBtn, styles.actionBtnGhost]}
-                    onPress={() => router.push(compareHref as `/explorer/compare`)}
+                    onPress={() =>
+                      router.push(
+                        buildCompareHref(profile) as `/explorer/compare`
+                      )
+                    }
                   >
                     <Text style={styles.actionTextGhost}>
                       View comparison → ({selected.length})
@@ -631,16 +819,16 @@ export default function GeographyDetailScreen() {
                 ) : null}
                 <View style={styles.exportWrap}>
                   <Pressable
-                    style={[styles.actionBtn, styles.actionBtnGhost]}
                     onPress={() => {
                       setExportMenuOpen((o) => !o);
                       setExportUpgradePrompt(false);
                     }}
+                    hitSlop={8}
                   >
-                    <Text style={styles.actionTextGhost}>
+                    <Text style={styles.exportLink}>
                       {exportsAllowed
-                        ? `Export${exportMenuOpen ? ' ▴' : ' ▾'}`
-                        : `Export 🔒${exportMenuOpen ? ' ▴' : ' ▾'}`}
+                        ? `Export data${exportMenuOpen ? ' ▴' : ' ▾'}`
+                        : `Export data 🔒${exportMenuOpen ? ' ▴' : ' ▾'}`}
                     </Text>
                   </Pressable>
                   {exportMenuOpen ? (
@@ -691,23 +879,19 @@ export default function GeographyDetailScreen() {
                     </View>
                   ) : null}
                 </View>
-                {/* MARKETPLACE: commented out for Outbound — preserved for future vendor/guide marketplace */}
-                {/* <Pressable
-                  style={[styles.actionBtn, styles.actionBtnGhost]}
-                  onPress={() =>
-                    router.push(
-                      `/explorer/${encodeURIComponent(data.isoCode ?? data.id)}/agents`
-                    )
-                  }
-                >
-                  <Text style={styles.actionTextGhost}>View agents →</Text>
-                </Pressable> */}
               </View>
             </View>
 
             {isWide ? (
               <View style={styles.sideCol}>
-                <QuickFactsPanel facts={data.quickFacts} overall={overall} />
+                <QuickFactsPanel
+                  facts={data.quickFacts}
+                  dimensions={data.tvi?.dimensions}
+                />
+                <PlanThisTripCard
+                  countryName={data.name}
+                  isoCode={data.isoCode ?? data.id}
+                />
               </View>
             ) : null}
           </View>
@@ -724,212 +908,246 @@ const mono = {
 const styles = StyleSheet.create({
   safe: {
     flex: 1,
-    backgroundColor: '#0b0b12',
+    backgroundColor: colors.background,
   },
   scroll: {
     flex: 1,
   },
   scrollContent: {
-    padding: 20,
-    paddingBottom: 48,
+    padding: spacing.md,
+    paddingBottom: spacing.xxl,
   },
   scrollContentWide: {
-    paddingHorizontal: 32,
+    paddingHorizontal: spacing.xl,
   },
   backBtn: {
     alignSelf: 'flex-start',
-    marginBottom: 20,
-    paddingVertical: 4,
+    marginBottom: spacing.md,
+    paddingVertical: spacing.xs,
   },
   backText: {
-    color: '#8eb4ff',
-    fontSize: 14,
-    fontWeight: '600',
+    color: colors.accent,
+    fontSize: typography.fontSize.md,
+    fontWeight: typography.fontWeight.semibold,
   },
   center: {
-    paddingVertical: 64,
+    paddingVertical: spacing.xxxl,
     alignItems: 'center',
-    gap: 12,
+    gap: spacing.sm,
   },
   loadingText: {
-    color: 'rgba(255,255,255,0.5)',
-    fontSize: 14,
+    color: colors.textMuted,
+    fontSize: typography.fontSize.md,
   },
   errorTitle: {
-    color: '#fff',
-    fontSize: 22,
-    fontWeight: '700',
+    color: colors.textPrimary,
+    fontSize: typography.fontSize.xl,
+    fontWeight: typography.fontWeight.bold,
   },
   errorBody: {
-    color: 'rgba(255,255,255,0.55)',
-    fontSize: 14,
+    color: colors.textMuted,
+    fontSize: typography.fontSize.md,
     textAlign: 'center',
   },
   errorBack: {
-    marginTop: 12,
+    marginTop: spacing.sm,
   },
   mainRow: {
     flexDirection: 'column',
-    gap: 24,
+    gap: spacing.lg,
   },
   mainRowWide: {
     flexDirection: 'row',
     alignItems: 'flex-start',
+    gap: spacing.xl,
   },
   mainCol: {
     flex: 1,
-    gap: 16,
+    gap: spacing.md,
   },
   mainColWide: {
-    flex: 1,
-    maxWidth: 720,
+    flex: 7,
+    minWidth: 0,
   },
   sideCol: {
-    width: 300,
+    flex: 3,
     flexShrink: 0,
+    minWidth: 260,
+    maxWidth: 340,
+    gap: spacing.md,
+    ...(Platform.OS === 'web'
+      ? ({
+          position: 'sticky',
+          top: spacing.md,
+          alignSelf: 'flex-start',
+        } as object)
+      : null),
+  },
+  hero: {
+    gap: spacing.sm,
   },
   qfPanel: {
-    backgroundColor: '#0e0e16',
+    backgroundColor: colors.backgroundElevated,
     borderWidth: 1,
-    borderColor: '#1c1c2a',
+    borderColor: colors.border,
     borderRadius: 12,
-    padding: 16,
-    gap: 14,
+    padding: spacing.md,
+    gap: spacing.md,
   },
   qfPanelCompact: {
-    marginTop: 4,
-  },
-  miniMapPlaceholder: {
-    height: 120,
-    borderRadius: 8,
-    borderWidth: 1,
-    backgroundColor: '#12121c',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    overflow: 'hidden',
-  },
-  miniMapSwatch: {
-    width: 56,
-    height: 36,
-    borderRadius: 6,
-    opacity: 0.85,
-  },
-  miniMapLabel: {
-    color: 'rgba(255,255,255,0.35)',
-    fontSize: 10,
-    fontWeight: '700',
-    letterSpacing: 1.2,
-    fontFamily: 'monospace',
+    marginTop: spacing.xs,
   },
   qfHeader: {
-    color: 'rgba(255,255,255,0.45)',
-    fontSize: 11,
-    fontWeight: '700',
+    color: colors.textMuted,
+    fontSize: typography.fontSize.xs,
+    fontWeight: typography.fontWeight.bold,
     letterSpacing: 1.4,
-    fontFamily: 'monospace',
   },
   qfRows: {
-    gap: 10,
+    gap: spacing.sm,
   },
   qfRowsCompact: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
+    gap: spacing.sm,
   },
   qfRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    gap: 12,
+    gap: spacing.sm,
   },
   qfRowCompact: {
     width: '48%',
     flexDirection: 'column',
     alignItems: 'flex-start',
-    backgroundColor: '#12121c',
+    backgroundColor: colors.surface,
     borderRadius: 8,
-    padding: 10,
-    gap: 4,
+    padding: spacing.sm,
+    gap: spacing.xs,
   },
   qfLabel: {
-    color: 'rgba(255,255,255,0.45)',
-    fontSize: 12,
+    color: colors.textMuted,
+    fontSize: typography.fontSize.sm,
+  },
+  qfValueRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+  },
+  qfToneDot: {
+    width: 7,
+    height: 7,
+    borderRadius: 4,
   },
   qfValue: {
-    color: '#fff',
-    fontSize: 13,
-    fontWeight: '600',
-    fontFamily: 'monospace',
+    color: colors.textPrimary,
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.semibold,
     textAlign: 'right',
   },
   qfValueMuted: {
-    color: 'rgba(255,255,255,0.35)',
+    color: colors.textMuted,
+  },
+  planCard: {
+    backgroundColor: colors.backgroundElevated,
+    borderWidth: 1,
+    borderColor: colors.accent,
+    borderRadius: 12,
+    padding: spacing.md,
+    gap: spacing.sm,
+  },
+  planHeading: {
+    color: colors.textPrimary,
+    fontSize: typography.fontSize.lg,
+    fontWeight: typography.fontWeight.bold,
+    lineHeight: Math.round(typography.fontSize.lg * typography.lineHeight.tight),
+  },
+  planSub: {
+    color: colors.textSecondary,
+    fontSize: typography.fontSize.sm,
+    lineHeight: Math.round(typography.fontSize.sm * typography.lineHeight.normal),
+  },
+  planBtn: {
+    marginTop: spacing.xs,
+    backgroundColor: colors.accent,
+    borderRadius: 8,
+    paddingVertical: spacing.sm + 4,
+    alignItems: 'center',
+  },
+  planBtnPressed: {
+    backgroundColor: colors.accentHover,
+  },
+  planBtnText: {
+    color: colors.textPrimary,
+    fontSize: typography.fontSize.md,
+    fontWeight: typography.fontWeight.semibold,
   },
   region: {
-    color: 'rgba(255,255,255,0.45)',
-    fontSize: 11,
-    fontWeight: '700',
+    color: colors.textMuted,
+    fontSize: typography.fontSize.xs,
+    fontWeight: typography.fontWeight.bold,
     letterSpacing: 1.4,
-    ...mono,
   },
   country: {
-    color: '#fff',
-    fontSize: 36,
-    fontWeight: '700',
-    lineHeight: 40,
+    color: colors.textPrimary,
+    fontSize: typography.fontSize.display,
+    fontWeight: typography.fontWeight.bold,
+    lineHeight: Math.round(typography.fontSize.display * typography.lineHeight.tight),
   },
   overallBlock: {
-    gap: 4,
-    marginTop: 4,
+    gap: spacing.xs,
+    marginTop: spacing.xs,
   },
   overallScore: {
-    fontSize: 64,
-    fontWeight: '700',
-    lineHeight: 68,
-    ...mono,
+    fontSize: 56,
+    fontWeight: typography.fontWeight.bold,
+    lineHeight: 60,
   },
   overallLabel: {
-    color: 'rgba(255,255,255,0.5)',
-    fontSize: 13,
-    fontWeight: '600',
-    letterSpacing: 0.3,
+    color: colors.textSecondary,
+    fontSize: typography.fontSize.md,
+    fontWeight: typography.fontWeight.semibold,
   },
   pillsRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
+    gap: spacing.sm,
+    marginTop: spacing.xs,
   },
   pill: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    backgroundColor: '#161622',
+    backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: '#2a2a3e',
+    borderColor: colors.border,
     borderRadius: 999,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
+    paddingHorizontal: spacing.sm + 2,
+    paddingVertical: spacing.xs + 2,
   },
   pillText: {
-    color: 'rgba(255,255,255,0.65)',
-    fontSize: 11,
-    ...mono,
+    color: colors.textSecondary,
+    fontSize: typography.fontSize.xs,
+  },
+  exportLink: {
+    color: colors.textMuted,
+    fontSize: typography.fontSize.sm,
+    textDecorationLine: 'underline',
   },
   signalPill: {
     backgroundColor: 'rgba(245, 158, 11, 0.12)',
     borderColor: 'rgba(245, 158, 11, 0.35)',
   },
   signalPillText: {
-    color: '#f59e0b',
-    fontSize: 11,
-    ...mono,
+    color: colors.warning,
+    fontSize: typography.fontSize.xs,
   },
   confRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 5,
-    marginTop: 4,
+    gap: spacing.xs,
+    marginTop: spacing.xs,
   },
   confDot: {
     width: 7,
@@ -937,38 +1155,62 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   confText: {
-    color: 'rgba(255,255,255,0.4)',
-    fontSize: 9,
-    fontWeight: '700',
+    color: colors.textMuted,
+    fontSize: typography.fontSize.xs,
+    fontWeight: typography.fontWeight.bold,
     letterSpacing: 0.6,
-    ...mono,
   },
   dimStack: {
-    gap: 12,
-    marginTop: 8,
+    gap: spacing.md,
+    marginTop: spacing.sm,
   },
   signalsSection: {
-    gap: 12,
-    marginTop: 8,
-    paddingTop: 20,
+    gap: spacing.md,
+    marginTop: spacing.sm,
+    paddingTop: spacing.lg,
     borderTopWidth: 1,
-    borderTopColor: '#1c1c2a',
+    borderTopColor: colors.border,
   },
   signalsSectionTitle: {
-    color: 'rgba(255,255,255,0.45)',
-    fontSize: 11,
-    fontWeight: '700',
-    letterSpacing: 1.4,
-    ...mono,
+    color: colors.textPrimary,
+    fontSize: typography.fontSize.lg,
+    fontWeight: typography.fontWeight.semibold,
+  },
+  sectionState: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    paddingVertical: spacing.md,
+  },
+  sectionStateText: {
+    color: colors.textMuted,
+    fontSize: typography.fontSize.sm,
+  },
+  signalsEmpty: {
+    alignItems: 'flex-start',
+    gap: spacing.xs,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 12,
+    padding: spacing.md,
+  },
+  signalsEmptyText: {
+    color: colors.textPrimary,
+    fontSize: typography.fontSize.md,
+    fontWeight: typography.fontWeight.semibold,
+  },
+  signalsEmptySub: {
+    color: colors.textMuted,
+    fontSize: typography.fontSize.sm,
   },
   signalCard: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    gap: 12,
+    gap: spacing.md,
     borderWidth: 1,
-    borderColor: '#1c1c2a',
     borderRadius: 12,
-    padding: 14,
+    padding: spacing.md,
   },
   signalIconWrap: {
     width: 28,
@@ -979,153 +1221,192 @@ const styles = StyleSheet.create({
   },
   signalCardBody: {
     flex: 1,
-    gap: 6,
+    gap: spacing.xs,
+  },
+  signalCategory: {
+    color: colors.textMuted,
+    fontSize: typography.fontSize.xs,
+    fontWeight: typography.fontWeight.semibold,
+    letterSpacing: 0.4,
+    textTransform: 'uppercase',
   },
   signalCardTitle: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: '600',
-    lineHeight: 20,
+    color: colors.textPrimary,
+    fontSize: typography.fontSize.md,
+    fontWeight: typography.fontWeight.semibold,
+    lineHeight: Math.round(typography.fontSize.md * typography.lineHeight.normal),
   },
   signalCardDesc: {
-    color: 'rgba(255,255,255,0.45)',
-    fontSize: 12,
-    lineHeight: 17,
+    color: colors.textSecondary,
+    fontSize: typography.fontSize.sm,
+    lineHeight: Math.round(typography.fontSize.sm * typography.lineHeight.normal),
   },
   signalTagRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 6,
-    marginTop: 2,
+    gap: spacing.xs + 2,
+    marginTop: spacing.xxs,
   },
   signalTag: {
     borderRadius: 4,
-    paddingHorizontal: 7,
-    paddingVertical: 3,
+    paddingHorizontal: spacing.sm - 1,
+    paddingVertical: spacing.xxs + 1,
   },
   signalTagText: {
-    fontSize: 10,
-    fontWeight: '600',
+    fontSize: typography.fontSize.xs,
+    fontWeight: typography.fontWeight.semibold,
   },
   signalDimPill: {
     borderRadius: 4,
-    paddingHorizontal: 7,
-    paddingVertical: 3,
-    backgroundColor: 'rgba(255,255,255,0.06)',
+    paddingHorizontal: spacing.sm - 1,
+    paddingVertical: spacing.xxs + 1,
+    backgroundColor: colors.backgroundElevated,
   },
   signalDimPillText: {
-    color: 'rgba(255,255,255,0.5)',
-    fontSize: 10,
-    fontWeight: '600',
+    color: colors.textMuted,
+    fontSize: typography.fontSize.xs,
+    fontWeight: typography.fontWeight.semibold,
   },
   signalMeta: {
-    color: 'rgba(255,255,255,0.35)',
-    fontSize: 11,
-    marginTop: 2,
+    color: colors.textMuted,
+    fontSize: typography.fontSize.xs,
+    marginTop: spacing.xxs,
   },
   signalsFooter: {
-    color: 'rgba(255,255,255,0.35)',
-    fontSize: 11,
-    lineHeight: 16,
-    marginTop: 2,
+    color: colors.textMuted,
+    fontSize: typography.fontSize.xs,
+    lineHeight: Math.round(typography.fontSize.xs * typography.lineHeight.normal),
+    marginTop: spacing.xxs,
   },
   dimCard: {
-    backgroundColor: '#0e0e16',
+    backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: '#1c1c2a',
+    borderColor: colors.border,
     borderRadius: 12,
-    padding: 16,
-    gap: 12,
+    padding: spacing.md,
+    gap: spacing.md,
   },
   dimTop: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    gap: 12,
+    gap: spacing.md,
   },
   dimTextCol: {
     flex: 1,
-    gap: 4,
+    gap: spacing.xs,
+  },
+  dimNameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: spacing.sm,
   },
   dimName: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '700',
+    color: colors.textPrimary,
+    fontSize: typography.fontSize.lg,
+    fontWeight: typography.fontWeight.semibold,
+    flex: 1,
   },
   dimDesc: {
-    color: 'rgba(255,255,255,0.45)',
-    fontSize: 12,
-    lineHeight: 17,
+    color: colors.textMuted,
+    fontSize: typography.fontSize.sm,
+    lineHeight: Math.round(typography.fontSize.sm * typography.lineHeight.normal),
+  },
+  crowdingQual: {
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.semibold,
   },
   dimScoreCol: {
     alignItems: 'flex-end',
   },
   dimScore: {
-    fontSize: 28,
-    fontWeight: '700',
-    lineHeight: 32,
-    ...mono,
+    fontSize: typography.fontSize.xl,
+    fontWeight: typography.fontWeight.bold,
+    lineHeight: Math.round(typography.fontSize.xl * typography.lineHeight.tight),
   },
   barTrack: {
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: '#1a1a2e',
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: colors.backgroundElevated,
     overflow: 'hidden',
   },
   barFill: {
-    height: 6,
-    borderRadius: 3,
+    height: 8,
+    borderRadius: 4,
+  },
+  barCaption: {
+    color: colors.textMuted,
+    fontSize: typography.fontSize.xs,
+    marginTop: -spacing.sm,
   },
   tagRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 6,
+    gap: spacing.xs + 2,
   },
   tag: {
-    backgroundColor: '#161622',
+    backgroundColor: colors.backgroundElevated,
     borderRadius: 6,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
   },
   tagText: {
-    color: 'rgba(255,255,255,0.5)',
-    fontSize: 10,
-    ...mono,
+    color: colors.textMuted,
+    fontSize: typography.fontSize.xs,
   },
   noData: {
-    color: 'rgba(255,255,255,0.3)',
-    fontSize: 11,
-    ...mono,
+    color: colors.textMuted,
+    fontSize: typography.fontSize.xs,
   },
   expandBlock: {
     borderTopWidth: 1,
-    borderTopColor: '#1c1c2a',
-    paddingTop: 10,
-    gap: 4,
+    borderTopColor: colors.border,
+    paddingTop: spacing.sm + 2,
+    gap: spacing.sm,
   },
-  expandLine: {
-    color: 'rgba(255,255,255,0.55)',
-    fontSize: 11,
-    lineHeight: 16,
-    ...mono,
+  expandRow: {
+    gap: spacing.xxs,
+  },
+  expandRowMain: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    gap: spacing.md,
+  },
+  expandLabel: {
+    color: colors.textSecondary,
+    fontSize: typography.fontSize.sm,
+    flex: 1,
+  },
+  expandValue: {
+    color: colors.textPrimary,
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.semibold,
+  },
+  expandSource: {
+    color: colors.textMuted,
+    fontSize: typography.fontSize.xs,
   },
   expandEmpty: {
-    color: 'rgba(255,255,255,0.35)',
-    fontSize: 11,
+    color: colors.textMuted,
+    fontSize: typography.fontSize.xs,
   },
   actionsRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 10,
-    marginTop: 8,
+    gap: spacing.sm + 2,
+    marginTop: spacing.sm,
   },
   actionBtn: {
-    backgroundColor: '#1a3a6e',
-    borderRadius: 8,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
+    backgroundColor: colors.scoreLow,
+    borderRadius: spacing.sm,
+    paddingVertical: spacing.sm + 4,
+    paddingHorizontal: spacing.md,
+    minHeight: 44,
+    justifyContent: 'center',
   },
   actionBtnActive: {
-    backgroundColor: '#2a4a3e',
+    backgroundColor: colors.scoreMidLow,
   },
   actionBtnDisabled: {
     opacity: 0.45,
@@ -1133,54 +1414,54 @@ const styles = StyleSheet.create({
   actionBtnGhost: {
     backgroundColor: 'transparent',
     borderWidth: 1,
-    borderColor: '#2a2a3e',
+    borderColor: colors.border,
   },
   actionText: {
-    color: '#c8dcff',
-    fontSize: 14,
-    fontWeight: '600',
+    color: colors.accent,
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.semibold,
   },
   actionTextDisabled: {
-    color: 'rgba(255,255,255,0.45)',
+    color: colors.textMuted,
   },
   actionTextGhost: {
-    color: 'rgba(255,255,255,0.7)',
-    fontSize: 14,
-    fontWeight: '600',
+    color: colors.textSecondary,
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.semibold,
   },
   exportWrap: {
     position: 'relative',
     zIndex: 5,
   },
   exportMenu: {
-    marginTop: 6,
+    marginTop: spacing.xs + 2,
     borderWidth: 1,
-    borderColor: '#2a2a3e',
-    borderRadius: 8,
-    backgroundColor: '#14141f',
+    borderColor: colors.border,
+    borderRadius: spacing.sm,
+    backgroundColor: colors.backgroundElevated,
     overflow: 'hidden',
     minWidth: 160,
   },
   exportMenuItem: {
-    paddingVertical: 10,
-    paddingHorizontal: 14,
+    paddingVertical: spacing.sm + 2,
+    paddingHorizontal: spacing.md - 2,
     borderBottomWidth: 1,
-    borderBottomColor: '#1c1c2a',
+    borderBottomColor: colors.border,
   },
   exportMenuItemLocked: {
     opacity: 0.45,
   },
   exportUpgradePrompt: {
-    color: '#e0a03a',
-    fontSize: 11,
-    fontWeight: '600',
-    paddingHorizontal: 12,
-    paddingBottom: 10,
-    paddingTop: 4,
+    color: colors.warning,
+    fontSize: typography.fontSize.xs,
+    fontWeight: typography.fontWeight.semibold,
+    paddingHorizontal: spacing.sm + 4,
+    paddingBottom: spacing.sm + 2,
+    paddingTop: spacing.xs,
   },
   exportMenuText: {
-    color: 'rgba(255,255,255,0.85)',
-    fontSize: 13,
-    fontWeight: '600',
+    color: colors.textPrimary,
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.semibold,
   },
 });

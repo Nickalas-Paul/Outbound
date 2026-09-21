@@ -31,10 +31,11 @@ export type TierAccess = {
 
 /**
  * Client-side tier + feature access.
- * When gating is off (beta default), all access checks return true.
+ * When gating is off (beta default), tier checks return true — but
+ * user-specific features still require authentication.
  */
 export function useTierAccess(): TierAccess {
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const gatingEnabled = isGatingEnabled();
   const currentTier = normalizeTier(user?.subscriptionTier);
 
@@ -43,9 +44,13 @@ export function useTierAccess(): TierAccess {
     currentTier,
     canUseFilter: (filterKey: string) => coreCanUseFilter(currentTier, filterKey),
     canUseHorizon: (horizon: string) => coreCanUseHorizon(currentTier, horizon),
-    canExport: () => canAccessFeature(currentTier, 'exports'),
-    canSaveSearches: () => canAccessFeature(currentTier, 'savedSearches'),
+    canExport: () =>
+      Boolean(isAuthenticated) && canAccessFeature(currentTier, 'exports'),
+    canSaveSearches: () =>
+      Boolean(isAuthenticated) &&
+      canAccessFeature(currentTier, 'savedSearches'),
     canAccessAgentIntros: () =>
+      Boolean(isAuthenticated) &&
       canAccessFeature(currentTier, 'agentIntroductions'),
     canUseTravelerProfile: () =>
       canAccessFeature(currentTier, 'travelerProfile'),

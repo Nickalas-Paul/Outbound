@@ -2,14 +2,7 @@ import { Link } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { useAuth } from '@/services/auth';
-
-const LINKS = [
-  { href: '/explorer' as const, label: 'Product' },
-  // MARKETPLACE: commented out for Outbound — preserved for future vendor/guide marketplace
-  // { href: '/marketplace' as const, label: 'Marketplace' },
-  { href: '/pricing' as const, label: 'Pricing' },
-  { href: '/docs/methodology' as const, label: 'Docs' },
-];
+import { colors, spacing, typography } from '@/theme/tokens';
 
 type Props = {
   theme?: 'light' | 'dark';
@@ -26,17 +19,40 @@ export function MarketingNav({ theme = 'light' }: Props) {
           <Text style={[styles.brand, dark && styles.brandDark]}>Outbound</Text>
         </Pressable>
       </Link>
+
       <View style={styles.links}>
-        {LINKS.map((item) => (
-          <Link key={item.label} href={item.href} asChild>
-            <Pressable style={styles.link}>
-              <Text style={[styles.linkText, dark && styles.linkTextDark]}>
-                {item.label}
-              </Text>
-            </Pressable>
-          </Link>
-        ))}
+        <Link href="/" asChild>
+          <Pressable style={styles.link}>
+            <Text style={[styles.linkText, dark && styles.linkTextDark]}>
+              Explorer
+            </Text>
+          </Pressable>
+        </Link>
+        <Link href="/about" asChild>
+          <Pressable style={styles.link}>
+            <Text style={[styles.linkText, dark && styles.linkTextDark]}>
+              About
+            </Text>
+          </Pressable>
+        </Link>
+        <Link href="/plan" asChild>
+          <Pressable
+            style={StyleSheet.flatten([styles.planCta, dark && styles.planCtaDark])}
+            accessibilityRole="button"
+            accessibilityLabel="Plan a Trip"
+          >
+            <Text style={styles.planCtaText}>Plan a Trip</Text>
+          </Pressable>
+        </Link>
+        <Link href="/docs/methodology" asChild>
+          <Pressable style={styles.link}>
+            <Text style={[styles.linkTextMuted, dark && styles.linkTextDark]}>
+              Methodology
+            </Text>
+          </Pressable>
+        </Link>
       </View>
+
       <View style={styles.actions}>
         {!isLoading && isAuthenticated ? (
           <>
@@ -46,11 +62,11 @@ export function MarketingNav({ theme = 'light' }: Props) {
             >
               {user?.email}
             </Text>
-            <Link href="/explorer" asChild>
-              <Pressable
-                style={StyleSheet.flatten([styles.cta, dark && styles.ctaDark])}
-              >
-                <Text style={styles.ctaText}>Go to Explorer</Text>
+            <Link href="/settings" asChild>
+              <Pressable>
+                <Text style={[styles.linkTextMuted, dark && styles.linkTextDark]}>
+                  Settings
+                </Text>
               </Pressable>
             </Link>
           </>
@@ -58,16 +74,16 @@ export function MarketingNav({ theme = 'light' }: Props) {
           <>
             <Link href="/login" asChild>
               <Pressable>
-                <Text style={[styles.linkText, dark && styles.linkTextDark]}>
+                <Text style={[styles.linkTextMuted, dark && styles.linkTextDark]}>
                   Log in
                 </Text>
               </Pressable>
             </Link>
             <Link href="/register" asChild>
               <Pressable
-                style={StyleSheet.flatten([styles.cta, dark && styles.ctaDark])}
+                style={StyleSheet.flatten([styles.registerCta, dark && styles.registerCtaDark])}
               >
-                <Text style={styles.ctaText}>Start free</Text>
+                <Text style={styles.registerCtaText}>Start free</Text>
               </Pressable>
             </Link>
           </>
@@ -82,12 +98,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 24,
-    paddingVertical: 16,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
     borderBottomWidth: 1,
     borderBottomColor: '#e2e2de',
     backgroundColor: '#ffffff',
-    gap: 16,
+    gap: spacing.md,
     flexWrap: 'wrap',
   },
   navDark: {
@@ -95,8 +111,8 @@ const styles = StyleSheet.create({
     borderBottomColor: '#1c1c2a',
   },
   brand: {
-    fontSize: 18,
-    fontWeight: '700',
+    fontSize: typography.fontSize.lg,
+    fontWeight: typography.fontWeight.bold,
   },
   brandDark: {
     color: '#ffffff',
@@ -104,25 +120,46 @@ const styles = StyleSheet.create({
   links: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 16,
+    gap: spacing.md,
     flexWrap: 'wrap',
   },
   link: {
     paddingVertical: 4,
   },
   linkText: {
-    fontSize: 14,
+    fontSize: typography.fontSize.md,
+    color: '#1a1a1a',
+  },
+  linkTextMuted: {
+    fontSize: typography.fontSize.sm,
+    color: '#1a1a1a',
+    opacity: 0.65,
   },
   linkTextDark: {
     color: 'rgba(255,255,255,0.75)',
+    opacity: 1,
+  },
+  planCta: {
+    backgroundColor: colors.accent,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderRadius: 6,
+  },
+  planCtaDark: {
+    backgroundColor: colors.accent,
+  },
+  planCtaText: {
+    color: colors.textPrimary,
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.semibold,
   },
   actions: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 16,
+    gap: spacing.md,
   },
   userLabel: {
-    fontSize: 13,
+    fontSize: typography.fontSize.sm,
     opacity: 0.7,
     maxWidth: 180,
   },
@@ -130,18 +167,18 @@ const styles = StyleSheet.create({
     color: 'rgba(255,255,255,0.65)',
     opacity: 1,
   },
-  cta: {
+  registerCta: {
     backgroundColor: '#1a1a1a',
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 6,
   },
-  ctaDark: {
+  registerCtaDark: {
     backgroundColor: '#1a3a6e',
   },
-  ctaText: {
+  registerCtaText: {
     color: '#ffffff',
-    fontSize: 14,
-    fontWeight: '600',
+    fontSize: typography.fontSize.md,
+    fontWeight: typography.fontWeight.semibold,
   },
 });

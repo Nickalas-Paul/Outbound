@@ -1,4 +1,5 @@
-import { Link, Redirect, Slot, Tabs } from 'expo-router';
+import { Link, Slot, Tabs } from 'expo-router';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import {
   ActivityIndicator,
   Platform,
@@ -13,18 +14,14 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CompareProvider } from '@/hooks/useCompareSelection';
 import { useTierAccess } from '@/hooks/useTierAccess';
 import { useAuth } from '@/services/auth';
+import { colors, spacing, typography } from '@/theme/tokens';
 // MARKETPLACE: commented out for Outbound — preserved for future vendor/guide marketplace
-// import { useEffect, useState } from 'react';
-// import { usePathname } from 'expo-router';
-// import { getUnreadCount } from '@/services/notifications';
 
-const APP_LINKS = [
-  { href: '/explorer' as const, label: 'Explorer' },
-  // MARKETPLACE: commented out for Outbound — preserved for future vendor/guide marketplace
-  // { href: '/marketplace' as const, label: 'Marketplace' },
-  // { href: '/engagements' as const, label: 'Engagements' },
-  { href: '/settings' as const, label: 'Settings' },
-];
+type NavLink = {
+  href: '/' | '/about' | '/plan' | '/settings' | '/docs/methodology' | '/login';
+  label: string;
+  variant?: 'default' | 'cta' | 'muted';
+};
 
 function TierBadge() {
   const { gatingEnabled, currentTier } = useTierAccess();
@@ -60,93 +57,81 @@ function TierBadge() {
   );
 }
 
-// MARKETPLACE: commented out for Outbound — preserved for future vendor/guide marketplace
-/*
-function NotificationBell() {
-  const { isAuthenticated } = useAuth();
-  const pathname = usePathname();
-  const [count, setCount] = useState(0);
-
-  useEffect(() => {
-    if (!isAuthenticated) {
-      setCount(0);
-      return;
-    }
-    let cancelled = false;
-    (async () => {
-      try {
-        const n = await getUnreadCount();
-        if (!cancelled) setCount(n);
-      } catch {
-        // non-fatal
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [isAuthenticated, pathname]);
-
-  return (
-    <Link href="/notifications" asChild>
-      <Pressable
-        testID="notification-bell"
-        style={styles.bellWrap}
-        accessibilityLabel="Notifications"
-      >
-        <Text style={styles.bellIcon}>🔔</Text>
-        {count > 0 ? (
-          <View style={styles.bellBadge} testID="notification-badge">
-            <Text style={styles.bellBadgeText}>
-              {count > 99 ? '99+' : String(count)}
-            </Text>
-          </View>
-        ) : null}
-      </Pressable>
-    </Link>
-  );
+function useShellNavLinks(): NavLink[] {
+  return [
+    { href: '/', label: 'Explorer' },
+    { href: '/about', label: 'About' },
+    { href: '/plan', label: 'Plan a Trip', variant: 'cta' },
+  ];
 }
-*/
 
 function WebSidebarShell() {
-  const { user, logout } = useAuth();
+  const { user, logout, isAuthenticated, isLoading } = useAuth();
+  const links = useShellNavLinks();
 
   return (
     <View style={styles.shell}>
       <View style={styles.sidebar}>
         <View style={styles.brandRow}>
           <Text style={styles.brand}>Outbound</Text>
-          <TierBadge />
-          {/* MARKETPLACE: commented out for Outbound — preserved for future vendor/guide marketplace */}
-          {/* <NotificationBell /> */}
+          {isAuthenticated ? <TierBadge /> : null}
         </View>
-        <Text style={styles.shellLabel}>App shell (sidebar)</Text>
         {user ? <Text style={styles.userEmail}>{user.email}</Text> : null}
-        {APP_LINKS.map((item) => (
+
+        {links.map((item) => (
           <Link key={item.href} href={item.href} asChild>
-            <Pressable style={styles.navItem}>
-              <Text style={styles.navText}>{item.label}</Text>
+            <Pressable
+              style={StyleSheet.flatten([
+                styles.navItem,
+                item.variant === 'cta' && styles.navItemCta,
+              ])}
+            >
+              <Text
+                style={StyleSheet.flatten([
+                  styles.navText,
+                  item.variant === 'cta' && styles.navTextCta,
+                ])}
+              >
+                {item.label}
+              </Text>
             </Pressable>
           </Link>
         ))}
-        {/* MARKETPLACE: commented out for Outbound — preserved for future vendor/guide marketplace */}
-        {/* <Link href="/notifications" asChild>
+
+        <View style={styles.sidebarSpacer} />
+
+        <Link href="/docs/methodology" asChild>
           <Pressable style={styles.navItem}>
-            <Text style={styles.navText}>Notifications</Text>
-          </Pressable>
-        </Link> */}
-        <Link href="/" asChild>
-          <Pressable style={styles.navItem}>
-            <Text style={styles.navTextMuted}>Marketing home</Text>
+            <Text style={styles.navTextMuted}>Methodology</Text>
           </Pressable>
         </Link>
-        <Pressable
-          style={styles.navItem}
-          onPress={() => {
-            void logout();
-          }}
-        >
-          <Text style={styles.navTextMuted}>Log out</Text>
-        </Pressable>
+
+        {isAuthenticated ? (
+          <Link href="/settings" asChild>
+            <Pressable style={styles.navItem}>
+              <Text style={styles.navTextMuted}>Settings</Text>
+            </Pressable>
+          </Link>
+        ) : null}
+
+        {!isLoading && !isAuthenticated ? (
+          <Link href="/login" asChild>
+            <Pressable style={styles.navItem}>
+              <Text style={styles.navTextMuted}>Log in</Text>
+            </Pressable>
+          </Link>
+        ) : null}
+
+        {isAuthenticated ? (
+          <Pressable
+            style={styles.navItem}
+            onPress={() => {
+              void logout();
+            }}
+          >
+            <Text style={styles.navTextMuted}>Log out</Text>
+          </Pressable>
+        ) : null}
       </View>
       <View style={styles.content}>
         <Slot />
@@ -157,26 +142,48 @@ function WebSidebarShell() {
 
 function NativeTabsShell() {
   const insets = useSafeAreaInsets();
-  const { logout } = useAuth();
+  const { logout, isAuthenticated, isLoading } = useAuth();
 
   return (
     <View style={styles.nativeWrap}>
       <View
-        style={[
+        style={StyleSheet.flatten([
           styles.nativeBadgeBar,
           { paddingTop: Math.max(insets.top, 8) },
-        ]}
+        ])}
       >
         <View style={styles.nativeBrandRow}>
           <Text style={styles.nativeBrand}>Outbound</Text>
-          <TierBadge />
+          {isAuthenticated ? <TierBadge /> : null}
         </View>
         <View style={styles.nativeActions}>
-          {/* MARKETPLACE: commented out for Outbound — preserved for future vendor/guide marketplace */}
-          {/* <NotificationBell /> */}
-          <Pressable onPress={() => void logout()} hitSlop={8}>
-            <Text style={styles.navTextMuted}>Log out</Text>
-          </Pressable>
+          {!isLoading && !isAuthenticated ? (
+            <Link href="/login" asChild>
+              <Pressable hitSlop={8}>
+                <Text style={styles.navTextMuted}>Log in</Text>
+              </Pressable>
+            </Link>
+          ) : null}
+          {isAuthenticated ? (
+            <>
+              <Link href="/settings" asChild>
+                <Pressable
+                  hitSlop={8}
+                  accessibilityRole="button"
+                  accessibilityLabel="Settings"
+                >
+                  <MaterialCommunityIcons
+                    name="cog-outline"
+                    size={22}
+                    color="#1a1a1a"
+                  />
+                </Pressable>
+              </Link>
+              <Pressable onPress={() => void logout()} hitSlop={8}>
+                <Text style={styles.navTextMuted}>Log out</Text>
+              </Pressable>
+            </>
+          ) : null}
         </View>
       </View>
       <Tabs
@@ -184,21 +191,40 @@ function NativeTabsShell() {
           headerShown: false,
           tabBarActiveTintColor: '#1a1a1a',
           tabBarInactiveTintColor: '#6b6b6b',
+          tabBarIcon: () => null,
           tabBarStyle: {
             paddingBottom: Math.max(insets.bottom, 8),
-            height: 56 + Math.max(insets.bottom, 8),
+            height: 52 + Math.max(insets.bottom, 8),
             backgroundColor: '#ffffff',
             borderTopColor: '#e2e2de',
           },
           tabBarLabelStyle: {
             fontSize: 12,
             fontWeight: '600',
+            marginBottom: 8,
           },
         }}
       >
-        <Tabs.Screen name="explorer" options={{ title: 'Explorer' }} />
+        <Tabs.Screen name="index" options={{ title: 'Explorer' }} />
+        <Tabs.Screen name="about" options={{ title: 'About' }} />
+        <Tabs.Screen
+          name="plan"
+          options={{
+            title: 'Plan a Trip',
+            tabBarActiveTintColor: colors.accent,
+          }}
+        />
+        {/* Settings via badge-bar gear — keep route registered, hide from tabs */}
+        <Tabs.Screen
+          name="settings"
+          options={{ href: null, title: 'Settings' }}
+        />
+        {/* Nested explorer routes (compare, detail) — hidden from tab bar */}
+        <Tabs.Screen
+          name="explorer"
+          options={{ href: null, title: 'Explorer' }}
+        />
         {/* MARKETPLACE: commented out for Outbound — preserved for future vendor/guide marketplace */}
-        {/* Hide from tab bar but keep routes registered for deep links / Coming Soon screens */}
         <Tabs.Screen
           name="marketplace"
           options={{ href: null, title: 'Marketplace' }}
@@ -207,7 +233,6 @@ function NativeTabsShell() {
           name="engagements"
           options={{ href: null, title: 'Engagements' }}
         />
-        <Tabs.Screen name="settings" options={{ title: 'Settings' }} />
         <Tabs.Screen
           name="notifications"
           options={{ href: null, title: 'Notifications' }}
@@ -220,19 +245,15 @@ function NativeTabsShell() {
 export default function AppShellLayout() {
   const { width } = useWindowDimensions();
   const useSidebar = Platform.OS === 'web' && width >= 768;
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isLoading } = useAuth();
 
   if (isLoading) {
     return (
       <View style={styles.loading}>
         <ActivityIndicator size="large" color="#1a1a1a" />
-        <Text style={styles.loadingText}>Checking session...</Text>
+        <Text style={styles.loadingText}>Loading…</Text>
       </View>
     );
-  }
-
-  if (!isAuthenticated) {
-    return <Redirect href="/login" />;
   }
 
   const shell = useSidebar ? <WebSidebarShell /> : <NativeTabsShell />;
@@ -291,53 +312,40 @@ const styles = StyleSheet.create({
   badgeTextOnColor: {
     color: '#ffffff',
   },
-  bellWrap: {
-    position: 'relative',
-    padding: 4,
-    marginLeft: 'auto',
-  },
-  bellIcon: {
-    fontSize: 16,
-  },
-  bellBadge: {
-    position: 'absolute',
-    top: -2,
-    right: -4,
-    minWidth: 16,
-    height: 16,
-    borderRadius: 8,
-    backgroundColor: '#c62828',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 3,
-  },
-  bellBadgeText: {
-    color: '#ffffff',
-    fontSize: 9,
-    fontWeight: '700',
-  },
-  shellLabel: {
-    fontSize: 12,
-    opacity: 0.55,
-    marginBottom: 12,
-  },
   userEmail: {
     fontSize: 12,
     opacity: 0.7,
     marginBottom: 8,
+  },
+  sidebarSpacer: {
+    flex: 1,
+    minHeight: spacing.md,
   },
   navItem: {
     paddingVertical: 10,
     paddingHorizontal: 8,
     borderRadius: 6,
   },
+  navItemCta: {
+    backgroundColor: colors.accent,
+    paddingVertical: 12,
+    paddingHorizontal: spacing.md,
+    marginTop: spacing.xs,
+  },
   navText: {
-    fontSize: 15,
-    fontWeight: '500',
+    fontSize: typography.fontSize.md,
+    fontWeight: typography.fontWeight.medium,
+    color: '#1a1a1a',
+  },
+  navTextCta: {
+    color: colors.textPrimary,
+    fontWeight: typography.fontWeight.semibold,
+    textAlign: 'center',
   },
   navTextMuted: {
-    fontSize: 14,
+    fontSize: typography.fontSize.sm,
     opacity: 0.6,
+    color: '#1a1a1a',
   },
   content: {
     flex: 1,

@@ -37,10 +37,12 @@ export {
 
 export {
   TVI_DIMENSION_DISPLAY,
+  TVI_UI_DIMENSION_ORDER,
   SOURCE_DISPLAY_NAMES,
   TVI_SOURCE_CATALOG,
   TVI_SCORING_VERSION_LABEL,
   getDimensionDisplay,
+  getOrderedDimensionDisplay,
   sourceDisplayName,
   formatNormalization,
   formatDirection,
@@ -86,3 +88,12 @@ export {
   type SignalSummaryMap,
   type SignalType,
 } from "./signals";
+
+// Trip intake (Phase 2 Prompt 4a)
+export {
+  SERVICE_TIERS,
+  TRIP_TYPES,
+  intakeSchema,
+  isGroupSizeSoftWarning,
+  type IntakePayload,
+} from "./schemas/intake";

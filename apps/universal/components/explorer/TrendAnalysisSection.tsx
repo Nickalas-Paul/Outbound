@@ -1,16 +1,23 @@
 import {
-  TVI_DIMENSION_DISPLAY,
+  getOrderedDimensionDisplay,
   type DimensionKey,
 } from '@outbound/core';
-import { useMemo } from 'react';
-import { Platform, StyleSheet, Text, View } from 'react-native';
+import { useMemo, useState } from 'react';
+import {
+  ActivityIndicator,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
-import { tviScoreColor } from '@/lib/tviColors';
 import type { DimensionTrend, TrendData } from '@/services/geographies';
+import { colors, spacing, typography } from '@/theme/tokens';
 
 import TrendSparkline from './TrendSparkline';
 
-const BASE_DIMS = TVI_DIMENSION_DISPLAY.filter((d) => !d.isComposite);
+const BASE_DIMS = getOrderedDimensionDisplay().filter((d) => !d.isComposite);
 
 function directionMeta(direction: DimensionTrend['direction']): {
   arrow: string;
@@ -18,18 +25,18 @@ function directionMeta(direction: DimensionTrend['direction']): {
   color: string;
 } {
   if (direction === 'improving') {
-    return { arrow: '↑', label: 'Improving', color: '#3ecf8e' };
+    return { arrow: '↑', label: 'Improving', color: colors.success };
   }
   if (direction === 'declining') {
-    return { arrow: '↓', label: 'Declining', color: '#d96b6b' };
+    return { arrow: '↓', label: 'Declining', color: colors.error };
   }
-  return { arrow: '→', label: 'Stable', color: '#8b8b9a' };
+  return { arrow: '→', label: 'Stable', color: colors.textMuted };
 }
 
 function confidenceDot(level: string): string {
-  if (level === 'high') return '#3ecf8e';
-  if (level === 'medium') return '#e0a03a';
-  return '#d96b6b';
+  if (level === 'high') return colors.success;
+  if (level === 'medium') return colors.warning;
+  return colors.error;
 }
 
 function fmtScore(n: number | null | undefined): string {
@@ -48,16 +55,40 @@ function fmtInterval(lo: number | null, hi: number | null): string {
   return `${Math.round(lo)}-${Math.round(hi)}`;
 }
 
+function scoreTone(score: number | null | undefined): string {
+  if (score == null || Number.isNaN(score)) return colors.accent;
+  if (score >= 65) return colors.success;
+  if (score >= 40) return colors.warning;
+  return colors.error;
+}
+
+function buildProjectionPoints(
+  trend: DimensionTrend
+): Array<{ year: number; score: number }> {
+  const series = trend.historicalScores ?? [];
+  const lastYear =
+    series.length > 0
+      ? series[series.length - 1].year
+      : trend.yearRange?.[1] ?? new Date().getUTCFullYear();
+  const points: Array<{ year: number; score: number }> = [];
+  if (trend.projected2yr != null) {
+    points.push({ year: lastYear + 2, score: trend.projected2yr });
+  }
+  if (trend.projected5yr != null) {
+    points.push({ year: lastYear + 5, score: trend.projected5yr });
+  }
+  return points;
+}
+
 function DimensionTrendCard({
   label,
-  dimKey,
   trend,
 }: {
   label: string;
   dimKey: DimensionKey;
   trend: DimensionTrend | null;
 }) {
-  const color = tviScoreColor(trend?.currentScore ?? null) ?? '#5b8def';
+  const color = scoreTone(trend?.currentScore ?? null);
 
   if (!trend) {
     return (
@@ -70,6 +101,7 @@ function DimensionTrendCard({
 
   const dir = directionMeta(trend.direction);
   const series = trend.historicalScores ?? [];
+  const projections = buildProjectionPoints(trend);
 
   return (
     <View style={styles.card}>
@@ -81,10 +113,15 @@ function DimensionTrendCard({
       </View>
 
       <View style={styles.cardBody}>
-        <TrendSparkline data={series} color={color} />
+        <TrendSparkline
+          data={series}
+          color={color}
+          projectionData={projections}
+        />
         <View style={styles.projCol}>
           <Text style={styles.projLine}>
-            Current: <Text style={styles.projVal}>{fmtScore(trend.currentScore)}</Text>
+            Current:{' '}
+            <Text style={styles.projVal}>{fmtScore(trend.currentScore)}</Text>
           </Text>
           <Text style={styles.projLine}>
             2yr:{' '}
@@ -93,7 +130,7 @@ function DimensionTrendCard({
               {fmtInterval(trend.confidence.lower2yr, trend.confidence.upper2yr)})
             </Text>
           </Text>
-          <Text style={styles.projLine}>
+          <Text style={[styles.projLine, styles.projMuted]}>
             5yr:{' '}
             <Text style={styles.projVal}>
               {fmtScore(trend.projected5yr)} (
@@ -105,10 +142,14 @@ function DimensionTrendCard({
 
       <View style={styles.metaRow}>
         <View
-          style={[styles.dot, { backgroundColor: confidenceDot(trend.trendConfidence) }]}
+          style={[
+            styles.dot,
+            { backgroundColor: confidenceDot(trend.trendConfidence) },
+          ]}
         />
         <Text style={styles.metaText}>
-          {trend.trendConfidence.charAt(0).toUpperCase() + trend.trendConfidence.slice(1)}{' '}
+          {trend.trendConfidence.charAt(0).toUpperCase() +
+            trend.trendConfidence.slice(1)}{' '}
           confidence · {trend.dataPoints} data points
           {trend.yearRange
             ? ` · ${trend.yearRange[0]}–${trend.yearRange[1]}`
@@ -130,7 +171,12 @@ function TrajectorySummary({
     return BASE_DIMS.map((dim) => {
       const t = trends[dim.key];
       if (!t) {
-        return { key: dim.key, label: dim.label, text: '— no trend', color: '#666' };
+        return {
+          key: dim.key,
+          label: dim.label,
+          text: '— no trend',
+          color: colors.textMuted,
+        };
       }
       const dir = directionMeta(t.direction);
       return {
@@ -174,15 +220,42 @@ export default function TrendAnalysisSection({
   trajectoryScore,
   loading,
 }: Props) {
+  const [expanded, setExpanded] = useState(true);
+
   return (
     <View style={styles.section}>
-      <Text style={styles.sectionHeader}>Trend Analysis</Text>
-      {loading ? (
-        <Text style={styles.insufficient}>Loading trends…</Text>
+      <Pressable
+        onPress={() => setExpanded((v) => !v)}
+        style={styles.sectionHeaderRow}
+        accessibilityRole="button"
+        accessibilityState={{ expanded }}
+      >
+        <Text style={styles.sectionHeader}>Trends & Outlook</Text>
+        <MaterialCommunityIcons
+          name={expanded ? 'chevron-up' : 'chevron-down'}
+          size={22}
+          color={colors.textMuted}
+        />
+      </Pressable>
+
+      {!expanded ? (
+        <Text style={styles.collapsedHint}>
+          Tap to view historical scores and 2yr / 5yr projections
+        </Text>
+      ) : loading ? (
+        <View style={styles.loadingRow}>
+          <ActivityIndicator color={colors.accent} size="small" />
+          <Text style={styles.insufficient}>Loading trends…</Text>
+        </View>
       ) : !trendData ? (
-        <Text style={styles.insufficient}>Trend data unavailable for this geography.</Text>
+        <Text style={styles.insufficient}>
+          No trend data available for this destination.
+        </Text>
       ) : (
         <>
+          <Text style={styles.legendNote}>
+            Solid = historical · Dashed = OLS projection (2yr / 5yr)
+          </Text>
           {BASE_DIMS.map((dim) => (
             <DimensionTrendCard
               key={dim.key}
@@ -201,74 +274,89 @@ export default function TrendAnalysisSection({
   );
 }
 
-const mono = Platform.select({
-  web: 'ui-monospace, SFMono-Regular, Menlo, monospace',
-  default: 'monospace',
-});
-
 const styles = StyleSheet.create({
   section: {
-    marginTop: 28,
-    gap: 12,
+    marginTop: spacing.lg,
+    gap: spacing.md,
+    paddingTop: spacing.lg,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+  },
+  sectionHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: spacing.sm,
   },
   sectionHeader: {
-    color: '#8b8b9a',
-    fontSize: 11,
-    letterSpacing: 1.4,
-    textTransform: 'uppercase',
-    fontFamily: mono,
-    marginBottom: 4,
+    color: colors.textPrimary,
+    fontSize: typography.fontSize.lg,
+    fontWeight: typography.fontWeight.semibold,
+  },
+  collapsedHint: {
+    color: colors.textMuted,
+    fontSize: typography.fontSize.sm,
+  },
+  legendNote: {
+    color: colors.textMuted,
+    fontSize: typography.fontSize.xs,
+  },
+  loadingRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
   },
   card: {
-    backgroundColor: '#12121a',
+    backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: '#232332',
-    borderRadius: 10,
-    padding: 14,
-    gap: 10,
+    borderColor: colors.border,
+    borderRadius: 12,
+    padding: spacing.md,
+    gap: spacing.sm + 2,
   },
   trajCard: {
-    borderColor: '#2a3a55',
-    backgroundColor: '#10141c',
+    borderColor: colors.accent,
   },
   cardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    gap: 12,
+    gap: spacing.md,
   },
   cardTitle: {
-    color: '#f2f2f7',
-    fontSize: 14,
-    fontWeight: '600',
+    color: colors.textPrimary,
+    fontSize: typography.fontSize.md,
+    fontWeight: typography.fontWeight.semibold,
     flex: 1,
   },
   dirText: {
-    fontSize: 12,
-    fontFamily: mono,
+    fontSize: typography.fontSize.sm,
   },
   cardBody: {
     flexDirection: 'row',
-    gap: 14,
+    gap: spacing.md,
     alignItems: 'center',
     flexWrap: 'wrap',
   },
   projCol: {
-    gap: 3,
+    gap: spacing.xxs + 1,
     minWidth: 140,
   },
   projLine: {
-    color: '#8b8b9a',
-    fontSize: 12,
+    color: colors.textMuted,
+    fontSize: typography.fontSize.sm,
+  },
+  projMuted: {
+    opacity: 0.85,
   },
   projVal: {
-    color: '#d8d8e2',
-    fontFamily: mono,
+    color: colors.textSecondary,
+    fontWeight: typography.fontWeight.medium,
   },
   metaRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: spacing.sm,
   },
   dot: {
     width: 7,
@@ -276,34 +364,31 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   metaText: {
-    color: '#6e6e7c',
-    fontSize: 11,
-    fontFamily: mono,
+    color: colors.textMuted,
+    fontSize: typography.fontSize.xs,
     flex: 1,
   },
   insufficient: {
-    color: '#6e6e7c',
-    fontSize: 13,
+    color: colors.textMuted,
+    fontSize: typography.fontSize.sm,
     fontStyle: 'italic',
   },
   trajScore: {
-    color: '#f2f2f7',
-    fontSize: 13,
-    fontFamily: mono,
-    fontWeight: '600',
+    color: colors.textPrimary,
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.semibold,
   },
   trajIntro: {
-    color: '#8b8b9a',
-    fontSize: 12,
+    color: colors.textMuted,
+    fontSize: typography.fontSize.sm,
   },
   trajGrid: {
-    gap: 4,
+    gap: spacing.xs,
   },
   trajLine: {
-    fontSize: 12,
-    fontFamily: mono,
+    fontSize: typography.fontSize.sm,
   },
   trajDim: {
-    color: '#6e6e7c',
+    color: colors.textMuted,
   },
 });

@@ -24,7 +24,7 @@ export default function RegisterScreen() {
   const [submitting, setSubmitting] = useState(false);
 
   if (!isLoading && isAuthenticated) {
-    return <Redirect href="/explorer" />;
+    return <Redirect href="/" />;
   }
 
   async function onSubmit() {
@@ -46,7 +46,7 @@ export default function RegisterScreen() {
     setSubmitting(true);
     try {
       await register(trimmed, password);
-      router.replace('/explorer');
+      router.replace('/');
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Registration failed');
     } finally {
@@ -58,7 +58,9 @@ export default function RegisterScreen() {
     <MarketingShell>
       <View style={styles.card}>
         <Text style={styles.title}>Create account</Text>
-        <Text style={styles.subtitle}>Start exploring market opportunities.</Text>
+        <Text style={styles.subtitle}>
+          Explore destinations. Plan smarter. Travel better.
+        </Text>
 
         <Text style={styles.label}>Email</Text>
         <TextInput

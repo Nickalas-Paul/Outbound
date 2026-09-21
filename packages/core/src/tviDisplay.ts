@@ -312,7 +312,7 @@ export const TVI_DIMENSION_DISPLAY: DimensionDisplay[] = [
     key: 'crowding',
     label: 'Tourism Crowding',
     description:
-      'Tourist intensity relative to population — higher crowding scores mean denser visitor pressure',
+      'Tourist intensity relative to population — higher scores mean less crowded destinations (lower pressure is better)',
     indicatorCodes: [
       'tourist_arrivals_per_capita',
       'tourism_receipts_per_capita',
@@ -443,6 +443,27 @@ export function sourceDisplayName(sourceKey: string): string {
 
 export function getDimensionDisplay(key: string): DimensionDisplay | undefined {
   return TVI_DIMENSION_DISPLAY.find((d) => d.key === key);
+}
+
+/**
+ * Travel-priority UI order for destination detail / trends.
+ * Safety & cost first; crowding & trajectory last.
+ */
+export const TVI_UI_DIMENSION_ORDER: DimensionKey[] = [
+  'safetyAndEntry',
+  'costIndex',
+  'tourismInfrastructure',
+  'accessibility',
+  'travelInfrastructure',
+  'crowding',
+  'trajectory',
+];
+
+export function getOrderedDimensionDisplay(): DimensionDisplay[] {
+  const byKey = new Map(TVI_DIMENSION_DISPLAY.map((d) => [d.key, d]));
+  return TVI_UI_DIMENSION_ORDER.map((k) => byKey.get(k)).filter(
+    (d): d is DimensionDisplay => Boolean(d)
+  );
 }
 
 export function formatNormalization(n: IndicatorNormalization): string {

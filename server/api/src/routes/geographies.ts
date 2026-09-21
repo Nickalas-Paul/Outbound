@@ -1,5 +1,13 @@
 /**
- * Geography + TVI score routes (public).
+ * Geography + TVI score routes.
+ *
+ * Public (optionalAuth — token parsed if present, never required):
+ *   GET  /api/geographies
+ *   GET  /api/geographies/search
+ *   GET  /api/geographies/geojson
+ *   POST /api/geographies/filter
+ *   GET  /api/geographies/:id
+ *   GET  /api/geographies/:id/trends
  *
  * Static paths (/search, /geojson, /filter) MUST be registered before /:id.
  */
@@ -18,7 +26,6 @@ import {
 } from '../config/tvi';
 import { optionalAuth } from '../middleware/optionalAuth';
 import { requireFilterAccess } from '../middleware/requireFilterAccess';
-import { requireTier } from '../middleware/requireTier';
 import { apiError, apiResponse } from '../utils/response';
 
 const DIMENSION_KEYS: DimensionKey[] = TVI_DIMENSIONS.map((d) => d.key);
@@ -378,7 +385,7 @@ async function metaCounts(): Promise<{ total: number; scored: number }> {
 }
 
 /** GET /api/geographies */
-router.get('/', async (req: Request, res: Response) => {
+router.get('/', optionalAuth, async (req: Request, res: Response) => {
   try {
     const vertical = parseProfile(req.query.profile ?? req.query.vertical);
     const fields = parseFields(req.query.fields);
@@ -444,7 +451,7 @@ router.get('/', async (req: Request, res: Response) => {
 });
 
 /** GET /api/geographies/search — spatial bbox or point+radius */
-router.get('/search', async (req: Request, res: Response) => {
+router.get('/search', optionalAuth, async (req: Request, res: Response) => {
   try {
     const vertical = parseProfile(req.query.profile ?? req.query.vertical);
     const hasBbox = typeof req.query.bbox === 'string' && req.query.bbox.trim();
@@ -909,8 +916,8 @@ router.post('/filter', optionalAuth, requireFilterAccess, async (req: Request, r
   }
 });
 
-/** GET /api/geographies/:id/trends — per-dimension trend vectors */
-router.get('/:id/trends', optionalAuth, requireTier('pro'), async (req: Request, res: Response) => {
+/** GET /api/geographies/:id/trends — per-dimension trend vectors (public; optional auth) */
+router.get('/:id/trends', optionalAuth, async (req: Request, res: Response) => {
   try {
     const id = String(req.params.id ?? '').trim();
     const isIso = /^[A-Za-z]{3}$/.test(id);
@@ -1036,8 +1043,8 @@ router.get('/:id/trends', optionalAuth, requireTier('pro'), async (req: Request,
   }
 });
 
-/** GET /api/geographies/:id — UUID or ISO alpha-3 */
-router.get('/:id', async (req: Request, res: Response) => {
+/** GET /api/geographies/:id — UUID or ISO alpha-3 (public; optional auth) */
+router.get('/:id', optionalAuth, async (req: Request, res: Response) => {
   try {
     const id = String(req.params.id ?? '').trim();
     const vertical = parseProfile(req.query.profile ?? req.query.vertical);

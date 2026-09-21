@@ -10,8 +10,11 @@
     "test": "echo \"No tests yet\""
   },
   "devDependencies": {
-    "typescript": "^5.7.0",
-    "@types/geojson": "^7946.0.16"
+    "@types/geojson": "^7946.0.16",
+    "typescript": "^5.7.0"
   },
-  "react-native": "src/index.ts"
+  "react-native": "src/index.ts",
+  "dependencies": {
+    "zod": "^4.6.5"
+  }
 }

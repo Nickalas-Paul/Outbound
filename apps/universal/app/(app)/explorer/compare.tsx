@@ -1,4 +1,4 @@
-import { TVI_DIMENSION_DISPLAY } from '@outbound/core';
+import { getOrderedDimensionDisplay } from '@outbound/core';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import {
@@ -26,8 +26,10 @@ import {
   getGeographyTrends,
   type DimensionTrend,
   type GeographyDetail,
-  type QuickFacts,
 } from '@/services/geographies';
+import { colors, spacing, typography } from '@/theme/tokens';
+
+const ORDERED_DIMENSIONS = getOrderedDimensionDisplay();
 
 function openExportUrl(url: string): void {
   if (Platform.OS === 'web' && typeof window !== 'undefined') {
@@ -46,6 +48,8 @@ type ColumnResult =
     }
   | { iso: string; status: 'error'; error: string };
 
+type FactTone = 'good' | 'neutral' | 'caution' | 'plain';
+
 function trendArrow(direction: DimensionTrend['direction'] | undefined): string {
   if (direction === 'improving') return '↑';
   if (direction === 'declining') return '↓';
@@ -53,10 +57,12 @@ function trendArrow(direction: DimensionTrend['direction'] | undefined): string 
   return '';
 }
 
-function trendArrowColor(direction: DimensionTrend['direction'] | undefined): string {
-  if (direction === 'improving') return '#3ecf8e';
-  if (direction === 'declining') return '#d96b6b';
-  return '#8b8b9a';
+function trendArrowColor(
+  direction: DimensionTrend['direction'] | undefined
+): string {
+  if (direction === 'improving') return colors.success;
+  if (direction === 'declining') return colors.error;
+  return colors.textMuted;
 }
 
 function parseCompareParam(raw: string | string[] | undefined): string[] {
@@ -75,10 +81,10 @@ function parseCompareParam(raw: string | string[] | undefined): string[] {
 }
 
 function confidenceColor(c: string | null | undefined): string {
-  if (c === 'high') return '#3ecf8e';
-  if (c === 'medium') return '#e0a03a';
-  if (c === 'low') return '#d96b6b';
-  return '#666';
+  if (c === 'high') return colors.success;
+  if (c === 'medium') return colors.warning;
+  if (c === 'low') return colors.error;
+  return colors.textMuted;
 }
 
 function formatPopulation(n: number | null | undefined): string {
@@ -90,20 +96,78 @@ function formatPopulation(n: number | null | undefined): string {
   return String(Math.round(n));
 }
 
-function formatGdpPpp(n: number | null | undefined): string {
-  if (n == null || Number.isNaN(n)) return '—';
-  if (Math.abs(n) >= 1000) {
-    return `$${(n / 1000).toFixed(1).replace(/\.0$/, '')}T`;
-  }
-  if (Math.abs(n) >= 1) {
-    return `$${n.toFixed(1).replace(/\.0$/, '')}B`;
-  }
-  return `$${(n * 1000).toFixed(0)}M`;
+function toneColor(tone: FactTone): string | undefined {
+  if (tone === 'good') return colors.success;
+  if (tone === 'neutral') return colors.warning;
+  if (tone === 'caution') return colors.error;
+  return undefined;
 }
 
-function formatCorpTax(n: number | null | undefined): string {
-  if (n == null || Number.isNaN(n)) return '—';
-  return `${n.toFixed(1)}%`;
+function safetyLevel(score: number | null | undefined): {
+  label: string;
+  tone: FactTone;
+} {
+  if (score == null || Number.isNaN(score)) return { label: '—', tone: 'plain' };
+  if (score >= 70) return { label: 'High', tone: 'good' };
+  if (score >= 40) return { label: 'Moderate', tone: 'neutral' };
+  return { label: 'Exercise Caution', tone: 'caution' };
+}
+
+function costLevel(score: number | null | undefined): {
+  label: string;
+  tone: FactTone;
+} {
+  if (score == null || Number.isNaN(score)) return { label: '—', tone: 'plain' };
+  if (score >= 65) return { label: 'Budget-Friendly', tone: 'good' };
+  if (score >= 40) return { label: 'Moderate', tone: 'neutral' };
+  return { label: 'Expensive', tone: 'caution' };
+}
+
+function crowdingLevel(score: number | null | undefined): {
+  label: string;
+  tone: FactTone;
+} {
+  if (score == null || Number.isNaN(score)) return { label: '—', tone: 'plain' };
+  if (score >= 65) return { label: 'Low Crowding', tone: 'good' };
+  if (score >= 40) return { label: 'Moderate', tone: 'neutral' };
+  return { label: 'High Crowding', tone: 'caution' };
+}
+
+function visaAccess(score: number | null | undefined): {
+  label: string;
+  tone: FactTone;
+} {
+  if (score == null || Number.isNaN(score)) return { label: '—', tone: 'plain' };
+  if (score >= 70) return { label: 'Open', tone: 'good' };
+  if (score >= 40) return { label: 'Moderate', tone: 'neutral' };
+  return { label: 'Restricted', tone: 'caution' };
+}
+
+/** Standard dims: high score = good. Crowding uses inverted meter fill. */
+function dimensionBarVisual(
+  dimKey: string,
+  score: number | null
+): { color: string; pct: number } {
+  if (score == null || Number.isNaN(score)) {
+    return { color: colors.textMuted, pct: 0 };
+  }
+  if (dimKey === 'crowding') {
+    const pct = Math.max(0, Math.min(100, 100 - score));
+    const color =
+      score >= 65
+        ? colors.success
+        : score >= 40
+          ? colors.warning
+          : colors.error;
+    return { color, pct };
+  }
+  const color =
+    score >= 65
+      ? colors.success
+      : score >= 40
+        ? colors.warning
+        : colors.error;
+  return { color, pct: Math.max(0, Math.min(100, score)) };
 }
 
 function leaderIndexes(scores: Array<number | null>): Set<number> {
@@ -129,7 +193,10 @@ function ColumnWidth(count: number, isWide: boolean): number | `${number}%` {
 export default function CompareMarketsScreen() {
   const router = useRouter();
   const { width } = useWindowDimensions();
-  const params = useLocalSearchParams<{ compare?: string | string[] }>();
+  const params = useLocalSearchParams<{
+    compare?: string | string[];
+    profile?: string;
+  }>();
   const { clearCompare } = useCompareSelection();
   const { canExport } = useTierAccess();
   const exportsAllowed = canExport();
@@ -137,6 +204,10 @@ export default function CompareMarketsScreen() {
   const isWide = width >= 768;
 
   const isos = useMemo(() => parseCompareParam(params.compare), [params.compare]);
+  const profile = useMemo(() => {
+    const raw = String(params.profile ?? 'balanced').trim();
+    return raw || 'balanced';
+  }, [params.profile]);
 
   const [columns, setColumns] = useState<ColumnResult[]>([]);
   const [loading, setLoading] = useState(false);
@@ -153,7 +224,7 @@ export default function CompareMarketsScreen() {
       isos.map(async (iso): Promise<ColumnResult> => {
         try {
           const [data, trendPayload] = await Promise.all([
-            getGeographyDetail(iso),
+            getGeographyDetail(iso, profile),
             getGeographyTrends(iso).catch(() => null),
           ]);
           return {
@@ -179,9 +250,60 @@ export default function CompareMarketsScreen() {
     return () => {
       cancelled = true;
     };
-  }, [isos]);
+  }, [isos, profile]);
 
   const colWidth = ColumnWidth(Math.max(columns.length, 1), isWide);
+
+  const quickFactRows = [
+    {
+      key: 'population',
+      label: 'Population',
+      format: (d: GeographyDetail | null) => ({
+        label: formatPopulation(d?.quickFacts?.population),
+        tone: 'plain' as FactTone,
+      }),
+    },
+    {
+      key: 'safetyLevel',
+      label: 'Safety Level',
+      format: (d: GeographyDetail | null) =>
+        safetyLevel(d?.tvi?.dimensions?.safetyAndEntry),
+    },
+    {
+      key: 'costLevel',
+      label: 'Cost Level',
+      format: (d: GeographyDetail | null) =>
+        costLevel(d?.tvi?.dimensions?.costIndex),
+    },
+    {
+      key: 'crowding',
+      label: 'Tourism Crowding',
+      format: (d: GeographyDetail | null) =>
+        crowdingLevel(d?.tvi?.dimensions?.crowding),
+    },
+    {
+      key: 'visaAccess',
+      label: 'Visa Access',
+      format: (d: GeographyDetail | null) =>
+        visaAccess(d?.tvi?.dimensions?.accessibility),
+    },
+    {
+      key: 'language',
+      label: 'Language',
+      format: (d: GeographyDetail | null) => ({
+        label: d?.quickFacts?.language ?? '—',
+        tone: 'plain' as FactTone,
+      }),
+    },
+    {
+      key: 'currency',
+      label: 'Currency',
+      format: (d: GeographyDetail | null) => ({
+        label: d?.quickFacts?.currency ?? '—',
+        tone: 'plain' as FactTone,
+      }),
+    },
+  ] as const;
 
   return (
     <SafeAreaView style={styles.safe} edges={['top', 'left', 'right']}>
@@ -193,30 +315,34 @@ export default function CompareMarketsScreen() {
         <Pressable
           onPress={() => {
             if (router.canGoBack()) router.back();
-            else router.push('/explorer');
+            else router.push('/');
           }}
           style={styles.backBtn}
         >
           <Text style={styles.backText}>← Back to Explorer</Text>
         </Pressable>
 
-        <Text style={styles.title}>Compare Markets</Text>
+        <Text style={styles.title}>Compare Destinations</Text>
         <Text style={styles.subtitle}>
           {isos.length === 0
-            ? 'No markets selected'
-            : `${isos.length} market${isos.length === 1 ? '' : 's'}`}
+            ? 'No destinations selected'
+            : `${isos.length} destination${isos.length === 1 ? '' : 's'}${
+                profile !== 'balanced' ? ` · ${profile.replace(/_/g, ' ')}` : ''
+              }`}
         </Text>
 
         {isos.length === 0 ? (
           <View style={styles.emptyCard}>
-            <Text style={styles.emptyTitle}>Select 2–3 markets to compare</Text>
+            <Text style={styles.emptyTitle}>
+              Select 2–3 destinations to compare
+            </Text>
             <Text style={styles.emptyBody}>
-              Use the Compare button on any market's detail page, then open the
-              comparison view.
+              Use the Compare button on any destination&apos;s detail page, then
+              open the comparison view.
             </Text>
             <Pressable
               style={styles.primaryBtn}
-              onPress={() => router.push('/explorer')}
+              onPress={() => router.push('/')}
             >
               <Text style={styles.primaryBtnText}>Go to Explorer</Text>
             </Pressable>
@@ -226,15 +352,15 @@ export default function CompareMarketsScreen() {
         {isos.length === 1 && !loading ? (
           <View style={styles.hintCard}>
             <Text style={styles.hintText}>
-              Add one or two more markets from their detail pages for a fuller
-              side-by-side comparison.
+              Add one or two more destinations from their detail pages for a
+              fuller side-by-side comparison.
             </Text>
           </View>
         ) : null}
 
         {loading ? (
           <View style={styles.center}>
-            <ActivityIndicator color="#fff" size="large" />
+            <ActivityIndicator color={colors.textPrimary} size="large" />
             <Text style={styles.loadingText}>Loading comparison…</Text>
           </View>
         ) : null}
@@ -245,13 +371,20 @@ export default function CompareMarketsScreen() {
             showsHorizontalScrollIndicator
             contentContainerStyle={styles.tableScroll}
           >
-            <View style={[styles.table, !isWide && { minWidth: columns.length * 200 }]}>
-              {/* Country headers */}
+            <View
+              style={[
+                styles.table,
+                !isWide && { minWidth: columns.length * 200 },
+              ]}
+            >
               <View style={styles.headerRow}>
                 {columns.map((col) => (
                   <View
                     key={col.iso}
-                    style={[styles.col, { width: isWide ? colWidth : 200 }]}
+                    style={[
+                      styles.headerCol,
+                      { width: isWide ? colWidth : 200 },
+                    ]}
                   >
                     {col.status === 'error' ? (
                       <>
@@ -268,7 +401,9 @@ export default function CompareMarketsScreen() {
                           style={[
                             styles.tviScore,
                             {
-                              color: tviScoreColor(col.data.tvi?.overall ?? null),
+                              color: tviScoreColor(
+                                col.data.tvi?.overall ?? null
+                              ),
                             },
                           ]}
                         >
@@ -289,8 +424,9 @@ export default function CompareMarketsScreen() {
                             ]}
                           />
                           <Text style={styles.confText}>
-                            {(col.data.tvi?.confidence ?? 'n/a').replace(/^\w/, (c) =>
-                              c.toUpperCase()
+                            {(col.data.tvi?.confidence ?? 'n/a').replace(
+                              /^\w/,
+                              (c) => c.toUpperCase()
                             )}
                           </Text>
                         </View>
@@ -300,8 +436,7 @@ export default function CompareMarketsScreen() {
                 ))}
               </View>
 
-              {/* Dimension rows (7 including Trajectory) */}
-              {TVI_DIMENSION_DISPLAY.map((dim) => {
+              {ORDERED_DIMENSIONS.map((dim) => {
                 const scores = columns.map((col) =>
                   col.status === 'ok'
                     ? (col.data.tvi?.dimensions?.[dim.key] ?? null)
@@ -317,9 +452,10 @@ export default function CompareMarketsScreen() {
                     <View style={styles.dimRow}>
                       {columns.map((col, idx) => {
                         const score = scores[idx];
-                        const color = tviScoreColor(score);
-                        const pct =
-                          score != null ? Math.max(0, Math.min(100, score)) : 0;
+                        const { color, pct } = dimensionBarVisual(
+                          dim.key,
+                          score
+                        );
                         const isLeader = leaders.has(idx);
                         const direction =
                           !dim.isComposite && col.status === 'ok'
@@ -340,9 +476,7 @@ export default function CompareMarketsScreen() {
                               <Text
                                 style={[
                                   styles.scoreValue,
-                                  {
-                                    color: score != null ? color : '#666',
-                                  },
+                                  { color },
                                   isLeader && styles.leaderScore,
                                 ]}
                               >
@@ -383,47 +517,17 @@ export default function CompareMarketsScreen() {
                 );
               })}
 
-              {/* Quick Facts */}
               <Text style={styles.qfSectionTitle}>QUICK FACTS</Text>
-              {(
-                [
-                  {
-                    key: 'population',
-                    label: 'Population',
-                    format: (q: QuickFacts | null) =>
-                      formatPopulation(q?.population),
-                  },
-                  {
-                    key: 'gdpPpp',
-                    label: 'GDP (PPP)',
-                    format: (q: QuickFacts | null) => formatGdpPpp(q?.gdpPpp),
-                  },
-                  {
-                    key: 'corpTaxRate',
-                    label: 'Corp. Tax Rate',
-                    format: (q: QuickFacts | null) =>
-                      formatCorpTax(q?.corpTaxRate),
-                  },
-                  {
-                    key: 'language',
-                    label: 'Language',
-                    format: (q: QuickFacts | null) => q?.language ?? '—',
-                  },
-                  {
-                    key: 'currency',
-                    label: 'Currency',
-                    format: (q: QuickFacts | null) => q?.currency ?? '—',
-                  },
-                ] as const
-              ).map((row) => (
+              {quickFactRows.map((row) => (
                 <View key={row.key} style={styles.dimBlock}>
                   <Text style={styles.dimLabel}>{row.label}</Text>
                   <View style={styles.dimRow}>
                     {columns.map((col) => {
-                      const value =
+                      const fact =
                         col.status === 'ok'
-                          ? row.format(col.data.quickFacts)
-                          : '—';
+                          ? row.format(col.data)
+                          : { label: '—', tone: 'plain' as FactTone };
+                      const tint = toneColor(fact.tone);
                       return (
                         <View
                           key={`${row.key}-${col.iso}`}
@@ -433,14 +537,25 @@ export default function CompareMarketsScreen() {
                             { width: isWide ? colWidth : 200 },
                           ]}
                         >
-                          <Text
-                            style={[
-                              styles.qfValue,
-                              value === '—' && styles.qfMuted,
-                            ]}
-                          >
-                            {value}
-                          </Text>
+                          <View style={styles.qfValueRow}>
+                            {tint ? (
+                              <View
+                                style={[
+                                  styles.qfToneDot,
+                                  { backgroundColor: tint },
+                                ]}
+                              />
+                            ) : null}
+                            <Text
+                              style={[
+                                styles.qfValue,
+                                tint ? { color: tint } : null,
+                                fact.label === '—' && styles.qfMuted,
+                              ]}
+                            >
+                              {fact.label}
+                            </Text>
+                          </View>
                         </View>
                       );
                     })}
@@ -455,7 +570,10 @@ export default function CompareMarketsScreen() {
           <View style={styles.actions}>
             <View style={styles.exportGateWrap}>
               <Pressable
-                style={[styles.ghostBtn, !exportsAllowed && styles.ghostBtnLocked]}
+                style={[
+                  styles.ghostBtn,
+                  !exportsAllowed && styles.ghostBtnLocked,
+                ]}
                 onPress={() => {
                   if (isos.length === 0) return;
                   if (!exportsAllowed) {
@@ -463,10 +581,13 @@ export default function CompareMarketsScreen() {
                     return;
                   }
                   const base = getApiUrl().replace(/\/$/, '');
-                  const url = `${base}/api/exports/compare/csv?compare=${encodeURIComponent(
-                    isos.join(',')
-                  )}`;
-                  openExportUrl(url);
+                  const qs = new URLSearchParams({
+                    compare: isos.join(','),
+                  });
+                  if (profile && profile !== 'balanced') {
+                    qs.set('profile', profile);
+                  }
+                  openExportUrl(`${base}/api/exports/compare/csv?${qs}`);
                 }}
               >
                 <Text style={styles.ghostBtnText}>
@@ -483,7 +604,7 @@ export default function CompareMarketsScreen() {
               style={styles.dangerBtn}
               onPress={() => {
                 clearCompare();
-                router.push('/explorer');
+                router.push('/');
               }}
             >
               <Text style={styles.dangerBtnText}>Clear selection</Text>
@@ -495,116 +616,121 @@ export default function CompareMarketsScreen() {
   );
 }
 
-const mono = { fontFamily: 'monospace' as const };
-
 const styles = StyleSheet.create({
   safe: {
     flex: 1,
-    backgroundColor: '#0b0b12',
+    backgroundColor: colors.background,
   },
   scroll: {
     flex: 1,
   },
   scrollContent: {
-    padding: 20,
-    paddingBottom: 48,
-    gap: 16,
+    padding: spacing.md + 4,
+    paddingBottom: spacing.xxl,
+    gap: spacing.md,
   },
   backBtn: {
     alignSelf: 'flex-start',
-    paddingVertical: 4,
+    paddingVertical: spacing.xs,
   },
   backText: {
-    color: '#8eb4ff',
-    fontSize: 14,
-    fontWeight: '600',
+    color: colors.accent,
+    fontSize: typography.fontSize.md,
+    fontWeight: typography.fontWeight.semibold,
   },
   title: {
-    color: '#fff',
-    fontSize: 32,
-    fontWeight: '700',
+    color: colors.textPrimary,
+    fontSize: typography.fontSize.xl,
+    fontWeight: typography.fontWeight.bold,
   },
   subtitle: {
-    color: 'rgba(255,255,255,0.5)',
-    fontSize: 14,
-    marginTop: -8,
-    ...mono,
+    color: colors.textMuted,
+    fontSize: typography.fontSize.md,
+    marginTop: -spacing.sm,
   },
   emptyCard: {
-    backgroundColor: '#12121f',
+    backgroundColor: colors.surface,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#1c1c2a',
-    padding: 24,
-    gap: 12,
-    marginTop: 12,
+    borderColor: colors.border,
+    padding: spacing.lg,
+    gap: spacing.md,
+    marginTop: spacing.sm,
   },
   emptyTitle: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: '700',
+    color: colors.textPrimary,
+    fontSize: typography.fontSize.lg,
+    fontWeight: typography.fontWeight.bold,
   },
   emptyBody: {
-    color: 'rgba(255,255,255,0.55)',
-    fontSize: 14,
-    lineHeight: 22,
+    color: colors.textSecondary,
+    fontSize: typography.fontSize.md,
+    lineHeight: Math.round(typography.fontSize.md * typography.lineHeight.normal),
   },
   hintCard: {
-    backgroundColor: '#161622',
+    backgroundColor: colors.surface,
     borderRadius: 8,
-    padding: 12,
+    borderWidth: 1,
+    borderColor: colors.border,
+    padding: spacing.md,
   },
   hintText: {
-    color: 'rgba(255,255,255,0.55)',
-    fontSize: 13,
-    lineHeight: 20,
+    color: colors.textSecondary,
+    fontSize: typography.fontSize.sm,
+    lineHeight: Math.round(typography.fontSize.sm * typography.lineHeight.normal),
   },
   center: {
-    paddingVertical: 48,
+    paddingVertical: spacing.xxl,
     alignItems: 'center',
-    gap: 12,
+    gap: spacing.md,
   },
   loadingText: {
-    color: 'rgba(255,255,255,0.5)',
+    color: colors.textMuted,
   },
   tableScroll: {
     flexGrow: 1,
   },
   table: {
     width: '100%',
-    gap: 12,
+    gap: spacing.md,
   },
   headerRow: {
     flexDirection: 'row',
-    gap: 8,
+    gap: spacing.sm,
+  },
+  headerCol: {
+    flexShrink: 0,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 12,
+    padding: spacing.md,
   },
   col: {
     flexShrink: 0,
   },
   countryName: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: '700',
+    color: colors.textPrimary,
+    fontSize: typography.fontSize.lg,
+    fontWeight: typography.fontWeight.bold,
   },
   region: {
-    color: 'rgba(255,255,255,0.4)',
-    fontSize: 10,
-    fontWeight: '700',
+    color: colors.textMuted,
+    fontSize: typography.fontSize.xs,
+    fontWeight: typography.fontWeight.bold,
     letterSpacing: 1,
-    marginTop: 4,
-    ...mono,
+    marginTop: spacing.xs,
   },
   tviScore: {
-    fontSize: 22,
-    fontWeight: '700',
-    marginTop: 8,
-    ...mono,
+    fontSize: typography.fontSize.xl,
+    fontWeight: typography.fontWeight.bold,
+    marginTop: spacing.sm,
   },
   confRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-    marginTop: 6,
+    gap: spacing.xs + 2,
+    marginTop: spacing.xs + 2,
   },
   confDot: {
     width: 7,
@@ -612,145 +738,163 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   confText: {
-    color: 'rgba(255,255,255,0.45)',
-    fontSize: 11,
-    ...mono,
+    color: colors.textMuted,
+    fontSize: typography.fontSize.xs,
   },
   errorText: {
-    color: '#ff8f8f',
-    fontSize: 12,
-    marginTop: 8,
+    color: colors.error,
+    fontSize: typography.fontSize.sm,
+    marginTop: spacing.sm,
   },
   dimBlock: {
-    backgroundColor: '#0e0e16',
+    backgroundColor: colors.surface,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#1c1c2a',
-    padding: 14,
-    gap: 10,
+    borderColor: colors.border,
+    padding: spacing.md,
+    gap: spacing.sm + 2,
   },
   dimLabel: {
-    color: 'rgba(255,255,255,0.7)',
-    fontSize: 13,
-    fontWeight: '700',
+    color: colors.textSecondary,
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.bold,
   },
   momentumHeader: {
-    color: 'rgba(255,255,255,0.45)',
-    fontSize: 10,
-    fontWeight: '700',
+    color: colors.textMuted,
+    fontSize: typography.fontSize.xs,
+    fontWeight: typography.fontWeight.bold,
     letterSpacing: 1.4,
-    marginBottom: 4,
-    marginTop: 8,
+    marginBottom: spacing.xs,
   },
   dimRow: {
     flexDirection: 'row',
-    gap: 8,
+    gap: spacing.sm,
   },
   scoreCell: {
-    gap: 8,
+    gap: spacing.sm,
   },
   leaderCell: {
-    backgroundColor: 'rgba(255,255,255,0.03)',
+    backgroundColor: 'rgba(91, 141, 239, 0.08)',
     borderRadius: 8,
-    padding: 6,
-    margin: -6,
+    padding: spacing.xs + 2,
+    margin: -(spacing.xs + 2),
   },
   scoreLine: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: spacing.xs + 2,
   },
   scoreValue: {
-    fontSize: 22,
-    fontWeight: '600',
-    ...mono,
+    fontSize: typography.fontSize.xl,
+    fontWeight: typography.fontWeight.semibold,
   },
   leaderScore: {
-    fontWeight: '800',
+    fontWeight: typography.fontWeight.bold,
   },
   leaderMark: {
-    color: 'rgba(255,220,120,0.85)',
-    fontSize: 12,
+    color: colors.warning,
+    fontSize: typography.fontSize.sm,
   },
   trendArrow: {
-    fontSize: 13,
-    fontWeight: '700',
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.bold,
     marginLeft: 2,
   },
   barTrack: {
-    height: 5,
+    height: 6,
     borderRadius: 3,
-    backgroundColor: '#1a1a2e',
+    backgroundColor: colors.backgroundElevated,
     overflow: 'hidden',
   },
   barFill: {
-    height: 5,
+    height: 6,
     borderRadius: 3,
   },
   qfSectionTitle: {
-    color: 'rgba(255,255,255,0.4)',
-    fontSize: 11,
-    fontWeight: '700',
-    letterSpacing: 1.3,
-    marginTop: 8,
-    ...mono,
+    color: colors.textMuted,
+    fontSize: typography.fontSize.xs,
+    fontWeight: typography.fontWeight.bold,
+    letterSpacing: 1.4,
+    marginTop: spacing.sm,
+  },
+  qfValueRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+  },
+  qfToneDot: {
+    width: 7,
+    height: 7,
+    borderRadius: 4,
   },
   qfValue: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: '600',
-    ...mono,
+    color: colors.textPrimary,
+    fontSize: typography.fontSize.md,
+    fontWeight: typography.fontWeight.semibold,
   },
   qfMuted: {
-    color: 'rgba(255,255,255,0.35)',
+    color: colors.textMuted,
   },
   actions: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 10,
-    marginTop: 8,
+    gap: spacing.sm + 2,
+    marginTop: spacing.sm,
+  },
+  exportGateWrap: {
+    gap: spacing.xs,
+  },
+  ghostBtn: {
+    minHeight: 44,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 8,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm + 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.surface,
+  },
+  ghostBtnLocked: {
+    opacity: 0.7,
+  },
+  ghostBtnText: {
+    color: colors.textSecondary,
+    fontSize: typography.fontSize.md,
+    fontWeight: typography.fontWeight.semibold,
+  },
+  exportUpgradePrompt: {
+    color: colors.warning,
+    fontSize: typography.fontSize.xs,
+  },
+  dangerBtn: {
+    minHeight: 44,
+    borderRadius: 8,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm + 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: colors.error,
+  },
+  dangerBtnText: {
+    color: colors.error,
+    fontSize: typography.fontSize.md,
+    fontWeight: typography.fontWeight.semibold,
   },
   primaryBtn: {
     alignSelf: 'flex-start',
-    backgroundColor: '#1a3a6e',
+    minHeight: 44,
+    backgroundColor: colors.accent,
     borderRadius: 8,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.sm + 4,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   primaryBtnText: {
-    color: '#c8dcff',
-    fontWeight: '600',
-  },
-  exportGateWrap: {
-    gap: 6,
-  },
-  ghostBtn: {
-    borderWidth: 1,
-    borderColor: '#2a2a3e',
-    borderRadius: 8,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-  },
-  ghostBtnLocked: {
-    opacity: 0.45,
-  },
-  exportUpgradePrompt: {
-    color: '#e0a03a',
-    fontSize: 11,
-    fontWeight: '600',
-  },
-  ghostBtnText: {
-    color: 'rgba(255,255,255,0.7)',
-    fontWeight: '600',
-  },
-  dangerBtn: {
-    backgroundColor: 'rgba(217,48,37,0.15)',
-    borderRadius: 8,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-  },
-  dangerBtnText: {
-    color: '#ff8f8f',
-    fontWeight: '600',
+    color: colors.textPrimary,
+    fontSize: typography.fontSize.md,
+    fontWeight: typography.fontWeight.semibold,
   },
 });

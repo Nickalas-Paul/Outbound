@@ -14,13 +14,12 @@ export default function RootLayout() {
       <AuthProvider>
         <StatusBar style="auto" />
         <Stack screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="index" />
+          <Stack.Screen name="(app)" />
           <Stack.Screen name="pricing" />
           <Stack.Screen name="docs/methodology" />
           <Stack.Screen name="login" />
           <Stack.Screen name="register" />
           <Stack.Screen name="auth/callback" />
-          <Stack.Screen name="(app)" />
         </Stack>
       </AuthProvider>
     </SafeAreaProvider>

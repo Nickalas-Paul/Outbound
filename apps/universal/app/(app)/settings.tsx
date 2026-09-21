@@ -1,5 +1,3 @@
-// MARKETPLACE: commented out for Outbound — preserved for future vendor/guide marketplace
-// import { Link } from 'expo-router';
 import { useState } from 'react';
 import {
   ActivityIndicator,
@@ -10,6 +8,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { RequireAuth } from '@/components/RequireAuth';
 import { useTierAccess } from '@/hooks/useTierAccess';
 import * as api from '@/services/api';
 import { useAuth } from '@/services/auth';
@@ -28,6 +27,14 @@ function formatMemberSince(iso: string | undefined): string {
 }
 
 export default function SettingsScreen() {
+  return (
+    <RequireAuth>
+      <SettingsScreenInner />
+    </RequireAuth>
+  );
+}
+
+function SettingsScreenInner() {
   const { user, accessToken, logout, refreshAuth } = useAuth();
   const { currentTier, gatingEnabled } = useTierAccess();
   const [busyTier, setBusyTier] = useState<api.SubscriptionTierName | null>(

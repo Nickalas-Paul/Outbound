@@ -112,7 +112,7 @@ export function signalTypeLabel(signalType: string): string {
   const labels: Record<string, string> = {
     political_instability: 'Political Instability',
     natural_disaster: 'Natural Disaster',
-    currency_crisis: 'Currency Crisis',
+    currency_crisis: 'Currency Alert',
     sanctions: 'Sanctions',
     entry_policy_change: 'Entry Policy Change',
     civil_unrest: 'Civil Unrest',
@@ -122,7 +122,7 @@ export function signalTypeLabel(signalType: string): string {
     extreme_weather: 'Extreme Weather',
     airline_disruption: 'Airline Disruption',
   };
-  return labels[signalType] ?? signalType;
+  return labels[signalType] ?? signalType.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
 export function sourceDisplayLabel(source: string): string {

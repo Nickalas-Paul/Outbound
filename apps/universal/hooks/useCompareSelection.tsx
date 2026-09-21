@@ -34,9 +34,17 @@ function parseCompareParam(
   return out;
 }
 
-export function compareHref(isos: string[]): string {
-  if (isos.length === 0) return '/explorer/compare';
-  return `/explorer/compare?compare=${encodeURIComponent(isos.join(','))}`;
+export function compareHref(isos: string[], profile?: string): string {
+  const qs = new URLSearchParams();
+  if (isos.length > 0) {
+    qs.set('compare', isos.join(','));
+  }
+  const p = profile?.trim();
+  if (p && p !== 'balanced') {
+    qs.set('profile', p);
+  }
+  const query = qs.toString();
+  return query ? `/explorer/compare?${query}` : '/explorer/compare';
 }
 
 type CompareContextValue = {
@@ -46,7 +54,9 @@ type CompareContextValue = {
   clearCompare: () => void;
   isSelected: (isoCode: string) => boolean;
   isAtMax: boolean;
+  /** Href without profile — prefer `compareHref(selected, profile)` when profile is known. */
   compareHref: string;
+  buildCompareHref: (profile?: string) => string;
 };
 
 const CompareContext = createContext<CompareContextValue | null>(null);
@@ -138,6 +148,7 @@ export function CompareProvider({ children }: { children: ReactNode }) {
       isSelected,
       isAtMax: selected.length >= COMPARE_MAX,
       compareHref: compareHref(selected),
+      buildCompareHref: (profile?: string) => compareHref(selected, profile),
     }),
     [
       selected,

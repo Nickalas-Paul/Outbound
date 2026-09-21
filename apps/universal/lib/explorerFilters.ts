@@ -105,7 +105,7 @@ export function parseFiltersFromParams(
     horizonRaw === '2yr' || horizonRaw === '5yr' ? horizonRaw : 'current';
 
   return {
-    profile: normalizeProfileKey(one('profile') ?? one('vertical')),
+    profile: normalizeProfileKey(one('profile')),
     horizon,
     minPopulation: num('minPopulation', DEFAULT_FILTERS.minPopulation),
     minCostIndex: num('minCostIndex', DEFAULT_FILTERS.minCostIndex),
@@ -149,23 +149,17 @@ export function filtersToQueryRecord(
 /** Portable JSONB shape stored in saved_searches.filters. */
 export type SavedFilterPayload = {
   population?: number;
-  /** @deprecated replaced by minCostIndex */
-  maxCorpTaxRate?: number;
   minCostIndex?: number;
   costIndex?: number;
   safetyAndEntry?: number;
   accessibility?: number;
   crowding?: number;
   profile?: string;
-  /** @deprecated use profile */
-  vertical?: string;
   horizon?: TimeHorizon | string;
   minPopulation?: number;
   minAccessibility?: number;
   maxCrowding?: number;
   minSafetyAndEntry?: number;
-  /** @deprecated use profile */
-  industryVertical?: string;
 };
 
 export function stateToSavedFilters(
@@ -203,10 +197,7 @@ export function savedFiltersToState(
     horizonRaw === '2yr' || horizonRaw === '5yr' ? horizonRaw : 'current';
 
   const profile = normalizeProfileKey(
-    (typeof f.profile === 'string' && f.profile) ||
-      (typeof f.vertical === 'string' && f.vertical) ||
-      (typeof f.industryVertical === 'string' && f.industryVertical) ||
-      undefined
+    typeof f.profile === 'string' && f.profile ? f.profile : undefined
   );
 
   return {

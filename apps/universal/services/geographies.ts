@@ -1,4 +1,5 @@
 import { getApiUrl } from '@/services/api';
+import { getStoredAccessToken } from '@/services/tokenStorage';
 
 export type GeographyFeatureProperties = {
   id: string;
@@ -90,6 +91,18 @@ async function parseJson<T>(response: Response): Promise<T> {
   return (await response.json()) as T;
 }
 
+/** Attach Bearer token when present; never block guest requests. */
+async function optionalAuthHeaders(
+  init?: HeadersInit
+): Promise<Headers> {
+  const headers = new Headers(init);
+  const token = await getStoredAccessToken();
+  if (token) {
+    headers.set('Authorization', `Bearer ${token}`);
+  }
+  return headers;
+}
+
 export async function fetchGeographiesGeojson(
   vertical?: string,
   horizon?: '2yr' | '5yr' | 'current' | null
@@ -98,7 +111,10 @@ export async function fetchGeographiesGeojson(
   if (vertical) params.set('profile', vertical);
   if (horizon === '2yr' || horizon === '5yr') params.set('horizon', horizon);
   const qs = params.toString() ? `?${params.toString()}` : '';
-  const response = await fetch(`${getApiUrl()}/api/geographies/geojson${qs}`);
+  const headers = await optionalAuthHeaders();
+  const response = await fetch(`${getApiUrl()}/api/geographies/geojson${qs}`, {
+    headers,
+  });
   return parseJson<GeographyFeatureCollection>(response);
 }
 
@@ -106,7 +122,8 @@ export async function fetchGeographiesGeojson(
 export async function listCountries(): Promise<
   Array<{ id: string; name: string; isoCode: string | null }>
 > {
-  const response = await fetch(`${getApiUrl()}/api/geographies`);
+  const headers = await optionalAuthHeaders();
+  const response = await fetch(`${getApiUrl()}/api/geographies`, { headers });
   const json = await parseJson<ApiEnvelope<GeographyListItem[]>>(response);
   return (json.data ?? []).map((g) => ({
     id: g.id,
@@ -123,9 +140,12 @@ export async function filterGeographies(
     horizon?: '2yr' | '5yr';
   }
 ): Promise<{ data: GeographyListItem[]; total: number }> {
+  const headers = await optionalAuthHeaders({
+    'Content-Type': 'application/json',
+  });
   const response = await fetch(`${getApiUrl()}/api/geographies/filter`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers,
     body: JSON.stringify({
       profile: options?.profile ?? 'balanced',
       horizon: options?.horizon,
@@ -146,8 +166,10 @@ export async function fetchGeographyById(
   vertical?: string
 ): Promise<GeographyListItem> {
   const qs = vertical ? `?profile=${encodeURIComponent(vertical)}` : '';
+  const headers = await optionalAuthHeaders();
   const response = await fetch(
-    `${getApiUrl()}/api/geographies/${encodeURIComponent(idOrIso)}${qs}`
+    `${getApiUrl()}/api/geographies/${encodeURIComponent(idOrIso)}${qs}`,
+    { headers }
   );
   const json = await parseJson<ApiEnvelope<GeographyListItem>>(response);
   return json.data;
@@ -213,8 +235,10 @@ export async function getGeographyDetail(
   const params = new URLSearchParams();
   if (vertical) params.set('profile', vertical);
   const qs = params.toString() ? `?${params.toString()}` : '';
+  const headers = await optionalAuthHeaders();
   const response = await fetch(
-    `${getApiUrl()}/api/geographies/${encodeURIComponent(id)}${qs}`
+    `${getApiUrl()}/api/geographies/${encodeURIComponent(id)}${qs}`,
+    { headers }
   );
   const json = await parseJson<ApiEnvelope<GeographyDetail>>(response);
   const data = json.data;
@@ -255,8 +279,10 @@ export type TrendData = {
 export async function getGeographyTrends(
   id: string
 ): Promise<TrendData | null> {
+  const headers = await optionalAuthHeaders();
   const response = await fetch(
-    `${getApiUrl()}/api/geographies/${encodeURIComponent(id)}/trends`
+    `${getApiUrl()}/api/geographies/${encodeURIComponent(id)}/trends`,
+    { headers }
   );
   if (response.status === 404) return null;
   const json = await parseJson<ApiEnvelope<TrendData>>(response);
