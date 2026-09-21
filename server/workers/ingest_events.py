@@ -41,49 +41,49 @@ GDELT_QUERIES: list[tuple[str, str, str, list[str]]] = [
         '"trade tariff" OR "import duty" OR "tariff increase"',
         "tariff_risk",
         "negative",
-        ["taxEnvironment", "competitorSaturation"],
+        ["costIndex"],
     ),
     (
         '"economic sanctions" OR "trade embargo" OR "sanctions imposed"',
         "sanctions",
         "negative",
-        ["regulatoryEase", "marketSizeAndGrowth"],
+        ["safetyAndEntry", "accessibility"],
     ),
     (
         '"trade agreement" OR "free trade" OR "trade deal signed"',
         "trade_agreement",
         "positive",
-        ["marketSizeAndGrowth", "competitorSaturation"],
+        ["costIndex"],
     ),
     (
         '"new regulation" OR "regulatory reform" OR "business regulation"',
         "regulatory_change",
         "neutral",
-        ["regulatoryEase"],
+        ["safetyAndEntry", "accessibility"],
     ),
     (
         '"political crisis" OR "coup" OR "civil unrest" OR "political instability"',
         "political_instability",
         "negative",
-        ["regulatoryEase"],
+        ["safetyAndEntry", "crowding"],
     ),
     (
         '"currency devaluation" OR "currency crisis"',
         "currency_crisis",
         "negative",
-        ["taxEnvironment", "marketSizeAndGrowth"],
+        ["costIndex"],
     ),
     (
         '"natural disaster" OR "hurricane" OR "earthquake" OR "flooding"',
         "natural_disaster",
         "negative",
-        ["infrastructure", "marketSizeAndGrowth"],
+        ["safetyAndEntry", "travelInfrastructure"],
     ),
     (
         '"economic reform" OR "investment incentive" OR "tax incentive"',
         "economic_policy",
         "positive",
-        ["marketSizeAndGrowth"],
+        ["costIndex"],
     ),
 ]
 
@@ -336,7 +336,7 @@ def seed_gdelt_signals(cursor, iso_map: dict[str, str]) -> int:
             "title": "US and China trade tariff tensions escalate in 2026 negotiations",
             "description": "Seed: renewed tariff threats affecting bilateral goods trade.",
             "direction": "negative",
-            "dims": ["taxEnvironment", "competitorSaturation"],
+            "dims": ["costIndex"],
         },
         {
             "isos": ["USA", "MEX"],
@@ -344,7 +344,7 @@ def seed_gdelt_signals(cursor, iso_map: dict[str, str]) -> int:
             "title": "US reviews import duties on Mexican automotive and steel shipments",
             "description": "Seed: USMCA-related tariff risk for North American supply chains.",
             "direction": "negative",
-            "dims": ["taxEnvironment", "competitorSaturation"],
+            "dims": ["costIndex"],
         },
         {
             "isos": ["CHN", "NLD"],
@@ -352,7 +352,7 @@ def seed_gdelt_signals(cursor, iso_map: dict[str, str]) -> int:
             "title": "Western allies discuss economic sanctions and chip export controls on China",
             "description": "Seed: semiconductor-related sanctions risk.",
             "direction": "negative",
-            "dims": ["regulatoryEase", "marketSizeAndGrowth"],
+            "dims": ["safetyAndEntry", "accessibility"],
         },
         {
             "isos": ["GBR", "IND"],
@@ -360,7 +360,7 @@ def seed_gdelt_signals(cursor, iso_map: dict[str, str]) -> int:
             "title": "UK and India advance free trade agreement talks toward 2026 signing",
             "description": "Seed: positive trade-agreement momentum.",
             "direction": "positive",
-            "dims": ["marketSizeAndGrowth", "competitorSaturation"],
+            "dims": ["costIndex"],
         },
         {
             "isos": ["DEU", "FRA"],
@@ -368,7 +368,7 @@ def seed_gdelt_signals(cursor, iso_map: dict[str, str]) -> int:
             "title": "EU advances new business regulation and compliance requirements for exporters",
             "description": "Seed: regulatory reform affecting EU travel conditions.",
             "direction": "neutral",
-            "dims": ["regulatoryEase"],
+            "dims": ["safetyAndEntry", "accessibility"],
         },
         {
             "isos": ["BRA"],
@@ -376,7 +376,7 @@ def seed_gdelt_signals(cursor, iso_map: dict[str, str]) -> int:
             "title": "Political crisis in Brazil raises market uncertainty over fiscal reforms",
             "description": "Seed: political instability signal for LatAm entry planning.",
             "direction": "negative",
-            "dims": ["regulatoryEase"],
+            "dims": ["safetyAndEntry", "crowding"],
         },
         {
             "isos": ["TUR", "ARG"],
@@ -384,15 +384,15 @@ def seed_gdelt_signals(cursor, iso_map: dict[str, str]) -> int:
             "title": "Currency devaluation pressures intensify in emerging markets",
             "description": "Seed: FX crisis risk for high-inflation economies.",
             "direction": "negative",
-            "dims": ["taxEnvironment", "marketSizeAndGrowth"],
+            "dims": ["costIndex"],
         },
         {
             "isos": ["USA", "JPN"],
             "signal_type": "natural_disaster",
-            "title": "Pacific earthquake and flooding disrupt regional infrastructure corridors",
-            "description": "Seed: natural disaster impact on logistics and infrastructure.",
+            "title": "Pacific earthquake and flooding disrupt regional travelInfrastructure corridors",
+            "description": "Seed: natural disaster impact on logistics and travelInfrastructure.",
             "direction": "negative",
-            "dims": ["infrastructure", "marketSizeAndGrowth"],
+            "dims": ["safetyAndEntry", "travelInfrastructure"],
         },
         {
             "isos": ["VNM", "IDN"],
@@ -400,7 +400,7 @@ def seed_gdelt_signals(cursor, iso_map: dict[str, str]) -> int:
             "title": "Southeast Asian governments expand investment incentives and tax incentives",
             "description": "Seed: positive economic reform / incentive packages.",
             "direction": "positive",
-            "dims": ["marketSizeAndGrowth"],
+            "dims": ["costIndex"],
         },
         {
             "isos": ["SAU", "ARE"],
@@ -408,7 +408,7 @@ def seed_gdelt_signals(cursor, iso_map: dict[str, str]) -> int:
             "title": "Gulf states announce economic reform packages to attract foreign investment",
             "description": "Seed: investment-incentive policy signal.",
             "direction": "positive",
-            "dims": ["marketSizeAndGrowth"],
+            "dims": ["costIndex"],
         },
     ]
 

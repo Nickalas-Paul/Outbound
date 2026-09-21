@@ -155,8 +155,8 @@ export default function FilterSidebar({ filters, onChange, onReset, style }: Pro
   } = useTierAccess();
   const [promptKey, setPromptKey] = useState<string | null>(null);
 
-  const talentLocked = !canUseFilter('talentDensity');
-  const competitorLocked = !canUseFilter('competitorSaturation');
+  const talentLocked = !canUseFilter('accessibility');
+  const competitorLocked = !canUseFilter('crowding');
   const industryLocked = !canUseIndustryVertical();
 
   const showPrompt = (key: string) => {
@@ -272,15 +272,15 @@ export default function FilterSidebar({ filters, onChange, onReset, style }: Pro
           style={styles.lockedBlock}
         >
           <FilterRow
-            label="Talent Density Min."
-            valueLabel={formatMinScore(filters.minTalentDensity)}
+            label="Accessibility Min."
+            valueLabel={formatMinScore(filters.minAccessibility)}
             locked
           >
             <RangeSlider
-              value={filters.minTalentDensity}
-              min={FILTER_LIMITS.minTalentDensity.min}
-              max={FILTER_LIMITS.minTalentDensity.max}
-              step={FILTER_LIMITS.minTalentDensity.step}
+              value={filters.minAccessibility}
+              min={FILTER_LIMITS.minAccessibility.min}
+              max={FILTER_LIMITS.minAccessibility.max}
+              step={FILTER_LIMITS.minAccessibility.step}
               accent="#3ecf8e"
               disabled
               onChange={() => undefined}
@@ -292,16 +292,16 @@ export default function FilterSidebar({ filters, onChange, onReset, style }: Pro
         </Pressable>
       ) : (
         <FilterRow
-          label="Talent Density Min."
-          valueLabel={formatMinScore(filters.minTalentDensity)}
+          label="Accessibility Min."
+          valueLabel={formatMinScore(filters.minAccessibility)}
         >
           <RangeSlider
-            value={filters.minTalentDensity}
-            min={FILTER_LIMITS.minTalentDensity.min}
-            max={FILTER_LIMITS.minTalentDensity.max}
-            step={FILTER_LIMITS.minTalentDensity.step}
+            value={filters.minAccessibility}
+            min={FILTER_LIMITS.minAccessibility.min}
+            max={FILTER_LIMITS.minAccessibility.max}
+            step={FILTER_LIMITS.minAccessibility.step}
             accent="#3ecf8e"
-            onChange={(minTalentDensity) => onChange({ minTalentDensity })}
+            onChange={(minAccessibility) => onChange({ minAccessibility })}
           />
         </FilterRow>
       )}
@@ -312,15 +312,15 @@ export default function FilterSidebar({ filters, onChange, onReset, style }: Pro
           style={styles.lockedBlock}
         >
           <FilterRow
-            label="Competitor Saturation"
-            valueLabel={formatMaxScore(filters.maxCompetitorSaturation)}
+            label="Tourism Crowding Max."
+            valueLabel={formatMaxScore(filters.maxCrowding)}
             locked
           >
             <RangeSlider
-              value={filters.maxCompetitorSaturation}
-              min={FILTER_LIMITS.maxCompetitorSaturation.min}
-              max={FILTER_LIMITS.maxCompetitorSaturation.max}
-              step={FILTER_LIMITS.maxCompetitorSaturation.step}
+              value={filters.maxCrowding}
+              min={FILTER_LIMITS.maxCrowding.min}
+              max={FILTER_LIMITS.maxCrowding.max}
+              step={FILTER_LIMITS.maxCrowding.step}
               accent="#d96b6b"
               disabled
               onChange={() => undefined}
@@ -332,33 +332,33 @@ export default function FilterSidebar({ filters, onChange, onReset, style }: Pro
         </Pressable>
       ) : (
         <FilterRow
-          label="Competitor Saturation"
-          valueLabel={formatMaxScore(filters.maxCompetitorSaturation)}
+          label="Tourism Crowding Max."
+          valueLabel={formatMaxScore(filters.maxCrowding)}
         >
           <RangeSlider
-            value={filters.maxCompetitorSaturation}
-            min={FILTER_LIMITS.maxCompetitorSaturation.min}
-            max={FILTER_LIMITS.maxCompetitorSaturation.max}
-            step={FILTER_LIMITS.maxCompetitorSaturation.step}
+            value={filters.maxCrowding}
+            min={FILTER_LIMITS.maxCrowding.min}
+            max={FILTER_LIMITS.maxCrowding.max}
+            step={FILTER_LIMITS.maxCrowding.step}
             accent="#d96b6b"
-            onChange={(maxCompetitorSaturation) =>
-              onChange({ maxCompetitorSaturation })
+            onChange={(maxCrowding) =>
+              onChange({ maxCrowding })
             }
           />
         </FilterRow>
       )}
 
       <FilterRow
-        label="Regulatory Ease Floor"
-        valueLabel={formatMinScore(filters.minRegulatoryEase)}
+        label="Safety & Entry Floor"
+        valueLabel={formatMinScore(filters.minSafetyAndEntry)}
       >
         <RangeSlider
-          value={filters.minRegulatoryEase}
-          min={FILTER_LIMITS.minRegulatoryEase.min}
-          max={FILTER_LIMITS.minRegulatoryEase.max}
-          step={FILTER_LIMITS.minRegulatoryEase.step}
+          value={filters.minSafetyAndEntry}
+          min={FILTER_LIMITS.minSafetyAndEntry.min}
+          max={FILTER_LIMITS.minSafetyAndEntry.max}
+          step={FILTER_LIMITS.minSafetyAndEntry.step}
           accent="#9b7bde"
-          onChange={(minRegulatoryEase) => onChange({ minRegulatoryEase })}
+          onChange={(minSafetyAndEntry) => onChange({ minSafetyAndEntry })}
         />
       </FilterRow>
 

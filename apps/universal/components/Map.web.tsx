@@ -166,22 +166,22 @@ export default function Map({
             : Number(props.overall),
         population:
           props.population == null ? null : Number(props.population),
-        marketSizeAndGrowth:
-          props.marketSizeAndGrowth == null
+        tourismInfrastructure:
+          props.tourismInfrastructure == null
             ? null
-            : Number(props.marketSizeAndGrowth),
-        talentDensity:
-          props.talentDensity == null ? null : Number(props.talentDensity),
-        taxEnvironment:
-          props.taxEnvironment == null ? null : Number(props.taxEnvironment),
-        regulatoryEase:
-          props.regulatoryEase == null ? null : Number(props.regulatoryEase),
-        infrastructure:
-          props.infrastructure == null ? null : Number(props.infrastructure),
-        competitorSaturation:
-          props.competitorSaturation == null
+            : Number(props.tourismInfrastructure),
+        accessibility:
+          props.accessibility == null ? null : Number(props.accessibility),
+        costIndex:
+          props.costIndex == null ? null : Number(props.costIndex),
+        safetyAndEntry:
+          props.safetyAndEntry == null ? null : Number(props.safetyAndEntry),
+        travelInfrastructure:
+          props.travelInfrastructure == null ? null : Number(props.travelInfrastructure),
+        crowding:
+          props.crowding == null
             ? null
-            : Number(props.competitorSaturation),
+            : Number(props.crowding),
         trajectory:
           props.trajectory == null ? null : Number(props.trajectory),
       };

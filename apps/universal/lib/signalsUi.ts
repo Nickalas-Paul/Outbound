@@ -5,12 +5,12 @@
 import type { MarketSignal, SignalDirection } from '@outbound/core';
 
 const DIM_SHORT: Record<string, string> = {
-  marketSizeAndGrowth: 'Market',
-  talentDensity: 'Talent',
-  taxEnvironment: 'Tax',
-  regulatoryEase: 'Regulatory',
-  infrastructure: 'Infrastructure',
-  competitorSaturation: 'Competition',
+  tourismInfrastructure: 'Tourism Cap.',
+  accessibility: 'Access',
+  costIndex: 'Cost',
+  safetyAndEntry: 'Safety',
+  travelInfrastructure: 'Travel Infra',
+  crowding: 'Crowding',
   trajectory: 'Trajectory',
 };
 

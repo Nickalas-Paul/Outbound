@@ -143,12 +143,12 @@ def test_log_normalization_non_positive_skipped():
 # ---------------------------------------------------------------------------
 
 _EQUAL_WEIGHTS = {
-    "marketSizeAndGrowth": 0.167,
-    "talentDensity": 0.167,
-    "taxEnvironment": 0.167,
-    "regulatoryEase": 0.167,
-    "infrastructure": 0.167,
-    "competitorSaturation": 0.167,
+    "tourismInfrastructure": 0.167,
+    "accessibility": 0.167,
+    "costIndex": 0.167,
+    "safetyAndEntry": 0.167,
+    "travelInfrastructure": 0.167,
+    "crowding": 0.167,
     "trajectory": 0.167,
 }
 
@@ -156,12 +156,12 @@ _EQUAL_WEIGHTS = {
 def test_overall_score_with_missing_dimensions():
     # 7 dimensions, 2 null → 5 scored (≥ MIN_DIMENSIONS_FOR_OVERALL of 3)
     dimensions = {
-        "marketSizeAndGrowth": 80,
-        "talentDensity": 60,
-        "taxEnvironment": 70,
-        "regulatoryEase": 90,
-        "infrastructure": 50,
-        "competitorSaturation": None,
+        "tourismInfrastructure": 80,
+        "accessibility": 60,
+        "costIndex": 70,
+        "safetyAndEntry": 90,
+        "travelInfrastructure": 50,
+        "crowding": None,
         "trajectory": None,
     }
     assert MIN_DIMENSIONS_FOR_OVERALL == 3
@@ -177,12 +177,12 @@ def test_overall_score_with_missing_dimensions():
 def test_overall_score_below_minimum_dimension_threshold():
     # Only 2 scored (< MIN_DIMENSIONS_FOR_OVERALL)
     dimensions = {
-        "marketSizeAndGrowth": 80,
-        "talentDensity": 60,
-        "taxEnvironment": None,
-        "regulatoryEase": None,
-        "infrastructure": None,
-        "competitorSaturation": None,
+        "tourismInfrastructure": 80,
+        "accessibility": 60,
+        "costIndex": None,
+        "safetyAndEntry": None,
+        "travelInfrastructure": None,
+        "crowding": None,
         "trajectory": None,
     }
     overall = compute_overall_score(dimensions, _EQUAL_WEIGHTS)

@@ -23,7 +23,7 @@ Phase 7.5 — institutional indicators, trend projections, and Layer 2 market si
 | `ingest_tax_global.py` | Global effective tax burden (World Bank) |
 | `ingest_education.py` | Global education / talent indicators |
 | `ingest_ilo.py` | ILO labor-force series |
-| `ingest_infrastructure.py` | Expanded infrastructure (broadband, power, air, etc.) |
+| `ingest_infrastructure.py` | Expanded travelInfrastructure (broadband, power, air, etc.) |
 | `ingest_cpi.py` | Transparency / Control of Corruption path |
 | `ingest_predictions.py` | Polymarket → `market_signals` (+ notification hook) |
 | `ingest_events.py` | GDELT / seed events → `market_signals` (+ notification hook) |

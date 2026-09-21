@@ -5,12 +5,12 @@ export type GeographyFeatureProperties = {
   name: string;
   isoCode: string | null;
   overall: number | null;
-  marketSizeAndGrowth: number | null;
-  talentDensity: number | null;
-  taxEnvironment: number | null;
-  regulatoryEase: number | null;
-  infrastructure: number | null;
-  competitorSaturation: number | null;
+  tourismInfrastructure: number | null;
+  accessibility: number | null;
+  costIndex: number | null;
+  safetyAndEntry: number | null;
+  travelInfrastructure: number | null;
+  crowding: number | null;
   trajectory: number | null;
   confidence: 'high' | 'medium' | 'low' | null;
   population: number | null;
@@ -46,12 +46,12 @@ export type GeographyListItem = {
   tvi: {
     overall: number | null;
     dimensions: {
-      marketSizeAndGrowth: number | null;
-      talentDensity: number | null;
-      taxEnvironment: number | null;
-      regulatoryEase: number | null;
-      infrastructure: number | null;
-      competitorSaturation: number | null;
+      tourismInfrastructure: number | null;
+      accessibility: number | null;
+      costIndex: number | null;
+      safetyAndEntry: number | null;
+      travelInfrastructure: number | null;
+      crowding: number | null;
       trajectory: number | null;
     } | null;
     confidence: 'high' | 'medium' | 'low' | null;
@@ -64,9 +64,9 @@ export type GeographyListItem = {
 export type GeographyFilters = {
   minPopulation?: number;
   maxCorpTaxRate?: number;
-  minTalentDensity?: number;
-  maxCompetitorSaturation?: number;
-  minRegulatoryEase?: number;
+  minAccessibility?: number;
+  maxCrowding?: number;
+  minSafetyAndEntry?: number;
 };
 
 type ApiEnvelope<T> = {
@@ -186,12 +186,12 @@ export type GeographyDetail = {
   tvi: {
     overall: number | null;
     dimensions: {
-      marketSizeAndGrowth: number | null;
-      talentDensity: number | null;
-      taxEnvironment: number | null;
-      regulatoryEase: number | null;
-      infrastructure: number | null;
-      competitorSaturation: number | null;
+      tourismInfrastructure: number | null;
+      accessibility: number | null;
+      costIndex: number | null;
+      safetyAndEntry: number | null;
+      travelInfrastructure: number | null;
+      crowding: number | null;
       trajectory: number | null;
     } | null;
     confidence: 'high' | 'medium' | 'low' | null;

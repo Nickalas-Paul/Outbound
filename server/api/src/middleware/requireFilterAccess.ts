@@ -13,12 +13,12 @@ const BODY_KEY_TO_FILTER: Record<string, FilterKey> = {
   population: 'population',
   minPopulation: 'population',
   maxCorpTaxRate: 'maxCorpTaxRate',
-  regulatoryEase: 'regulatoryEase',
-  minRegulatoryEase: 'regulatoryEase',
-  talentDensity: 'talentDensity',
-  minTalentDensity: 'talentDensity',
-  competitorSaturation: 'competitorSaturation',
-  maxCompetitorSaturation: 'competitorSaturation',
+  safetyAndEntry: 'safetyAndEntry',
+  minSafetyAndEntry: 'safetyAndEntry',
+  accessibility: 'accessibility',
+  minAccessibility: 'accessibility',
+  crowding: 'crowding',
+  maxCrowding: 'crowding',
 };
 
 function normalizeTier(raw: string | undefined): SubscriptionTier {

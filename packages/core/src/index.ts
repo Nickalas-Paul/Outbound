@@ -9,12 +9,12 @@ export interface Geography {
 export interface TVIScore {
   overall: number;
   dimensions: {
-    marketSizeAndGrowth: number;
-    talentDensity: number;
-    taxEnvironment: number;
-    regulatoryEase: number;
-    infrastructure: number;
-    competitorSaturation: number;
+    tourismInfrastructure: number;
+    accessibility: number;
+    costIndex: number;
+    safetyAndEntry: number;
+    travelInfrastructure: number;
+    crowding: number;
     trajectory: number;
   };
   confidence: "high" | "medium" | "low";

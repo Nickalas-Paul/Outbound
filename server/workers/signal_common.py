@@ -54,7 +54,7 @@ SIGNAL_RULES: list[tuple[tuple[str, ...], str, list[str], str]] = [
             "tariff",
         ),
         "tariff_risk",
-        ["taxEnvironment", "competitorSaturation"],
+        ["costIndex"],
         "negative",
     ),
     (
@@ -73,7 +73,7 @@ SIGNAL_RULES: list[tuple[tuple[str, ...], str, list[str], str]] = [
             "sanction",
         ),
         "sanctions",
-        ["regulatoryEase", "marketSizeAndGrowth"],
+        ["safetyAndEntry", "accessibility"],
         "negative",
     ),
     (
@@ -87,7 +87,7 @@ SIGNAL_RULES: list[tuple[tuple[str, ...], str, list[str], str]] = [
             "free trade agreement",
         ),
         "trade_agreement",
-        ["marketSizeAndGrowth", "competitorSaturation"],
+        ["costIndex"],
         "positive",
     ),
     (
@@ -101,7 +101,7 @@ SIGNAL_RULES: list[tuple[tuple[str, ...], str, list[str], str]] = [
             "capital gains tax",
         ),
         "regulatory_change",
-        ["regulatoryEase"],
+        ["safetyAndEntry", "accessibility"],
         "neutral",
     ),
     (
@@ -117,7 +117,7 @@ SIGNAL_RULES: list[tuple[tuple[str, ...], str, list[str], str]] = [
             "debt ceiling",
         ),
         "political_instability",
-        ["regulatoryEase"],
+        ["safetyAndEntry", "crowding"],
         "negative",
     ),
     (
@@ -130,7 +130,7 @@ SIGNAL_RULES: list[tuple[tuple[str, ...], str, list[str], str]] = [
             "dollarization",
         ),
         "currency_crisis",
-        ["taxEnvironment", "marketSizeAndGrowth"],
+        ["costIndex"],
         "negative",
     ),
     (
@@ -152,7 +152,7 @@ SIGNAL_RULES: list[tuple[tuple[str, ...], str, list[str], str]] = [
             "inflation",
         ),
         "economic_policy",
-        ["marketSizeAndGrowth"],
+        ["costIndex"],
         "neutral",
     ),
 ]

@@ -10,9 +10,9 @@ export type SubscriptionTier = 'free' | 'pro' | 'marketplace';
 export type FilterKey =
   | 'population'
   | 'maxCorpTaxRate'
-  | 'regulatoryEase'
-  | 'talentDensity'
-  | 'competitorSaturation';
+  | 'safetyAndEntry'
+  | 'accessibility'
+  | 'crowding';
 
 export type TimeHorizon = 'current' | '2yr' | '5yr';
 
@@ -28,15 +28,15 @@ export type TierFeature =
 export const FREE_FILTER_KEYS: readonly FilterKey[] = [
   'population',
   'maxCorpTaxRate',
-  'regulatoryEase',
+  'safetyAndEntry',
 ] as const;
 
 export const ALL_FILTER_KEYS: readonly FilterKey[] = [
   'population',
   'maxCorpTaxRate',
-  'regulatoryEase',
-  'talentDensity',
-  'competitorSaturation',
+  'safetyAndEntry',
+  'accessibility',
+  'crowding',
 ] as const;
 
 export const ALL_HORIZONS: readonly TimeHorizon[] = [

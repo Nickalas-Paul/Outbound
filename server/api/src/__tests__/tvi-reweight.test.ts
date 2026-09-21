@@ -1,9 +1,8 @@
 /**
  * Golden-fixture tests for query-time TVI profile reweighting.
  *
- * NOTE (Phase 1 Step 3): Dimension keys below are the current GEXIS-era names
- * (`marketSizeAndGrowth`, `talentDensity`, …). When Step 3 renames dimensions,
- * update these fixture keys to match the new vocabulary.
+ * Dimension keys are the Phase 1 Step 3 travel vocabulary
+ * (`tourismInfrastructure`, `accessibility`, …).
  */
 
 import { describe, expect, it } from 'vitest';
@@ -18,23 +17,23 @@ import {
 
 /** Shared synthetic dimension scores for reweight fixtures. */
 const SCORES: Record<DimensionKey, number> = {
-  marketSizeAndGrowth: 80,
-  talentDensity: 60,
-  taxEnvironment: 70,
-  regulatoryEase: 90,
-  infrastructure: 50,
-  competitorSaturation: 40,
+  tourismInfrastructure: 80,
+  accessibility: 60,
+  costIndex: 70,
+  safetyAndEntry: 90,
+  travelInfrastructure: 50,
+  crowding: 40,
   trajectory: 65,
 };
 
 const EQUAL_WEIGHTS: DimensionWeights = withTrajectory(
   {
-    marketSizeAndGrowth: 0.167,
-    talentDensity: 0.167,
-    taxEnvironment: 0.167,
-    regulatoryEase: 0.167,
-    infrastructure: 0.167,
-    competitorSaturation: 0.167,
+    tourismInfrastructure: 0.167,
+    accessibility: 0.167,
+    costIndex: 0.167,
+    safetyAndEntry: 0.167,
+    travelInfrastructure: 0.167,
+    crowding: 0.167,
   },
   1.0
 );
@@ -50,14 +49,14 @@ describe('computeWeightedOverall — golden fixtures', () => {
   });
 
   it('reweights with skewed weights toward highest-scoring dimension', () => {
-    // regulatoryEase = 90 heavily weighted at 0.40; others 0.10
+    // safetyAndEntry = 90 heavily weighted at 0.40; others 0.10
     const skewed: DimensionWeights = {
-      marketSizeAndGrowth: 0.1,
-      talentDensity: 0.1,
-      taxEnvironment: 0.1,
-      regulatoryEase: 0.4,
-      infrastructure: 0.1,
-      competitorSaturation: 0.1,
+      tourismInfrastructure: 0.1,
+      accessibility: 0.1,
+      costIndex: 0.1,
+      safetyAndEntry: 0.4,
+      travelInfrastructure: 0.1,
+      crowding: 0.1,
       trajectory: 0.1,
     };
 
@@ -65,18 +64,18 @@ describe('computeWeightedOverall — golden fixtures', () => {
     const overall = computeWeightedOverallWithWeights(SCORES, skewed);
     expect(overall).toBe(72.5);
 
-    // Skew pulls overall toward regulatoryEase (90) vs equal-weight 65
+    // Skew pulls overall toward safetyAndEntry (90) vs equal-weight 65
     expect(overall).toBeGreaterThan(65);
   });
 
   it('renormalizes when some dimensions are null', () => {
     const partial: Partial<Record<DimensionKey, number | null>> = {
-      marketSizeAndGrowth: 80,
-      talentDensity: 60,
-      taxEnvironment: 70,
-      regulatoryEase: 90,
-      infrastructure: 50,
-      competitorSaturation: null,
+      tourismInfrastructure: 80,
+      accessibility: 60,
+      costIndex: 70,
+      safetyAndEntry: 90,
+      travelInfrastructure: 50,
+      crowding: null,
       trajectory: null,
     };
 
@@ -87,12 +86,12 @@ describe('computeWeightedOverall — golden fixtures', () => {
 
   it('applies trajectory multiplier 1.3 (tech_saas profile)', () => {
     const base = {
-      marketSizeAndGrowth: 0.15,
-      talentDensity: 0.25,
-      taxEnvironment: 0.15,
-      regulatoryEase: 0.1,
-      infrastructure: 0.2,
-      competitorSaturation: 0.15,
+      tourismInfrastructure: 0.15,
+      accessibility: 0.25,
+      costIndex: 0.15,
+      safetyAndEntry: 0.1,
+      travelInfrastructure: 0.2,
+      crowding: 0.15,
     };
     const weights = withTrajectory(base, 1.3);
 

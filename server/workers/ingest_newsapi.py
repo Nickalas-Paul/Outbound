@@ -34,37 +34,37 @@ NEWSAPI_QUERIES: list[dict[str, Any]] = [
         "q": '"trade tariff" OR "import duty" OR "tariff increase"',
         "signal_type": "tariff_risk",
         "direction": "negative",
-        "dims": ["taxEnvironment", "competitorSaturation"],
+        "dims": ["costIndex"],
     },
     {
         "q": '"economic sanctions" OR "trade embargo" OR "sanctions imposed"',
         "signal_type": "sanctions",
         "direction": "negative",
-        "dims": ["regulatoryEase", "marketSizeAndGrowth"],
+        "dims": ["safetyAndEntry", "accessibility"],
     },
     {
         "q": '"trade agreement" OR "free trade deal" OR "trade pact signed"',
         "signal_type": "trade_agreement",
         "direction": "positive",
-        "dims": ["marketSizeAndGrowth", "competitorSaturation"],
+        "dims": ["costIndex"],
     },
     {
         "q": '"new regulation" OR "regulatory reform" OR "deregulation"',
         "signal_type": "regulatory_change",
         "direction": "neutral",
-        "dims": ["regulatoryEase"],
+        "dims": ["safetyAndEntry", "accessibility"],
     },
     {
         "q": '"political crisis" OR "coup" OR "civil unrest" OR "mass protest"',
         "signal_type": "political_instability",
         "direction": "negative",
-        "dims": ["regulatoryEase"],
+        "dims": ["safetyAndEntry", "crowding"],
     },
     {
         "q": '"currency devaluation" OR "currency crisis" OR "hyperinflation"',
         "signal_type": "currency_crisis",
         "direction": "negative",
-        "dims": ["taxEnvironment", "marketSizeAndGrowth"],
+        "dims": ["costIndex"],
     },
     {
         "q": (
@@ -73,7 +73,7 @@ NEWSAPI_QUERIES: list[dict[str, Any]] = [
         ),
         "signal_type": "natural_disaster",
         "direction": "negative",
-        "dims": ["infrastructure", "marketSizeAndGrowth"],
+        "dims": ["safetyAndEntry", "travelInfrastructure"],
     },
     {
         "q": (
@@ -82,7 +82,7 @@ NEWSAPI_QUERIES: list[dict[str, Any]] = [
         ),
         "signal_type": "labor_unrest",
         "direction": "negative",
-        "dims": ["talentDensity", "competitorSaturation"],
+        "dims": ["safetyAndEntry", "crowding"],
     },
 ]
 

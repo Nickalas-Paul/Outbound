@@ -16,12 +16,12 @@ import {
 export const TVI_SCORING_VERSION = '0.1.0';
 
 export type DimensionKey =
-  | 'marketSizeAndGrowth'
-  | 'talentDensity'
-  | 'taxEnvironment'
-  | 'regulatoryEase'
-  | 'infrastructure'
-  | 'competitorSaturation'
+  | 'tourismInfrastructure'
+  | 'accessibility'
+  | 'costIndex'
+  | 'safetyAndEntry'
+  | 'travelInfrastructure'
+  | 'crowding'
   | 'trajectory';
 
 export interface IndicatorMeta {
@@ -43,172 +43,159 @@ export interface DimensionMeta {
 
 export const TVI_DIMENSIONS: DimensionMeta[] = [
   {
-    key: 'marketSizeAndGrowth',
-    label: 'Market Size & Growth',
-    description: 'GDP, growth rates, population, and PPP-adjusted economic scale',
+    key: 'tourismInfrastructure',
+    label: 'Tourism Infrastructure & Capacity',
+    description:
+      'Visitor volume, air connectivity, and tourism spend that indicate destination capacity and maturity',
     indicators: [
       {
         source: 'world_bank',
-        code: 'NY.GDP.MKTP.CD',
-        name: 'GDP (current US$)',
+        code: 'ST.INT.ARVL',
+        name: 'International tourism, number of arrivals',
         weight: 0.35,
       },
       {
         source: 'world_bank',
-        code: 'NY.GDP.MKTP.KD.ZG',
-        name: 'GDP growth (annual %)',
-        weight: 0.35,
+        code: 'IS.AIR.DPRT',
+        name: 'Air transport, registered carrier departures worldwide',
+        weight: 0.25,
       },
       {
         source: 'world_bank',
-        code: 'SP.POP.TOTL',
-        name: 'Population',
-        weight: 0.15,
+        code: 'ST.INT.TVLX.CD',
+        name: 'International tourism, expenditures (current US$)',
+        weight: 0.25,
       },
       {
-        source: 'imf_weo',
-        code: 'imf_gdp_ppp',
-        name: 'GDP PPP',
+        source: 'world_bank_derived',
+        code: 'tourism_receipts_per_arrival',
+        name: 'Tourism receipts per arrival',
         weight: 0.15,
       },
     ],
   },
   {
-    key: 'talentDensity',
-    label: 'Talent Density',
-    description: 'Tertiary education attainment and skilled workforce density',
+    key: 'accessibility',
+    label: 'Accessibility & Ease of Travel',
+    description:
+      'Visa openness, digital connectivity, and environmental quality that affect how easily travelers can visit and navigate a destination',
     indicators: [
       {
-        source: 'education',
-        code: 'SE.TER.CUAT.BA.ZS',
-        name: "Educational attainment, at least Bachelor's or equivalent (% of population 25+)",
-        weight: 0.25,
+        source: 'ef_epi',
+        code: 'ef_epi_score',
+        name: 'Environmental Performance Index score',
+        weight: 0.3,
       },
       {
-        source: 'education',
-        code: 'SE.TER.ENRR',
-        name: 'School enrollment, tertiary (% gross)',
+        source: 'visa_index',
+        code: 'visa_free_score',
+        name: 'Visa-free access score',
+        weight: 0.3,
+      },
+      {
+        source: 'world_bank',
+        code: 'IT.NET.USER.ZS',
+        name: 'Internet users (% of population)',
         weight: 0.2,
       },
       {
-        source: 'education',
-        code: 'SL.TLF.ADVN.ZS',
-        name: 'Labor force with advanced education (% of total working-age population)',
+        source: 'world_bank',
+        code: 'IT.CEL.SETS.P2',
+        name: 'Mobile cellular subscriptions (per 100 people)',
+        weight: 0.2,
+      },
+    ],
+  },
+  {
+    key: 'costIndex',
+    label: 'Cost Index',
+    description:
+      'Relative cost of visiting and operating in a destination — purchasing power, inflation, tourism spend intensity, and FX volatility',
+    indicators: [
+      {
+        source: 'world_bank_derived',
+        code: 'gdp_ppp_per_capita',
+        name: 'GDP PPP per capita',
+        weight: 0.3,
+      },
+      {
+        source: 'world_bank',
+        code: 'FP.CPI.TOTL',
+        name: 'Consumer price index (2010 = 100)',
+        weight: 0.3,
+      },
+      {
+        source: 'world_bank_derived',
+        code: 'tourism_receipts_per_arrival',
+        name: 'Tourism receipts per arrival',
         weight: 0.2,
       },
       {
-        source: 'ilo',
-        code: 'SL.TLF.CACT.ZS',
-        name: 'Labor force participation rate (% of total population ages 15+)',
-        weight: 0.15,
-      },
-      {
-        source: 'ilo',
-        code: 'SL.UEM.TOTL.ZS',
-        name: 'Unemployment, total (% of total labor force)',
-        weight: 0.1,
-      },
-      {
-        source: 'education',
-        code: 'SE.XPD.TOTL.GD.ZS',
-        name: 'Government expenditure on education (% of GDP)',
-        weight: 0.1,
+        source: 'ecb_fx_derived',
+        code: 'fx_volatility',
+        name: 'FX volatility (USD cross)',
+        weight: 0.2,
       },
     ],
   },
   {
-    key: 'taxEnvironment',
-    label: 'Tax Environment',
-    description: 'Corporate tax competitiveness for travelers and operators',
+    key: 'safetyAndEntry',
+    label: 'Entry Requirements & Safety',
+    description:
+      'Travel advisories, political stability, rule of law, corruption control, and visa openness for entry risk',
     indicators: [
       {
-        source: 'tax_foundation',
-        code: 'corp_tax_rate',
-        name: 'Corporate tax rate (%)',
-        weight: 0.4,
-      },
-      {
-        source: 'tax_global',
-        code: 'GC.TAX.TOTL.GD.ZS',
-        name: 'Tax revenue (% of GDP)',
-        weight: 0.35,
-      },
-      {
-        source: 'tax_global',
-        code: 'GC.TAX.GSRV.RV.ZS',
-        name: 'Taxes on goods and services (% of revenue)',
-        weight: 0.25,
-      },
-    ],
-  },
-  {
-    key: 'regulatoryEase',
-    label: 'Regulatory Ease',
-    description: 'Economic freedom and ease of operating a business',
-    indicators: [
-      {
-        source: 'world_bank',
-        code: 'RQ.PER.RNK',
-        name: 'Regulatory Quality (WGI Percentile)',
-        weight: 0.25,
-      },
-      {
-        source: 'transparency',
-        code: 'CC.PER.RNK',
-        name: 'Control of Corruption (WGI score)',
-        weight: 0.15,
-      },
-      {
-        source: 'world_bank',
-        code: 'GE.PER.RNK',
-        name: 'Government Effectiveness (WGI Percentile)',
-        weight: 0.15,
-      },
-      {
-        source: 'heritage',
-        code: 'heritage_overall',
-        name: 'Economic Freedom Index (overall)',
-        weight: 0.13,
+        source: 'state_dept_advisory',
+        code: 'travel_advisory_level',
+        name: 'US State Department travel advisory level',
+        weight: 0.3,
       },
       {
         source: 'world_bank',
         code: 'RL.PER.RNK',
         name: 'Rule of Law (WGI Percentile)',
-        weight: 0.12,
+        weight: 0.2,
       },
       {
-        source: 'heritage',
-        code: 'heritage_business_freedom',
-        name: 'Business Freedom',
+        source: 'transparency',
+        code: 'CC.PER.RNK',
+        name: 'Control of Corruption (WGI score)',
+        weight: 0.2,
+      },
+      {
+        source: 'world_bank',
+        code: 'PV.PER.RNK',
+        name: 'Political Stability / Absence of Violence (WGI Percentile)',
+        weight: 0.2,
+      },
+      {
+        source: 'visa_index',
+        code: 'visa_free_score',
+        name: 'Visa-free access score',
         weight: 0.1,
-      },
-      {
-        source: 'heritage',
-        code: 'heritage_trade_freedom',
-        name: 'Trade Freedom',
-        weight: 0.05,
-      },
-      {
-        source: 'heritage',
-        code: 'heritage_investment_freedom',
-        name: 'Investment Freedom',
-        weight: 0.05,
       },
     ],
   },
   {
-    key: 'infrastructure',
-    label: 'Infrastructure',
-    description: 'Digital connectivity and logistics performance',
+    key: 'travelInfrastructure',
+    label: 'Travel Infrastructure',
+    description:
+      'Power, connectivity, logistics, and healthcare capacity that support traveler movement and operations',
     indicators: [
       {
-        source: 'infrastructure_expanded',
+        source: 'world_bank',
         code: 'EG.ELC.ACCS.ZS',
         name: 'Access to electricity (% of population)',
         weight: 0.2,
       },
       {
-        source: 'infrastructure_expanded',
+        source: 'world_bank',
+        code: 'IT.NET.USER.ZS',
+        name: 'Internet users (% of population)',
+        weight: 0.2,
+      },
+      {
+        source: 'world_bank',
         code: 'IT.NET.BBND.P2',
         name: 'Fixed broadband subscriptions (per 100 people)',
         weight: 0.2,
@@ -221,34 +208,29 @@ export const TVI_DIMENSIONS: DimensionMeta[] = [
       },
       {
         source: 'world_bank',
-        code: 'IT.NET.USER.ZS',
-        name: 'Internet users (% of population)',
-        weight: 0.15,
-      },
-      {
-        source: 'infrastructure_expanded',
-        code: 'IT.CEL.SETS.P2',
-        name: 'Mobile cellular subscriptions (per 100 people)',
-        weight: 0.15,
-      },
-      {
-        source: 'infrastructure_expanded',
-        code: 'IS.AIR.DPRT',
-        name: 'Air transport, registered carrier departures worldwide',
-        weight: 0.1,
+        code: 'SH.MED.PHYS.ZS',
+        name: 'Physicians (per 1,000 people)',
+        weight: 0.2,
       },
     ],
   },
   {
-    key: 'competitorSaturation',
-    label: 'Competitor Saturation',
-    description: 'New business formation intensity as a market-activity proxy',
+    key: 'crowding',
+    label: 'Tourism Crowding',
+    description:
+      'Tourist intensity relative to population — higher crowding scores mean denser visitor pressure',
     indicators: [
       {
-        source: 'world_bank',
-        code: 'IC.BUS.NDNS.ZS',
-        name: 'New business density (per 1,000 people)',
-        weight: 1.0,
+        source: 'world_bank_derived',
+        code: 'tourist_arrivals_per_capita',
+        name: 'Tourist arrivals per capita',
+        weight: 0.55,
+      },
+      {
+        source: 'world_bank_derived',
+        code: 'tourism_receipts_per_capita',
+        name: 'Tourism receipts per capita',
+        weight: 0.45,
       },
     ],
   },
@@ -271,50 +253,35 @@ export const SOURCE_CATALOG: Record<
     url: 'https://data.worldbank.org',
     refreshCadence: 'Annual',
   },
-  imf_weo: {
-    name: 'IMF World Economic Outlook',
-    url: 'https://data.imf.org/en/datasets/IMF.RES:WEO',
-    refreshCadence: 'Biannual (Apr/Oct)',
-  },
-  heritage: {
-    name: 'Heritage Foundation Index of Economic Freedom',
-    url: 'https://indexdotnet.azurewebsites.net/index/download',
-    refreshCadence: 'Annual',
-  },
-  tax_foundation: {
-    name: 'Tax Foundation International Tax Competitiveness Index',
-    url: 'https://taxfoundation.org/research/all/global/2025-international-tax-competitiveness-index/',
-    refreshCadence: 'Annual',
-  },
-  oecd: {
-    name: 'OECD / World Bank education proxy',
-    url: 'https://data-explorer.oecd.org/',
-    refreshCadence: 'Annual',
-  },
-  education: {
-    name: 'World Bank Education Indicators',
+  world_bank_derived: {
+    name: 'World Bank derived ratios',
     url: 'https://data.worldbank.org',
     refreshCadence: 'Annual',
   },
-  ilo: {
-    name: 'ILO Labor Market Indicators (via World Bank)',
-    url: 'https://ilostat.ilo.org/',
+  ef_epi: {
+    name: 'Yale Environmental Performance Index',
+    url: 'https://epi.yale.edu/',
+    refreshCadence: 'Biennial',
+  },
+  visa_index: {
+    name: 'Visa / passport openness indexes',
+    url: 'https://www.passportindex.org/',
     refreshCadence: 'Annual',
   },
-  tax_global: {
-    name: 'World Bank Global Tax Indicators',
-    url: 'https://data.worldbank.org',
-    refreshCadence: 'Annual',
-  },
-  infrastructure_expanded: {
-    name: 'World Bank Infrastructure Indicators',
-    url: 'https://data.worldbank.org',
-    refreshCadence: 'Annual',
+  state_dept_advisory: {
+    name: 'US State Department travel advisories',
+    url: 'https://travel.state.gov/',
+    refreshCadence: 'Continuous',
   },
   transparency: {
-    name: 'WGI Control of Corruption (Transparency / CPI fallback)',
+    name: 'WGI Control of Corruption',
     url: 'https://www.worldbank.org/en/publication/worldwide-governance-indicators',
     refreshCadence: 'Annual',
+  },
+  ecb_fx_derived: {
+    name: 'ECB / Frankfurter FX (derived)',
+    url: 'https://www.frankfurter.app/',
+    refreshCadence: 'Daily → monthly aggregate',
   },
 };
 
@@ -357,12 +324,12 @@ export const INDUSTRY_VERTICALS: IndustryVertical[] = [
     label: INDUSTRY_VERTICAL_LABELS['all'],
     weights: withTrajectory(
       {
-        marketSizeAndGrowth: 0.167,
-        talentDensity: 0.167,
-        taxEnvironment: 0.167,
-        regulatoryEase: 0.167,
-        infrastructure: 0.167,
-        competitorSaturation: 0.167,
+        tourismInfrastructure: 0.167,
+        accessibility: 0.167,
+        costIndex: 0.167,
+        safetyAndEntry: 0.167,
+        travelInfrastructure: 0.167,
+        crowding: 0.167,
       },
       1.0
     ),
@@ -372,12 +339,12 @@ export const INDUSTRY_VERTICALS: IndustryVertical[] = [
     label: INDUSTRY_VERTICAL_LABELS['tech_saas'],
     weights: withTrajectory(
       {
-        marketSizeAndGrowth: 0.15,
-        talentDensity: 0.25,
-        taxEnvironment: 0.15,
-        regulatoryEase: 0.1,
-        infrastructure: 0.2,
-        competitorSaturation: 0.15,
+        tourismInfrastructure: 0.15,
+        accessibility: 0.25,
+        costIndex: 0.15,
+        safetyAndEntry: 0.1,
+        travelInfrastructure: 0.2,
+        crowding: 0.15,
       },
       1.3
     ),
@@ -387,12 +354,12 @@ export const INDUSTRY_VERTICALS: IndustryVertical[] = [
     label: INDUSTRY_VERTICAL_LABELS['financial'],
     weights: withTrajectory(
       {
-        marketSizeAndGrowth: 0.2,
-        talentDensity: 0.15,
-        taxEnvironment: 0.2,
-        regulatoryEase: 0.25,
-        infrastructure: 0.1,
-        competitorSaturation: 0.1,
+        tourismInfrastructure: 0.2,
+        accessibility: 0.15,
+        costIndex: 0.2,
+        safetyAndEntry: 0.25,
+        travelInfrastructure: 0.1,
+        crowding: 0.1,
       },
       1.0
     ),
@@ -402,12 +369,12 @@ export const INDUSTRY_VERTICALS: IndustryVertical[] = [
     label: INDUSTRY_VERTICAL_LABELS['manufacturing'],
     weights: withTrajectory(
       {
-        marketSizeAndGrowth: 0.15,
-        talentDensity: 0.1,
-        taxEnvironment: 0.15,
-        regulatoryEase: 0.2,
-        infrastructure: 0.25,
-        competitorSaturation: 0.15,
+        tourismInfrastructure: 0.15,
+        accessibility: 0.1,
+        costIndex: 0.15,
+        safetyAndEntry: 0.2,
+        travelInfrastructure: 0.25,
+        crowding: 0.15,
       },
       0.7
     ),
@@ -417,12 +384,12 @@ export const INDUSTRY_VERTICALS: IndustryVertical[] = [
     label: INDUSTRY_VERTICAL_LABELS['healthcare'],
     weights: withTrajectory(
       {
-        marketSizeAndGrowth: 0.2,
-        talentDensity: 0.2,
-        taxEnvironment: 0.1,
-        regulatoryEase: 0.25,
-        infrastructure: 0.15,
-        competitorSaturation: 0.1,
+        tourismInfrastructure: 0.2,
+        accessibility: 0.2,
+        costIndex: 0.1,
+        safetyAndEntry: 0.25,
+        travelInfrastructure: 0.15,
+        crowding: 0.1,
       },
       1.0
     ),
@@ -432,12 +399,12 @@ export const INDUSTRY_VERTICALS: IndustryVertical[] = [
     label: INDUSTRY_VERTICAL_LABELS['ecommerce'],
     weights: withTrajectory(
       {
-        marketSizeAndGrowth: 0.25,
-        talentDensity: 0.1,
-        taxEnvironment: 0.15,
-        regulatoryEase: 0.1,
-        infrastructure: 0.25,
-        competitorSaturation: 0.15,
+        tourismInfrastructure: 0.25,
+        accessibility: 0.1,
+        costIndex: 0.15,
+        safetyAndEntry: 0.1,
+        travelInfrastructure: 0.25,
+        crowding: 0.15,
       },
       1.0
     ),
@@ -447,12 +414,12 @@ export const INDUSTRY_VERTICALS: IndustryVertical[] = [
     label: INDUSTRY_VERTICAL_LABELS['energy'],
     weights: withTrajectory(
       {
-        marketSizeAndGrowth: 0.15,
-        talentDensity: 0.1,
-        taxEnvironment: 0.15,
-        regulatoryEase: 0.25,
-        infrastructure: 0.25,
-        competitorSaturation: 0.1,
+        tourismInfrastructure: 0.15,
+        accessibility: 0.1,
+        costIndex: 0.15,
+        safetyAndEntry: 0.25,
+        travelInfrastructure: 0.25,
+        crowding: 0.1,
       },
       0.7
     ),
@@ -462,12 +429,12 @@ export const INDUSTRY_VERTICALS: IndustryVertical[] = [
     label: INDUSTRY_VERTICAL_LABELS['professional'],
     weights: withTrajectory(
       {
-        marketSizeAndGrowth: 0.15,
-        talentDensity: 0.3,
-        taxEnvironment: 0.15,
-        regulatoryEase: 0.15,
-        infrastructure: 0.1,
-        competitorSaturation: 0.15,
+        tourismInfrastructure: 0.15,
+        accessibility: 0.3,
+        costIndex: 0.15,
+        safetyAndEntry: 0.15,
+        travelInfrastructure: 0.1,
+        crowding: 0.15,
       },
       1.0
     ),
@@ -477,12 +444,12 @@ export const INDUSTRY_VERTICALS: IndustryVertical[] = [
     label: INDUSTRY_VERTICAL_LABELS['logistics'],
     weights: withTrajectory(
       {
-        marketSizeAndGrowth: 0.2,
-        talentDensity: 0.05,
-        taxEnvironment: 0.15,
-        regulatoryEase: 0.15,
-        infrastructure: 0.35,
-        competitorSaturation: 0.1,
+        tourismInfrastructure: 0.2,
+        accessibility: 0.05,
+        costIndex: 0.15,
+        safetyAndEntry: 0.15,
+        travelInfrastructure: 0.35,
+        crowding: 0.1,
       },
       1.0
     ),
@@ -492,12 +459,12 @@ export const INDUSTRY_VERTICALS: IndustryVertical[] = [
     label: INDUSTRY_VERTICAL_LABELS['telecom'],
     weights: withTrajectory(
       {
-        marketSizeAndGrowth: 0.2,
-        talentDensity: 0.15,
-        taxEnvironment: 0.1,
-        regulatoryEase: 0.2,
-        infrastructure: 0.25,
-        competitorSaturation: 0.1,
+        tourismInfrastructure: 0.2,
+        accessibility: 0.15,
+        costIndex: 0.1,
+        safetyAndEntry: 0.2,
+        travelInfrastructure: 0.25,
+        crowding: 0.1,
       },
       1.3
     ),
@@ -507,12 +474,12 @@ export const INDUSTRY_VERTICALS: IndustryVertical[] = [
     label: INDUSTRY_VERTICAL_LABELS['consumer_goods'],
     weights: withTrajectory(
       {
-        marketSizeAndGrowth: 0.25,
-        talentDensity: 0.1,
-        taxEnvironment: 0.1,
-        regulatoryEase: 0.15,
-        infrastructure: 0.2,
-        competitorSaturation: 0.2,
+        tourismInfrastructure: 0.25,
+        accessibility: 0.1,
+        costIndex: 0.1,
+        safetyAndEntry: 0.15,
+        travelInfrastructure: 0.2,
+        crowding: 0.2,
       },
       1.0
     ),

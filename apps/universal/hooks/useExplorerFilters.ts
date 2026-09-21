@@ -79,9 +79,9 @@ export function useExplorerFilters() {
       horizon: query.horizon ?? undefined,
       minPopulation: query.minPopulation ?? undefined,
       maxCorpTaxRate: query.maxCorpTaxRate ?? undefined,
-      minTalentDensity: query.minTalentDensity ?? undefined,
-      maxCompetitorSaturation: query.maxCompetitorSaturation ?? undefined,
-      minRegulatoryEase: query.minRegulatoryEase ?? undefined,
+      minAccessibility: query.minAccessibility ?? undefined,
+      maxCrowding: query.maxCrowding ?? undefined,
+      minSafetyAndEntry: query.minSafetyAndEntry ?? undefined,
     });
   }, [filters, router]);
 

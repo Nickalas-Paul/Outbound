@@ -12,12 +12,12 @@ The Travel Viability Index is a **0–100** score that summarizes how attractive
 
 | Dimension key | Label | What it captures |
 |---|---|---|
-| `marketSizeAndGrowth` | Market Size & Growth | Economic scale, growth, and population |
-| `talentDensity` | Talent Density | Education attainment, tertiary enrollment, skilled labor force |
-| `taxEnvironment` | Tax Environment | Statutory corporate tax and effective tax burden |
-| `regulatoryEase` | Regulatory Ease | Governance quality, corruption control, and economic freedom |
-| `infrastructure` | Infrastructure | Digital access, electricity, logistics, and air transport |
-| `competitorSaturation` | Competitor Saturation | Intensity of new business formation (market activity proxy) |
+| `tourismInfrastructure` | Market Size & Growth | Economic scale, growth, and population |
+| `accessibility` | Talent Density | Education attainment, tertiary enrollment, skilled labor force |
+| `costIndex` | Tax Environment | Statutory corporate tax and effective tax burden |
+| `safetyAndEntry` | Regulatory Ease | Governance quality, corruption control, and economic freedom |
+| `travelInfrastructure` | Infrastructure | Digital access, electricity, logistics, and air transport |
+| `crowding` | Competitor Saturation | Intensity of new business formation (market activity proxy) |
 | `trajectory` | Trajectory | **Composite** momentum from trend direction/rate across the other six dimensions |
 
 Each base dimension is scored **0–100**. Missing dimensions are stored as `null` (not zero). Zero means “measured and weak,” not “no data.” Trajectory is derived after base dimensions and trends are computed — it has no raw indicators of its own.
@@ -126,7 +126,7 @@ For the default vertical `all` / `all_industries`, the seven dimensions (six bas
 - **Manufacturing / Energy & Renewables:** trajectory weighted **0.7×**
 - Other verticals (financial, healthcare, ecommerce, professional, logistics, consumer goods, all): trajectory **1.0×**
 
-Base dimension emphasis also shifts (e.g. talent-heavy for tech/professional, infrastructure-heavy for logistics).
+Base dimension emphasis also shifts (e.g. talent-heavy for tech/professional, travelInfrastructure-heavy for logistics).
 
 ## Confidence levels
 

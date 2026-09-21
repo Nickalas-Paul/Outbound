@@ -8,9 +8,9 @@ export type ExplorerFilterState = {
   horizon: TimeHorizon;
   minPopulation: number;
   maxCorpTaxRate: number;
-  minTalentDensity: number;
-  maxCompetitorSaturation: number;
-  minRegulatoryEase: number;
+  minAccessibility: number;
+  maxCrowding: number;
+  minSafetyAndEntry: number;
 };
 
 export const DEFAULT_FILTERS: ExplorerFilterState = {
@@ -18,17 +18,17 @@ export const DEFAULT_FILTERS: ExplorerFilterState = {
   horizon: 'current',
   minPopulation: 0,
   maxCorpTaxRate: 50,
-  minTalentDensity: 0,
-  maxCompetitorSaturation: 100,
-  minRegulatoryEase: 0,
+  minAccessibility: 0,
+  maxCrowding: 100,
+  minSafetyAndEntry: 0,
 };
 
 export const FILTER_LIMITS = {
   minPopulation: { min: 0, max: 100_000_000, step: 1_000_000 },
   maxCorpTaxRate: { min: 0, max: 50, step: 1 },
-  minTalentDensity: { min: 0, max: 100, step: 1 },
-  maxCompetitorSaturation: { min: 0, max: 100, step: 1 },
-  minRegulatoryEase: { min: 0, max: 100, step: 1 },
+  minAccessibility: { min: 0, max: 100, step: 1 },
+  maxCrowding: { min: 0, max: 100, step: 1 },
+  minSafetyAndEntry: { min: 0, max: 100, step: 1 },
 } as const;
 
 export function formatPopulation(value: number): string {
@@ -61,11 +61,11 @@ export function toApiFilters(state: ExplorerFilterState): GeographyFilters {
   if (state.maxCorpTaxRate < FILTER_LIMITS.maxCorpTaxRate.max) {
     filters.maxCorpTaxRate = state.maxCorpTaxRate;
   }
-  if (state.minTalentDensity > 0) filters.minTalentDensity = state.minTalentDensity;
-  if (state.maxCompetitorSaturation < 100) {
-    filters.maxCompetitorSaturation = state.maxCompetitorSaturation;
+  if (state.minAccessibility > 0) filters.minAccessibility = state.minAccessibility;
+  if (state.maxCrowding < 100) {
+    filters.maxCrowding = state.maxCrowding;
   }
-  if (state.minRegulatoryEase > 0) filters.minRegulatoryEase = state.minRegulatoryEase;
+  if (state.minSafetyAndEntry > 0) filters.minSafetyAndEntry = state.minSafetyAndEntry;
   return filters;
 }
 
@@ -75,9 +75,9 @@ export function filtersEqual(a: ExplorerFilterState, b: ExplorerFilterState): bo
     a.horizon === b.horizon &&
     a.minPopulation === b.minPopulation &&
     a.maxCorpTaxRate === b.maxCorpTaxRate &&
-    a.minTalentDensity === b.minTalentDensity &&
-    a.maxCompetitorSaturation === b.maxCompetitorSaturation &&
-    a.minRegulatoryEase === b.minRegulatoryEase
+    a.minAccessibility === b.minAccessibility &&
+    a.maxCrowding === b.maxCrowding &&
+    a.minSafetyAndEntry === b.minSafetyAndEntry
   );
 }
 
@@ -107,12 +107,12 @@ export function parseFiltersFromParams(
     horizon,
     minPopulation: num('minPopulation', DEFAULT_FILTERS.minPopulation),
     maxCorpTaxRate: num('maxCorpTaxRate', DEFAULT_FILTERS.maxCorpTaxRate),
-    minTalentDensity: num('minTalentDensity', DEFAULT_FILTERS.minTalentDensity),
-    maxCompetitorSaturation: num(
-      'maxCompetitorSaturation',
-      DEFAULT_FILTERS.maxCompetitorSaturation
+    minAccessibility: num('minAccessibility', DEFAULT_FILTERS.minAccessibility),
+    maxCrowding: num(
+      'maxCrowding',
+      DEFAULT_FILTERS.maxCrowding
     ),
-    minRegulatoryEase: num('minRegulatoryEase', DEFAULT_FILTERS.minRegulatoryEase),
+    minSafetyAndEntry: num('minSafetyAndEntry', DEFAULT_FILTERS.minSafetyAndEntry),
   };
 }
 
@@ -132,14 +132,14 @@ export function filtersToQueryRecord(
   if (state.maxCorpTaxRate !== DEFAULT_FILTERS.maxCorpTaxRate) {
     out.maxCorpTaxRate = String(state.maxCorpTaxRate);
   }
-  if (state.minTalentDensity !== DEFAULT_FILTERS.minTalentDensity) {
-    out.minTalentDensity = String(state.minTalentDensity);
+  if (state.minAccessibility !== DEFAULT_FILTERS.minAccessibility) {
+    out.minAccessibility = String(state.minAccessibility);
   }
-  if (state.maxCompetitorSaturation !== DEFAULT_FILTERS.maxCompetitorSaturation) {
-    out.maxCompetitorSaturation = String(state.maxCompetitorSaturation);
+  if (state.maxCrowding !== DEFAULT_FILTERS.maxCrowding) {
+    out.maxCrowding = String(state.maxCrowding);
   }
-  if (state.minRegulatoryEase !== DEFAULT_FILTERS.minRegulatoryEase) {
-    out.minRegulatoryEase = String(state.minRegulatoryEase);
+  if (state.minSafetyAndEntry !== DEFAULT_FILTERS.minSafetyAndEntry) {
+    out.minSafetyAndEntry = String(state.minSafetyAndEntry);
   }
   return out;
 }
@@ -148,16 +148,16 @@ export function filtersToQueryRecord(
 export type SavedFilterPayload = {
   population?: number;
   maxCorpTaxRate?: number;
-  regulatoryEase?: number;
-  talentDensity?: number;
-  competitorSaturation?: number;
+  safetyAndEntry?: number;
+  accessibility?: number;
+  crowding?: number;
   vertical?: string;
   horizon?: TimeHorizon | string;
   // Also accept explorer-native keys for forward compatibility.
   minPopulation?: number;
-  minTalentDensity?: number;
-  maxCompetitorSaturation?: number;
-  minRegulatoryEase?: number;
+  minAccessibility?: number;
+  maxCrowding?: number;
+  minSafetyAndEntry?: number;
   industryVertical?: string;
 };
 
@@ -167,9 +167,9 @@ export function stateToSavedFilters(
   return {
     population: state.minPopulation,
     maxCorpTaxRate: state.maxCorpTaxRate,
-    regulatoryEase: state.minRegulatoryEase,
-    talentDensity: state.minTalentDensity,
-    competitorSaturation: state.maxCompetitorSaturation,
+    safetyAndEntry: state.minSafetyAndEntry,
+    accessibility: state.minAccessibility,
+    crowding: state.maxCrowding,
     vertical: state.industryVertical,
     horizon: state.horizon,
   };
@@ -209,20 +209,20 @@ export function savedFiltersToState(
       ['maxCorpTaxRate'],
       DEFAULT_FILTERS.maxCorpTaxRate
     ),
-    minTalentDensity: numField(
+    minAccessibility: numField(
       f,
-      ['talentDensity', 'minTalentDensity'],
-      DEFAULT_FILTERS.minTalentDensity
+      ['accessibility', 'minAccessibility'],
+      DEFAULT_FILTERS.minAccessibility
     ),
-    maxCompetitorSaturation: numField(
+    maxCrowding: numField(
       f,
-      ['competitorSaturation', 'maxCompetitorSaturation'],
-      DEFAULT_FILTERS.maxCompetitorSaturation
+      ['crowding', 'maxCrowding'],
+      DEFAULT_FILTERS.maxCrowding
     ),
-    minRegulatoryEase: numField(
+    minSafetyAndEntry: numField(
       f,
-      ['regulatoryEase', 'minRegulatoryEase'],
-      DEFAULT_FILTERS.minRegulatoryEase
+      ['safetyAndEntry', 'minSafetyAndEntry'],
+      DEFAULT_FILTERS.minSafetyAndEntry
     ),
   };
 }

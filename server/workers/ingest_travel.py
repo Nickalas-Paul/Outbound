@@ -28,7 +28,7 @@ EVENT_URL = (
 )
 REQUEST_TIMEOUT_SEC = 90
 EXPIRE_DAYS = 90
-AFFECTED_DIMENSIONS = ["regulatoryEase", "marketSizeAndGrowth"]
+AFFECTED_DIMENSIONS = ["safetyAndEntry", "crowding"]
 
 FIPS_TO_ISO3: dict[str, str] = {
     "AF": "AFG", "AL": "ALB", "AG": "DZA", "AQ": "ASM", "AN": "AND",

@@ -94,12 +94,12 @@ const router = Router();
 type Confidence = 'high' | 'medium' | 'low';
 
 interface TviDimensions {
-  marketSizeAndGrowth: number | null;
-  talentDensity: number | null;
-  taxEnvironment: number | null;
-  regulatoryEase: number | null;
-  infrastructure: number | null;
-  competitorSaturation: number | null;
+  tourismInfrastructure: number | null;
+  accessibility: number | null;
+  costIndex: number | null;
+  safetyAndEntry: number | null;
+  travelInfrastructure: number | null;
+  crowding: number | null;
   trajectory: number | null;
 }
 
@@ -608,12 +608,12 @@ router.get('/geojson', optionalAuth, async (req: Request, res: Response) => {
           isoCode: row.iso_code,
           overall,
           overallScore: overall,
-          marketSizeAndGrowth: overallDims.marketSizeAndGrowth ?? null,
-          talentDensity: overallDims.talentDensity ?? null,
-          taxEnvironment: overallDims.taxEnvironment ?? null,
-          regulatoryEase: overallDims.regulatoryEase ?? null,
-          infrastructure: overallDims.infrastructure ?? null,
-          competitorSaturation: overallDims.competitorSaturation ?? null,
+          tourismInfrastructure: overallDims.tourismInfrastructure ?? null,
+          accessibility: overallDims.accessibility ?? null,
+          costIndex: overallDims.costIndex ?? null,
+          safetyAndEntry: overallDims.safetyAndEntry ?? null,
+          travelInfrastructure: overallDims.travelInfrastructure ?? null,
+          crowding: overallDims.crowding ?? null,
           trajectory: overallDims.trajectory ?? null,
           confidence: row.confidence,
           population: row.population != null ? Number(row.population) : null,
@@ -705,28 +705,28 @@ router.post('/filter', optionalAuth, requireFilterAccess, async (req: Request, r
     // When projecting, dimension score filters are applied in memory on projected dims.
     if (!horizon) {
       addNumFilter(
-        filters.minTalentDensity,
-        `(m.dimensions->>'talentDensity')::numeric >= ?`
+        filters.minAccessibility,
+        `(m.dimensions->>'accessibility')::numeric >= ?`
       );
       addNumFilter(
-        filters.maxCompetitorSaturation,
-        `(m.dimensions->>'competitorSaturation')::numeric <= ?`
+        filters.maxCrowding,
+        `(m.dimensions->>'crowding')::numeric <= ?`
       );
       addNumFilter(
-        filters.minRegulatoryEase,
-        `(m.dimensions->>'regulatoryEase')::numeric >= ?`
+        filters.minSafetyAndEntry,
+        `(m.dimensions->>'safetyAndEntry')::numeric >= ?`
       );
       addNumFilter(
-        filters.minInfrastructure,
-        `(m.dimensions->>'infrastructure')::numeric >= ?`
+        filters.minTravelInfrastructure,
+        `(m.dimensions->>'travelInfrastructure')::numeric >= ?`
       );
       addNumFilter(
-        filters.minMarketSizeAndGrowth,
-        `(m.dimensions->>'marketSizeAndGrowth')::numeric >= ?`
+        filters.minTourismInfrastructure,
+        `(m.dimensions->>'tourismInfrastructure')::numeric >= ?`
       );
       addNumFilter(
-        filters.minTaxEnvironment,
-        `(m.dimensions->>'taxEnvironment')::numeric >= ?`
+        filters.minCostIndex,
+        `(m.dimensions->>'costIndex')::numeric >= ?`
       );
       addNumFilter(
         filters.minTrajectory,
@@ -765,13 +765,19 @@ router.post('/filter', optionalAuth, requireFilterAccess, async (req: Request, r
     const sortDir =
       String(sort.direction ?? 'desc').toLowerCase() === 'asc' ? 'ASC' : 'DESC';
     const dimensionSortKeys = new Set([
+      'tourisminfrastructure',
+      'accessibility',
+      'costindex',
+      'safetyandentry',
+      'travelinfrastructure',
+      'crowding',
+      'trajectory',
+      // Legacy GEXIS-era aliases (pre–Phase 1 Step 3)
       'marketsizeandgrowth',
       'talentdensity',
       'taxenvironment',
       'regulatoryease',
-      'infrastructure',
       'competitorsaturation',
-      'trajectory',
     ]);
 
     // Fetch without relying on stored overall for final ranking when vertical weights apply.
@@ -779,13 +785,18 @@ router.post('/filter', optionalAuth, requireFilterAccess, async (req: Request, r
     let orderBy = `g.name ASC`;
     if (sortField !== 'overall' && dimensionSortKeys.has(sortField.replace(/_/g, ''))) {
       const keyMap: Record<string, string> = {
-        marketsizeandgrowth: 'marketSizeAndGrowth',
-        talentdensity: 'talentDensity',
-        taxenvironment: 'taxEnvironment',
-        regulatoryease: 'regulatoryEase',
-        infrastructure: 'infrastructure',
-        competitorsaturation: 'competitorSaturation',
+        tourisminfrastructure: 'tourismInfrastructure',
+        accessibility: 'accessibility',
+        costindex: 'costIndex',
+        safetyandentry: 'safetyAndEntry',
+        travelinfrastructure: 'travelInfrastructure',
+        crowding: 'crowding',
         trajectory: 'trajectory',
+        marketsizeandgrowth: 'tourismInfrastructure',
+        talentdensity: 'accessibility',
+        taxenvironment: 'costIndex',
+        regulatoryease: 'safetyAndEntry',
+        competitorsaturation: 'crowding',
       };
       const dimKey = keyMap[sortField.replace(/_/g, '')];
       orderBy = `(m.dimensions->>'${dimKey}')::numeric ${sortDir} NULLS LAST, g.name ASC`;
@@ -854,12 +865,12 @@ router.post('/filter', optionalAuth, requireFilterAccess, async (req: Request, r
           return v != null && v <= n;
         };
         return (
-          checkMin(filters.minTalentDensity, 'talentDensity') &&
-          checkMax(filters.maxCompetitorSaturation, 'competitorSaturation') &&
-          checkMin(filters.minRegulatoryEase, 'regulatoryEase') &&
-          checkMin(filters.minInfrastructure, 'infrastructure') &&
-          checkMin(filters.minMarketSizeAndGrowth, 'marketSizeAndGrowth') &&
-          checkMin(filters.minTaxEnvironment, 'taxEnvironment') &&
+          checkMin(filters.minAccessibility, 'accessibility') &&
+          checkMax(filters.maxCrowding, 'crowding') &&
+          checkMin(filters.minSafetyAndEntry, 'safetyAndEntry') &&
+          checkMin(filters.minTravelInfrastructure, 'travelInfrastructure') &&
+          checkMin(filters.minTourismInfrastructure, 'tourismInfrastructure') &&
+          checkMin(filters.minCostIndex, 'costIndex') &&
           checkMin(filters.minTrajectory, 'trajectory')
         );
       };

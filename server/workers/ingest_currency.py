@@ -25,7 +25,7 @@ WINDOW_DAYS = 30
 EXPIRE_DAYS = 7
 CV_THRESHOLD = 0.03
 MOVE_THRESHOLD = 0.05
-AFFECTED_DIMENSIONS = ["taxEnvironment", "marketSizeAndGrowth"]
+AFFECTED_DIMENSIONS = ["costIndex"]
 
 CURRENCY_TO_ISO3: dict[str, list[str]] = {
     "EUR": [

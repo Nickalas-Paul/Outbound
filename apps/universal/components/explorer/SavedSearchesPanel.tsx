@@ -65,11 +65,11 @@ export default function SavedSearchesPanel({ filters, onChange }: Props) {
     const next = applySavedSearch(search);
 
     // When gating is on, ignore dimensions the user cannot use.
-    if (!canUseFilter('talentDensity')) {
-      next.minTalentDensity = DEFAULT_FILTERS.minTalentDensity;
+    if (!canUseFilter('accessibility')) {
+      next.minAccessibility = DEFAULT_FILTERS.minAccessibility;
     }
-    if (!canUseFilter('competitorSaturation')) {
-      next.maxCompetitorSaturation = DEFAULT_FILTERS.maxCompetitorSaturation;
+    if (!canUseFilter('crowding')) {
+      next.maxCrowding = DEFAULT_FILTERS.maxCrowding;
     }
     if (!canUseIndustryVertical()) {
       next.industryVertical = DEFAULT_FILTERS.industryVertical;
