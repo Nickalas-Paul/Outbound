@@ -338,7 +338,8 @@ export interface IndustryVertical {
  * Trajectory multipliers (relative to avg of the original six):
  *   tech_saas / telecom → 1.3; manufacturing / energy → 0.7; else → 1.0
  */
-function withTrajectory(
+/** Add trajectory weight = avg(base) * multiplier (rounded to 3 decimals). */
+export function withTrajectory(
   weights: Omit<DimensionWeights, 'trajectory'>,
   trajectoryMult: number
 ): DimensionWeights {
@@ -547,13 +548,15 @@ export function getVerticalWeights(verticalKey: string): DimensionWeights {
   );
 }
 
-/** Weighted overall from stored dimension scores; renormalizes over non-null dims. */
-export function computeWeightedOverall(
+/**
+ * Weighted overall from stored dimension scores using an explicit weight map.
+ * Renormalizes over non-null dimensions (same math as query-time reweighting).
+ */
+export function computeWeightedOverallWithWeights(
   dimensions: Partial<Record<DimensionKey, number | null>> | null | undefined,
-  verticalKey: string = DEFAULT_VERTICAL
+  weights: DimensionWeights
 ): number | null {
   if (!dimensions) return null;
-  const weights = getVerticalWeights(verticalKey);
   let numerator = 0;
   let denominator = 0;
   (Object.keys(weights) as DimensionKey[]).forEach((key) => {
@@ -567,4 +570,16 @@ export function computeWeightedOverall(
   });
   if (denominator <= 0) return null;
   return Math.round((numerator / denominator) * 100) / 100;
+}
+
+/** Weighted overall from stored dimension scores; renormalizes over non-null dims. */
+export function computeWeightedOverall(
+  dimensions: Partial<Record<DimensionKey, number | null>> | null | undefined,
+  verticalKey: string = DEFAULT_VERTICAL
+): number | null {
+  if (!dimensions) return null;
+  return computeWeightedOverallWithWeights(
+    dimensions,
+    getVerticalWeights(verticalKey)
+  );
 }

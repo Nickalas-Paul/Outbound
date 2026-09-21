@@ -195,6 +195,37 @@ def compute_confidence(
     return "low"
 
 
+def compute_overall_score(
+    dimensions: dict[str, float | int | None],
+    vertical_weights: dict[str, float],
+    *,
+    min_dimensions: int | None = None,
+) -> int | None:
+    """
+    Weighted overall from available dimension scores.
+    Missing / zero-weight dimensions are dropped and weights renormalize.
+    Returns None when fewer than min_dimensions scores are available.
+    """
+    threshold = (
+        MIN_DIMENSIONS_FOR_OVERALL if min_dimensions is None else min_dimensions
+    )
+    overall_parts: list[tuple[float, float]] = []
+    for dim_key, score in dimensions.items():
+        if score is None:
+            continue
+        weight = float(vertical_weights.get(dim_key, 0.0))
+        if weight <= 0:
+            continue
+        overall_parts.append((float(score), weight))
+
+    if len(overall_parts) < threshold:
+        return None
+    overall_raw = weighted_average(overall_parts)
+    if overall_raw is None:
+        return None
+    return round_score(overall_raw)
+
+
 def upsert_tvi_score(
     cursor,
     geography_id: str,
@@ -358,24 +389,15 @@ def compute_all() -> None:
                 dimensions_out["trajectory"] = None
 
             # Overall from available dimensions (up to 7)
-            overall_parts: list[tuple[float, float]] = []
-            for dim_key, score in dimensions_out.items():
-                if score is None:
-                    continue
-                weight = float(vertical_weights.get(dim_key, 0.0))
-                if weight <= 0:
-                    continue
-                overall_parts.append((float(score), weight))
-
-            dimensions_scored = len(overall_parts)
+            dimensions_scored = sum(
+                1
+                for dim_key, score in dimensions_out.items()
+                if score is not None
+                and float(vertical_weights.get(dim_key, 0.0)) > 0
+            )
             if dimensions_scored < MIN_DIMENSIONS_FOR_OVERALL:
-                overall_score: int | None = None
                 null_overall += 1
-            else:
-                overall_raw = weighted_average(overall_parts)
-                overall_score = (
-                    round_score(overall_raw) if overall_raw is not None else None
-                )
+            overall_score = compute_overall_score(dimensions_out, vertical_weights)
 
             confidence = compute_confidence(
                 dimensions_scored=dimensions_scored,
