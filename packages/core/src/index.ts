@@ -78,7 +78,11 @@ export * from "./travelerProfiles";
 
 // Market Signals (Layer 2)
 export {
+  SIGNAL_TYPE_KEYS,
+  SIGNAL_TYPE_LABELS,
+  SIGNAL_TYPE_DESCRIPTIONS,
   type MarketSignal,
   type SignalDirection,
   type SignalSummaryMap,
+  type SignalType,
 } from "./signals";

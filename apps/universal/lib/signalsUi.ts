@@ -81,29 +81,48 @@ export function directionLabel(direction: SignalDirection): string {
 /** MaterialCommunityIcons name closest to the Tabler mapping in the spec. */
 export function signalTypeIcon(signalType: string): string {
   switch (signalType) {
-    case 'tariff_risk':
-      return 'receipt';
-    case 'sanctions':
-      return 'cancel';
-    case 'trade_agreement':
-      return 'handshake';
-    case 'regulatory_change':
-      return 'gavel';
     case 'political_instability':
       return 'alert';
-    case 'currency_crisis':
-      return 'currency-usd';
     case 'natural_disaster':
       return 'weather-lightning';
-    case 'economic_policy':
-      return 'bank';
-    case 'labor_unrest':
+    case 'currency_crisis':
+      return 'currency-usd';
+    case 'sanctions':
+      return 'cancel';
+    case 'entry_policy_change':
+      return 'passport';
+    case 'civil_unrest':
       return 'account-group';
     case 'infrastructure_event':
       return 'road-variant';
+    case 'travel_advisory':
+      return 'map-marker-alert';
+    case 'health_emergency':
+      return 'hospital-box';
+    case 'extreme_weather':
+      return 'weather-pouring';
+    case 'airline_disruption':
+      return 'airplane-off';
     default:
       return 'information-outline';
   }
+}
+
+export function signalTypeLabel(signalType: string): string {
+  const labels: Record<string, string> = {
+    political_instability: 'Political Instability',
+    natural_disaster: 'Natural Disaster',
+    currency_crisis: 'Currency Crisis',
+    sanctions: 'Sanctions',
+    entry_policy_change: 'Entry Policy Change',
+    civil_unrest: 'Civil Unrest',
+    infrastructure_event: 'Infrastructure Event',
+    travel_advisory: 'Travel Advisory',
+    health_emergency: 'Health Emergency',
+    extreme_weather: 'Extreme Weather',
+    airline_disruption: 'Airline Disruption',
+  };
+  return labels[signalType] ?? signalType;
 }
 
 export function sourceDisplayLabel(source: string): string {

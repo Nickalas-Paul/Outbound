@@ -21,7 +21,7 @@ from db import get_cursor, load_geography_iso_map
 from notify_signals import trigger_signal_notifications
 
 SOURCE = "state_dept"
-SIGNAL_TYPE = "political_instability"
+SIGNAL_TYPE = "travel_advisory"
 RSS_URL = "https://travel.state.gov/_res/rss/TAsTWs.xml"
 EVENT_URL = (
     "https://travel.state.gov/content/travel/en/traveladvisories/traveladvisories.html"
