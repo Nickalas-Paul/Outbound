@@ -50,7 +50,7 @@ function confidenceColor(c: string | null | undefined): string {
 
 type Props = {
   geographyIdOrIso: string | null;
-  vertical?: string;
+  profile?: string;
   onClose: () => void;
   variant?: 'panel' | 'sheet';
   style?: object;
@@ -58,7 +58,7 @@ type Props = {
 
 export default function GeographyDrillDown({
   geographyIdOrIso,
-  vertical = 'all',
+  profile = 'balanced',
   onClose,
   variant = 'panel',
   style,
@@ -81,7 +81,7 @@ export default function GeographyDrillDown({
     setLoading(true);
     setError(null);
     setSignals([]);
-    void fetchGeographyById(geographyIdOrIso, vertical)
+    void fetchGeographyById(geographyIdOrIso, profile)
       .then((geo) => {
         if (!cancelled) setData(geo);
       })
@@ -101,7 +101,7 @@ export default function GeographyDrillDown({
     return () => {
       cancelled = true;
     };
-  }, [geographyIdOrIso, vertical]);
+  }, [geographyIdOrIso, profile]);
 
   if (!geographyIdOrIso) return null;
 
@@ -274,8 +274,8 @@ export default function GeographyDrillDown({
               onPress={() => {
                 const base = `/explorer/${encodeURIComponent(geoKey)}`;
                 const href =
-                  vertical && vertical !== 'all'
-                    ? `${base}?vertical=${encodeURIComponent(vertical)}`
+                  profile && profile !== 'balanced'
+                    ? `${base}?profile=${encodeURIComponent(profile)}`
                     : base;
                 router.push(href as `/explorer/${string}`);
               }}

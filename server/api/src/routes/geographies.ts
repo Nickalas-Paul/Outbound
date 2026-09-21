@@ -9,12 +9,12 @@ import { Router, Request, Response } from 'express';
 import { pool } from '../config/database';
 import {
   computeWeightedOverall,
-  DEFAULT_VERTICAL,
+  DEFAULT_PROFILE,
   DimensionKey,
   TVI_DIMENSIONS,
   TVI_SCORING_VERSION,
-  resolveVerticalKey,
-  STORED_TVI_VERTICAL,
+  resolveProfileKey,
+  STORED_TVI_PROFILE,
 } from '../config/tvi';
 import { optionalAuth } from '../middleware/optionalAuth';
 import { requireFilterAccess } from '../middleware/requireFilterAccess';
@@ -147,8 +147,8 @@ const GEO_SELECT = `
   m.calculated_at
 `;
 
-function parseVertical(raw: unknown): string {
-  return resolveVerticalKey(raw);
+function parseProfile(raw: unknown): string {
+  return resolveProfileKey(raw);
 }
 
 function parseFields(raw: unknown): Set<string> {
@@ -187,7 +187,7 @@ function buildTvi(
     calculatedAt: row.calculated_at
       ? new Date(row.calculated_at).toISOString()
       : null,
-    vertical: verticalKey || DEFAULT_VERTICAL,
+    profile: verticalKey || DEFAULT_PROFILE,
   };
   if (includeSources) {
     tvi.sources = row.sources ?? [];
@@ -310,11 +310,11 @@ function mapGeography(
   opts: {
     includeGeometry?: boolean;
     includeSources?: boolean;
-    vertical?: string;
+    profile?: string;
     quickFacts?: QuickFactsPayload | null;
   } = {}
 ): Record<string, unknown> {
-  const vertical = resolveVerticalKey(opts.vertical);
+  const vertical = resolveProfileKey(opts.profile);
   const population =
     opts.quickFacts?.population ??
     (row.population != null ? Number(row.population) : null);
@@ -366,10 +366,10 @@ async function metaCounts(): Promise<{ total: number; scored: number }> {
     FROM geographies g
     LEFT JOIN destination_scores m
       ON m.geography_id = g.id
-     AND m.industry_vertical = $1
+     AND m.profile = $1
     WHERE g.region_type = 'country'
     `,
-    [STORED_TVI_VERTICAL]
+    [STORED_TVI_PROFILE]
   );
   return {
     total: Number(result.rows[0]?.total ?? 0),
@@ -380,7 +380,7 @@ async function metaCounts(): Promise<{ total: number; scored: number }> {
 /** GET /api/geographies */
 router.get('/', async (req: Request, res: Response) => {
   try {
-    const vertical = parseVertical(req.query.vertical);
+    const vertical = parseProfile(req.query.profile ?? req.query.vertical);
     const fields = parseFields(req.query.fields);
     const includeGeometry = fields.has('geometry');
     const includeSources = fields.has('sources');
@@ -389,7 +389,7 @@ router.get('/', async (req: Request, res: Response) => {
         ? req.query.region_type.trim()
         : 'country';
 
-    const params: unknown[] = [STORED_TVI_VERTICAL, regionType];
+    const params: unknown[] = [STORED_TVI_PROFILE, regionType];
     const where: string[] = ['g.region_type = $2'];
 
     if (req.query.min_score != null && String(req.query.min_score).length) {
@@ -416,7 +416,7 @@ router.get('/', async (req: Request, res: Response) => {
       FROM geographies g
       LEFT JOIN destination_scores m
         ON m.geography_id = g.id
-       AND m.industry_vertical = $1
+       AND m.profile = $1
       WHERE ${where.join(' AND ')}
       ORDER BY g.name ASC
       `,
@@ -425,14 +425,14 @@ router.get('/', async (req: Request, res: Response) => {
 
     const counts = await metaCounts();
     const data = result.rows.map((row) =>
-      mapGeography(row, { includeGeometry, includeSources, vertical })
+      mapGeography(row, { includeGeometry, includeSources, profile: vertical })
     );
 
     res.json(
       apiResponse(data, {
         total: counts.total,
         scored: counts.scored,
-        vertical,
+        profile: vertical,
         dataVersion: TVI_SCORING_VERSION,
         returned: data.length,
       })
@@ -446,7 +446,7 @@ router.get('/', async (req: Request, res: Response) => {
 /** GET /api/geographies/search — spatial bbox or point+radius */
 router.get('/search', async (req: Request, res: Response) => {
   try {
-    const vertical = parseVertical(req.query.vertical);
+    const vertical = parseProfile(req.query.profile ?? req.query.vertical);
     const hasBbox = typeof req.query.bbox === 'string' && req.query.bbox.trim();
     const hasPoint = typeof req.query.point === 'string' && req.query.point.trim();
     const hasRadius = req.query.radius != null && String(req.query.radius).length > 0;
@@ -464,7 +464,7 @@ router.get('/search', async (req: Request, res: Response) => {
       return;
     }
 
-    const params: unknown[] = [STORED_TVI_VERTICAL];
+    const params: unknown[] = [STORED_TVI_PROFILE];
     let spatialClause = '';
 
     if (hasBbox) {
@@ -509,7 +509,7 @@ router.get('/search', async (req: Request, res: Response) => {
       FROM geographies g
       LEFT JOIN destination_scores m
         ON m.geography_id = g.id
-       AND m.industry_vertical = $1
+       AND m.profile = $1
       WHERE g.region_type = 'country'
         ${spatialClause}
       ORDER BY g.name ASC
@@ -517,11 +517,11 @@ router.get('/search', async (req: Request, res: Response) => {
       params
     );
 
-    const data = result.rows.map((row) => mapGeography(row, { vertical }));
+    const data = result.rows.map((row) => mapGeography(row, { profile: vertical }));
     res.json(
       apiResponse(data, {
         total: data.length,
-        vertical,
+        profile: vertical,
         dataVersion: TVI_SCORING_VERSION,
       })
     );
@@ -534,7 +534,7 @@ router.get('/search', async (req: Request, res: Response) => {
 /** GET /api/geographies/geojson — FeatureCollection for Mapbox */
 router.get('/geojson', optionalAuth, async (req: Request, res: Response) => {
   try {
-    const vertical = parseVertical(req.query.vertical);
+    const vertical = parseProfile(req.query.profile ?? req.query.vertical);
     let horizonQuery = req.query.horizon;
     if (isGatingEnabled()) {
       const tier = req.user?.subscriptionTier ?? 'free';
@@ -583,12 +583,12 @@ router.get('/geojson', optionalAuth, async (req: Request, res: Response) => {
       FROM geographies g
       LEFT JOIN destination_scores m
         ON m.geography_id = g.id
-       AND m.industry_vertical = $1
+       AND m.profile = $1
       WHERE g.region_type = 'country'
         AND g.geometry IS NOT NULL
       ORDER BY g.name ASC
       `,
-      [STORED_TVI_VERTICAL]
+      [STORED_TVI_PROFILE]
     );
 
     const projectedByGeo = horizon ? await loadProjectedByGeo(horizon) : null;
@@ -617,7 +617,7 @@ router.get('/geojson', optionalAuth, async (req: Request, res: Response) => {
           trajectory: overallDims.trajectory ?? null,
           confidence: row.confidence,
           population: row.population != null ? Number(row.population) : null,
-          vertical,
+          profile: vertical,
           horizon: horizon ?? null,
         },
         geometry: row.geometry_geojson ? JSON.parse(row.geometry_geojson) : null,
@@ -629,7 +629,7 @@ router.get('/geojson', optionalAuth, async (req: Request, res: Response) => {
       type: 'FeatureCollection',
       features,
       meta: {
-        vertical,
+        profile: vertical,
         dataVersion: TVI_SCORING_VERSION,
         horizon: horizon ?? null,
       },
@@ -650,7 +650,7 @@ router.get('/geojson', optionalAuth, async (req: Request, res: Response) => {
 router.post('/filter', optionalAuth, requireFilterAccess, async (req: Request, res: Response) => {
   try {
     const body = req.body ?? {};
-    const vertical = parseVertical(body.vertical);
+    const vertical = parseProfile(body.profile ?? body.vertical);
     const horizon = parseHorizon(body.horizon);
     if (body.horizon !== undefined && body.horizon !== null && body.horizon !== '' && horizon == null) {
       res.status(400).json(apiError('horizon must be 2yr or 5yr'));
@@ -666,6 +666,7 @@ router.post('/filter', optionalAuth, requireFilterAccess, async (req: Request, r
       if (
         key === 'filters' ||
         key === 'vertical' ||
+        key === 'profile' ||
         key === 'sort' ||
         key === 'limit' ||
         key === 'horizon'
@@ -687,7 +688,7 @@ router.post('/filter', optionalAuth, requireFilterAccess, async (req: Request, r
     if (Number.isNaN(limit) || limit < 1) limit = 50;
     if (limit > 200) limit = 200;
 
-    const params: unknown[] = [STORED_TVI_VERTICAL];
+    const params: unknown[] = [STORED_TVI_PROFILE];
     const where: string[] = [`g.region_type = 'country'`];
 
     const addNumFilter = (value: unknown, sql: string) => {
@@ -811,7 +812,7 @@ router.post('/filter', optionalAuth, requireFilterAccess, async (req: Request, r
       FROM geographies g
       LEFT JOIN destination_scores m
         ON m.geography_id = g.id
-       AND m.industry_vertical = $1
+       AND m.profile = $1
       WHERE ${where.join(' AND ')}
       ORDER BY ${orderBy}
       LIMIT $${params.length}
@@ -822,7 +823,7 @@ router.post('/filter', optionalAuth, requireFilterAccess, async (req: Request, r
     const projectedByGeo = horizon ? await loadProjectedByGeo(horizon) : null;
 
     let data = result.rows.map((row) => {
-      const mapped = mapGeography(row, { vertical });
+      const mapped = mapGeography(row, { profile: vertical });
       if (!horizon || !mapped.tvi) return mapped;
       const dims = applyProjectedDimensions(
         (mapped.tvi as { dimensions?: TviDimensions | null }).dimensions,
@@ -893,7 +894,7 @@ router.post('/filter', optionalAuth, requireFilterAccess, async (req: Request, r
     res.json(
       apiResponse(data, {
         total: data.length,
-        vertical,
+        profile: vertical,
         horizon: horizon ?? null,
         dataVersion: TVI_SCORING_VERSION,
         limit,
@@ -1039,7 +1040,7 @@ router.get('/:id/trends', optionalAuth, requireTier('pro'), async (req: Request,
 router.get('/:id', async (req: Request, res: Response) => {
   try {
     const id = String(req.params.id ?? '').trim();
-    const vertical = parseVertical(req.query.vertical);
+    const vertical = parseProfile(req.query.profile ?? req.query.vertical);
     const isIso = /^[A-Za-z]{3}$/.test(id);
 
     const result = await pool.query<DbGeoRow>(
@@ -1051,11 +1052,11 @@ router.get('/:id', async (req: Request, res: Response) => {
       FROM geographies g
       LEFT JOIN destination_scores m
         ON m.geography_id = g.id
-       AND m.industry_vertical = $1
+       AND m.profile = $1
       WHERE ${isIso ? 'upper(g.iso_code) = upper($2)' : 'g.id = $2::uuid'}
       LIMIT 1
       `,
-      [STORED_TVI_VERTICAL, isIso ? id.toUpperCase() : id]
+      [STORED_TVI_PROFILE, isIso ? id.toUpperCase() : id]
     );
 
     if (result.rows.length === 0) {
@@ -1071,7 +1072,7 @@ router.get('/:id', async (req: Request, res: Response) => {
         mapGeography(row, {
           includeGeometry: true,
           includeSources: true,
-          vertical,
+          profile: vertical,
           quickFacts,
         })
       )

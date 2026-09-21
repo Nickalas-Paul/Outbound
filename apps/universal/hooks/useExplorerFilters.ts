@@ -34,7 +34,7 @@ export function useExplorerFilters() {
       const hasActive = Object.keys(apiFilters).length > 0;
       const result = await filterGeographies(apiFilters, {
         limit: 200,
-        vertical: next.industryVertical,
+        profile: next.profile,
         horizon: next.horizon === 'current' ? undefined : next.horizon,
       });
       setMatched(result.data);
@@ -75,7 +75,8 @@ export function useExplorerFilters() {
     }
     const query = filtersToQueryRecord(filters);
     router.setParams({
-      vertical: query.vertical ?? undefined,
+      profile: query.profile ?? undefined,
+      vertical: undefined,
       horizon: query.horizon ?? undefined,
       minPopulation: query.minPopulation ?? undefined,
       maxCorpTaxRate: query.maxCorpTaxRate ?? undefined,

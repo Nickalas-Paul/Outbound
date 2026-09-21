@@ -23,7 +23,7 @@ export type TierFeature =
   | 'agentIntroductions'
   | 'trendAnalysis'
   | 'timeHorizon'
-  | 'industryVertical';
+  | 'travelerProfile';
 
 export const FREE_FILTER_KEYS: readonly FilterKey[] = [
   'population',
@@ -48,8 +48,8 @@ export const ALL_HORIZONS: readonly TimeHorizon[] = [
 export type TierFeatureMap = {
   filterKeys: readonly FilterKey[];
   horizons: readonly TimeHorizon[];
-  /** When false, industry vertical is locked to All Industries. */
-  industryVertical: boolean;
+  /** When false, traveler profile is locked to Balanced. */
+  travelerProfile: boolean;
   exports: boolean;
   savedSearches: boolean;
   agentIntroductions: boolean;
@@ -63,7 +63,7 @@ export const TIER_FEATURES: Record<SubscriptionTier, TierFeatureMap> = {
   free: {
     filterKeys: FREE_FILTER_KEYS,
     horizons: ['current'],
-    industryVertical: false,
+    travelerProfile: false,
     exports: false,
     savedSearches: false,
     agentIntroductions: false,
@@ -73,7 +73,7 @@ export const TIER_FEATURES: Record<SubscriptionTier, TierFeatureMap> = {
   pro: {
     filterKeys: ALL_FILTER_KEYS,
     horizons: ALL_HORIZONS,
-    industryVertical: true,
+    travelerProfile: true,
     exports: true,
     savedSearches: true,
     agentIntroductions: false,
@@ -83,7 +83,7 @@ export const TIER_FEATURES: Record<SubscriptionTier, TierFeatureMap> = {
   marketplace: {
     filterKeys: ALL_FILTER_KEYS,
     horizons: ALL_HORIZONS,
-    industryVertical: true,
+    travelerProfile: true,
     exports: true,
     savedSearches: true,
     agentIntroductions: true,

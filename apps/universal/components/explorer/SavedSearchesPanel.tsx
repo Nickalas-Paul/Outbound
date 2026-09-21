@@ -22,7 +22,7 @@ type Props = {
 };
 
 export default function SavedSearchesPanel({ filters, onChange }: Props) {
-  const { canSaveSearches, canUseFilter, canUseHorizon, canUseIndustryVertical } =
+  const { canSaveSearches, canUseFilter, canUseHorizon, canUseTravelerProfile } =
     useTierAccess();
   const allowed = canSaveSearches();
   const {
@@ -71,8 +71,8 @@ export default function SavedSearchesPanel({ filters, onChange }: Props) {
     if (!canUseFilter('crowding')) {
       next.maxCrowding = DEFAULT_FILTERS.maxCrowding;
     }
-    if (!canUseIndustryVertical()) {
-      next.industryVertical = DEFAULT_FILTERS.industryVertical;
+    if (!canUseTravelerProfile()) {
+      next.profile = DEFAULT_FILTERS.profile;
     }
     if (!canUseHorizon(next.horizon)) {
       next.horizon = DEFAULT_FILTERS.horizon;

@@ -73,8 +73,8 @@ export {
 // Agents
 export * from "./agents";
 
-// Industry Verticals
-export * from "./verticals";
+// Traveler Profiles (formerly industry verticals)
+export * from "./travelerProfiles";
 
 // Market Signals (Layer 2)
 export {

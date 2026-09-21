@@ -107,26 +107,26 @@ Six indicators (broadband, mobile, electricity, air transport, plus internet use
 
 ### Trajectory (composite)
 
-Trajectory is computed from `trend_scores` after the six base dimensions are scored. It summarizes trend direction and annualized rate across base dimensions into a 0–100 momentum score. It does not replace any base dimension; it is an additional input to the overall TVI (and is re-weighted per industry vertical).
+Trajectory is computed from `trend_scores` after the six base dimensions are scored. It summarizes trend direction and annualized rate across base dimensions into a 0–100 momentum score. It does not replace any base dimension; it is an additional input to the overall TVI (and is re-weighted per traveler profile).
 
 ## How the overall score is computed
 
-For the default vertical `all` / `all_industries`, the seven dimensions (six base + trajectory) are combined with near-equal base weights and trajectory at 1.0× the average base weight.
+For the default profile `balanced`, the seven dimensions (six base + trajectory) are combined with near-equal base weights and trajectory at 1.0× the average base weight.
 
 1. Keep only dimensions with a real score.
 2. Redistribute weights among available dimensions.
 3. Overall = weighted average, rounded to the nearest integer (0–100).
 4. If fewer than **three** dimensions have scores → overall is `null` (insufficient data).
 
-### Industry verticals
+### Traveler profiles
 
-**Active.** Eleven verticals apply different weight profiles at query time (API / explorer filters). Examples:
+**Active.** Seven traveler profiles apply different weight maps at query time (API / explorer filters). Examples:
 
-- **Technology & SaaS / Telecommunications:** trajectory weighted **1.3×**
-- **Manufacturing / Energy & Renewables:** trajectory weighted **0.7×**
-- Other verticals (financial, healthcare, ecommerce, professional, logistics, consumer goods, all): trajectory **1.0×**
+- **Solo Backpacker / Budget:** trajectory weighted **1.3×**
+- **Family:** trajectory weighted **0.7×**
+- Other profiles (balanced, couple, group, luxury): trajectory **1.0×**
 
-Base dimension emphasis also shifts (e.g. talent-heavy for tech/professional, travelInfrastructure-heavy for logistics).
+Base dimension emphasis also shifts (e.g. cost-heavy for budget/solo, safety-heavy for family/couple).
 
 ## Confidence levels
 

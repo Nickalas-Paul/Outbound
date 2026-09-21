@@ -38,10 +38,10 @@ ORIGINAL IMPLEMENTATION (preserved):
 import {
   AGENT_CATEGORY_KEYS,
   AGENT_CATEGORY_LABELS,
-  AGENT_SELECTABLE_VERTICALS,
-  INDUSTRY_VERTICAL_LABELS,
+  AGENT_SELECTABLE_PROFILES,
+  TRAVELER_PROFILE_LABELS,
   type AgentCategory,
-  type IndustryVerticalKey,
+  type TravelerProfileKey,
 } from '@outbound/core';
 import { Link, router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -348,16 +348,16 @@ export default function MarketplaceScreen() {
             testIDPrefix="industry"
             valueLabel={
               filters.vertical
-                ? INDUSTRY_VERTICAL_LABELS[
-                    filters.vertical as IndustryVerticalKey
+                ? TRAVELER_PROFILE_LABELS[
+                    filters.vertical as TravelerProfileKey
                   ] ?? filters.vertical
                 : 'All Industries'
             }
             options={[
               { key: '', label: 'All Industries' },
-              ...AGENT_SELECTABLE_VERTICALS.map((key) => ({
+              ...AGENT_SELECTABLE_PROFILES.map((key) => ({
                 key,
-                label: INDUSTRY_VERTICAL_LABELS[key],
+                label: TRAVELER_PROFILE_LABELS[key],
               })),
             ]}
             onSelect={setVertical}

@@ -38,14 +38,14 @@ ORIGINAL IMPLEMENTATION (preserved):
 import {
   AGENT_CATEGORY_KEYS,
   AGENT_CATEGORY_LABELS,
-  AGENT_SELECTABLE_VERTICALS,
-  INDUSTRY_VERTICAL_LABELS,
+  AGENT_SELECTABLE_PROFILES,
+  TRAVELER_PROFILE_LABELS,
   RESPONSE_TIME_KEYS,
   RESPONSE_TIME_LABELS,
   getAgentCategoryLabel,
   type Agent,
   type AgentCategory,
-  type IndustryVerticalKey,
+  type TravelerProfileKey,
   type ResponseTime,
 } from '@outbound/core';
 import { Link, router } from 'expo-router';
@@ -485,9 +485,9 @@ export default function AgentOnboardScreen() {
               </>
             ) : null}
 
-            <Text style={styles.fieldLabel}>Industry verticals</Text>
+            <Text style={styles.fieldLabel}>Traveler profiles</Text>
             <View style={styles.chipRow}>
-              {AGENT_SELECTABLE_VERTICALS.map((key) => {
+              {AGENT_SELECTABLE_PROFILES.map((key) => {
                 const active = form.industryVerticals.includes(key);
                 return (
                   <Pressable
@@ -503,8 +503,8 @@ export default function AgentOnboardScreen() {
                       ]}
                     >
                       {
-                        INDUSTRY_VERTICAL_LABELS[
-                          key as Exclude<IndustryVerticalKey, 'all'>
+                        TRAVELER_PROFILE_LABELS[
+                          key as Exclude<TravelerProfileKey, 'balanced'>
                         ]
                       }
                     </Text>
@@ -637,8 +637,8 @@ export default function AgentOnboardScreen() {
                     ? form.industryVerticals
                         .map(
                           (k) =>
-                            INDUSTRY_VERTICAL_LABELS[
-                              k as IndustryVerticalKey
+                            TRAVELER_PROFILE_LABELS[
+                              k as TravelerProfileKey
                             ] ?? k
                         )
                         .join(', ')

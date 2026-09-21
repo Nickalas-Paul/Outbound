@@ -25,7 +25,7 @@ export type TierAccess = {
   canExport: () => boolean;
   canSaveSearches: () => boolean;
   canAccessAgentIntros: () => boolean;
-  canUseIndustryVertical: () => boolean;
+  canUseTravelerProfile: () => boolean;
   getAvailableFilters: () => FilterKey[];
 };
 
@@ -47,8 +47,8 @@ export function useTierAccess(): TierAccess {
     canSaveSearches: () => canAccessFeature(currentTier, 'savedSearches'),
     canAccessAgentIntros: () =>
       canAccessFeature(currentTier, 'agentIntroductions'),
-    canUseIndustryVertical: () =>
-      canAccessFeature(currentTier, 'industryVertical'),
+    canUseTravelerProfile: () =>
+      canAccessFeature(currentTier, 'travelerProfile'),
     getAvailableFilters: () => coreGetAvailableFilters(currentTier),
   };
 }

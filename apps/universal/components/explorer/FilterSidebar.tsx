@@ -17,9 +17,9 @@ import {
   type ExplorerFilterState,
   type TimeHorizon,
 } from '@/lib/explorerFilters';
-import { DEFAULT_INDUSTRY_VERTICAL } from '@/lib/industryVerticals';
+import { DEFAULT_TRAVELER_PROFILE } from '@/lib/travelerProfiles';
 
-import IndustryVerticalSelect from './IndustryVerticalSelect';
+import TravelerProfileSelect from './TravelerProfileSelect';
 import SavedSearchesPanel from './SavedSearchesPanel';
 
 type Props = {
@@ -151,13 +151,13 @@ export default function FilterSidebar({ filters, onChange, onReset, style }: Pro
   const {
     canUseFilter,
     canUseHorizon,
-    canUseIndustryVertical,
+    canUseTravelerProfile,
   } = useTierAccess();
   const [promptKey, setPromptKey] = useState<string | null>(null);
 
   const talentLocked = !canUseFilter('accessibility');
   const competitorLocked = !canUseFilter('crowding');
-  const industryLocked = !canUseIndustryVertical();
+  const profileLocked = !canUseTravelerProfile();
 
   const showPrompt = (key: string) => {
     setPromptKey(key);
@@ -174,26 +174,26 @@ export default function FilterSidebar({ filters, onChange, onReset, style }: Pro
 
       <View style={StyleSheet.flatten([styles.row, styles.verticalRow])}>
         <Text style={styles.rowLabel}>
-          {industryLocked ? 'Industry Vertical 🔒' : 'Industry Vertical'}
+          {profileLocked ? 'Traveler Profile 🔒' : 'Traveler Profile'}
         </Text>
-        {industryLocked ? (
+        {profileLocked ? (
           <Pressable
             style={styles.lockedBlock}
-            onPress={() => showPrompt('industry')}
+            onPress={() => showPrompt('profile')}
           >
-            <IndustryVerticalSelect
-              value={DEFAULT_INDUSTRY_VERTICAL}
+            <TravelerProfileSelect
+              value={DEFAULT_TRAVELER_PROFILE}
               onChange={() => undefined}
               locked
             />
-            {promptKey === 'industry' ? (
+            {promptKey === 'profile' ? (
               <Text style={styles.upgradePrompt}>{UPGRADE_PROMPT}</Text>
             ) : null}
           </Pressable>
         ) : (
-          <IndustryVerticalSelect
-            value={filters.industryVertical}
-            onChange={(industryVertical) => onChange({ industryVertical })}
+          <TravelerProfileSelect
+            value={filters.profile}
+            onChange={(profile) => onChange({ profile })}
           />
         )}
       </View>

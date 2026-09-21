@@ -1,9 +1,9 @@
 import {
-  INDUSTRY_VERTICAL_LABELS,
+  TRAVELER_PROFILE_LABELS,
   RESPONSE_TIME_LABELS,
   getAgentCategoryLabel,
   type AgentCard as AgentCardType,
-  type IndustryVerticalKey,
+  type TravelerProfileKey,
   type ResponseTime,
 } from '@outbound/core';
 import { Link } from 'expo-router';
@@ -110,7 +110,7 @@ export default function AgentCard({
           {visibleVerticals.map((key) => (
             <View key={key} style={styles.verticalChip}>
               <Text style={styles.verticalChipText}>
-                {INDUSTRY_VERTICAL_LABELS[key as IndustryVerticalKey] ?? key}
+                {TRAVELER_PROFILE_LABELS[key as TravelerProfileKey] ?? key}
               </Text>
             </View>
           ))}

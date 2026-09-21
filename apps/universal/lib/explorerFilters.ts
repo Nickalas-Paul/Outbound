@@ -1,10 +1,10 @@
 import type { GeographyFilters } from '@/services/geographies';
-import { DEFAULT_INDUSTRY_VERTICAL } from '@/lib/industryVerticals';
+import { DEFAULT_TRAVELER_PROFILE } from '@/lib/travelerProfiles';
 
 export type TimeHorizon = 'current' | '2yr' | '5yr';
 
 export type ExplorerFilterState = {
-  industryVertical: string;
+  profile: string;
   horizon: TimeHorizon;
   minPopulation: number;
   maxCorpTaxRate: number;
@@ -14,7 +14,7 @@ export type ExplorerFilterState = {
 };
 
 export const DEFAULT_FILTERS: ExplorerFilterState = {
-  industryVertical: DEFAULT_INDUSTRY_VERTICAL,
+  profile: DEFAULT_TRAVELER_PROFILE,
   horizon: 'current',
   minPopulation: 0,
   maxCorpTaxRate: 50,
@@ -71,7 +71,7 @@ export function toApiFilters(state: ExplorerFilterState): GeographyFilters {
 
 export function filtersEqual(a: ExplorerFilterState, b: ExplorerFilterState): boolean {
   return (
-    a.industryVertical === b.industryVertical &&
+    a.profile === b.profile &&
     a.horizon === b.horizon &&
     a.minPopulation === b.minPopulation &&
     a.maxCorpTaxRate === b.maxCorpTaxRate &&
@@ -79,6 +79,13 @@ export function filtersEqual(a: ExplorerFilterState, b: ExplorerFilterState): bo
     a.maxCrowding === b.maxCrowding &&
     a.minSafetyAndEntry === b.minSafetyAndEntry
   );
+}
+
+function normalizeProfileKey(raw: string | undefined): string {
+  if (!raw || raw === 'all_industries' || raw === 'all') {
+    return DEFAULT_FILTERS.profile;
+  }
+  return raw;
 }
 
 export function parseFiltersFromParams(
@@ -100,10 +107,7 @@ export function parseFiltersFromParams(
     horizonRaw === '2yr' || horizonRaw === '5yr' ? horizonRaw : 'current';
 
   return {
-    industryVertical:
-      one('vertical') === 'all_industries'
-        ? DEFAULT_FILTERS.industryVertical
-        : one('vertical') || DEFAULT_FILTERS.industryVertical,
+    profile: normalizeProfileKey(one('profile') ?? one('vertical')),
     horizon,
     minPopulation: num('minPopulation', DEFAULT_FILTERS.minPopulation),
     maxCorpTaxRate: num('maxCorpTaxRate', DEFAULT_FILTERS.maxCorpTaxRate),
@@ -120,8 +124,8 @@ export function filtersToQueryRecord(
   state: ExplorerFilterState
 ): Record<string, string> {
   const out: Record<string, string> = {};
-  if (state.industryVertical !== DEFAULT_FILTERS.industryVertical) {
-    out.vertical = state.industryVertical;
+  if (state.profile !== DEFAULT_FILTERS.profile) {
+    out.profile = state.profile;
   }
   if (state.horizon !== DEFAULT_FILTERS.horizon) {
     out.horizon = state.horizon;
@@ -151,13 +155,15 @@ export type SavedFilterPayload = {
   safetyAndEntry?: number;
   accessibility?: number;
   crowding?: number;
+  profile?: string;
+  /** @deprecated use profile */
   vertical?: string;
   horizon?: TimeHorizon | string;
-  // Also accept explorer-native keys for forward compatibility.
   minPopulation?: number;
   minAccessibility?: number;
   maxCrowding?: number;
   minSafetyAndEntry?: number;
+  /** @deprecated use profile */
   industryVertical?: string;
 };
 
@@ -170,7 +176,7 @@ export function stateToSavedFilters(
     safetyAndEntry: state.minSafetyAndEntry,
     accessibility: state.minAccessibility,
     crowding: state.maxCrowding,
-    vertical: state.industryVertical,
+    profile: state.profile,
     horizon: state.horizon,
   };
 }
@@ -195,13 +201,15 @@ export function savedFiltersToState(
   const horizon: TimeHorizon =
     horizonRaw === '2yr' || horizonRaw === '5yr' ? horizonRaw : 'current';
 
-  const vertical =
-    (typeof f.vertical === 'string' && f.vertical) ||
-    (typeof f.industryVertical === 'string' && f.industryVertical) ||
-    DEFAULT_FILTERS.industryVertical;
+  const profile = normalizeProfileKey(
+    (typeof f.profile === 'string' && f.profile) ||
+      (typeof f.vertical === 'string' && f.vertical) ||
+      (typeof f.industryVertical === 'string' && f.industryVertical) ||
+      undefined
+  );
 
   return {
-    industryVertical: vertical === 'all_industries' ? DEFAULT_INDUSTRY_VERTICAL : vertical,
+    profile,
     horizon,
     minPopulation: numField(f, ['population', 'minPopulation'], DEFAULT_FILTERS.minPopulation),
     maxCorpTaxRate: numField(

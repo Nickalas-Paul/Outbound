@@ -1,8 +1,8 @@
 """
 TVI scoring engine.
 
-Reads raw_indicators + scoring_config, writes destination_scores for industry_vertical
-'all_industries'. Deterministic: same inputs produce the same scores.
+Reads raw_indicators + scoring_config, writes destination_scores for profile
+'balanced'. Deterministic: same inputs produce the same scores.
 
 Dependency order:
     1. python compute_trends.py   # writes trend_scores used for Trajectory
@@ -31,9 +31,9 @@ from db import get_cursor
 from scoring_config import (
     BASE_DIMENSION_KEYS,
     DIMENSIONS,
-    INDUSTRY_VERTICAL,
     MIN_DIMENSIONS_FOR_OVERALL,
-    VERTICAL_WEIGHTS,
+    PROFILE_WEIGHTS,
+    STORED_PROFILE,
 )
 
 
@@ -239,7 +239,7 @@ def upsert_tvi_score(
         """
         INSERT INTO destination_scores (
             geography_id,
-            industry_vertical,
+            profile,
             overall_score,
             dimensions,
             confidence,
@@ -249,7 +249,7 @@ def upsert_tvi_score(
         )
         VALUES (
             %(geography_id)s,
-            %(industry_vertical)s,
+            %(profile)s,
             %(overall_score)s,
             %(dimensions)s,
             %(confidence)s,
@@ -257,7 +257,7 @@ def upsert_tvi_score(
             %(sources)s,
             NOW()
         )
-        ON CONFLICT (geography_id, industry_vertical)
+        ON CONFLICT (geography_id, profile)
         DO UPDATE SET
             overall_score = EXCLUDED.overall_score,
             dimensions = EXCLUDED.dimensions,
@@ -268,7 +268,7 @@ def upsert_tvi_score(
         """,
         {
             "geography_id": geography_id,
-            "industry_vertical": INDUSTRY_VERTICAL,
+            "profile": STORED_PROFILE,
             "overall_score": overall_score,
             "dimensions": Json(dimensions),
             "confidence": confidence,
@@ -279,7 +279,7 @@ def upsert_tvi_score(
 
 
 def compute_all() -> None:
-    vertical_weights = VERTICAL_WEIGHTS[INDUSTRY_VERTICAL]
+    vertical_weights = PROFILE_WEIGHTS[STORED_PROFILE]
     total_configured_indicators = sum(
         len(dim["indicators"])
         for dim in DIMENSIONS.values()
@@ -297,9 +297,9 @@ def compute_all() -> None:
         )
         geography_ids = [row[0] for row in cursor.fetchall()]
         logger.info(
-            "Scoring %s countries for vertical=%s (7-dimension model)",
+            "Scoring %s countries for profile=%s (7-dimension model)",
             len(geography_ids),
-            INDUSTRY_VERTICAL,
+            STORED_PROFILE,
         )
 
         trend_rates = fetch_trend_rates(cursor)

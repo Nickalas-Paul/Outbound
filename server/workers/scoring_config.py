@@ -265,171 +265,114 @@ def _with_trajectory(weights: dict[str, float], trajectory_mult: float) -> dict[
     return out
 
 
-# Industry vertical weight profiles (API applies these on query; compute_tvi stores equal-weight).
-# COUPLING: keep in sync with server/api/src/config/tvi.ts INDUSTRY_VERTICALS.
-# Trajectory multipliers: tech_saas/telecom 1.3, manufacturing/energy 0.7, else 1.0.
-# Profile key renaming is Phase 1 Step 4 — keep GEXIS-era vertical keys for now.
-INDUSTRY_VERTICALS = {
-    "all": {
-        "label": "All Industries",
+# Traveler profile weight maps (API applies these on query; compute_tvi stores balanced).
+# COUPLING: keep in sync with server/api/src/config/tvi.ts TRAVELER_PROFILES.
+# Trajectory weight = avg(base) * multiplier (rounded to 3 decimals).
+TRAVELER_PROFILES = {
+    "balanced": {
+        "label": "Balanced",
         "weights": _with_trajectory(
             {
-                "tourismInfrastructure": 0.167,
-                "accessibility": 0.167,
-                "costIndex": 0.167,
-                "safetyAndEntry": 0.167,
-                "travelInfrastructure": 0.167,
-                "crowding": 0.167,
+                "tourismInfrastructure": 0.17,
+                "accessibility": 0.17,
+                "costIndex": 0.17,
+                "safetyAndEntry": 0.17,
+                "travelInfrastructure": 0.17,
+                "crowding": 0.15,
             },
             1.0,
         ),
     },
-    "tech_saas": {
-        "label": "Technology & SaaS",
+    "solo_backpacker": {
+        "label": "Solo Backpacker",
         "weights": _with_trajectory(
             {
-                "tourismInfrastructure": 0.15,
-                "accessibility": 0.25,
-                "costIndex": 0.15,
-                "safetyAndEntry": 0.10,
-                "travelInfrastructure": 0.20,
-                "crowding": 0.15,
+                "tourismInfrastructure": 0.10,
+                "accessibility": 0.20,
+                "costIndex": 0.30,
+                "safetyAndEntry": 0.20,
+                "travelInfrastructure": 0.10,
+                "crowding": 0.10,
             },
             1.3,
         ),
     },
-    "financial": {
-        "label": "Financial Services",
+    "couple": {
+        "label": "Couple / Honeymoon",
         "weights": _with_trajectory(
             {
-                "tourismInfrastructure": 0.20,
+                "tourismInfrastructure": 0.15,
                 "accessibility": 0.15,
-                "costIndex": 0.20,
+                "costIndex": 0.15,
                 "safetyAndEntry": 0.25,
-                "travelInfrastructure": 0.10,
+                "travelInfrastructure": 0.20,
                 "crowding": 0.10,
             },
             1.0,
         ),
     },
-    "manufacturing": {
-        "label": "Manufacturing",
+    "family": {
+        "label": "Family",
         "weights": _with_trajectory(
             {
-                "tourismInfrastructure": 0.15,
-                "accessibility": 0.10,
+                "tourismInfrastructure": 0.10,
+                "accessibility": 0.15,
                 "costIndex": 0.15,
-                "safetyAndEntry": 0.20,
-                "travelInfrastructure": 0.25,
-                "crowding": 0.15,
+                "safetyAndEntry": 0.30,
+                "travelInfrastructure": 0.20,
+                "crowding": 0.10,
             },
             0.7,
         ),
     },
-    "healthcare": {
-        "label": "Healthcare & Life Sciences",
+    "group": {
+        "label": "Group / Tour",
         "weights": _with_trajectory(
             {
                 "tourismInfrastructure": 0.20,
-                "accessibility": 0.20,
-                "costIndex": 0.10,
-                "safetyAndEntry": 0.25,
+                "accessibility": 0.25,
+                "costIndex": 0.15,
+                "safetyAndEntry": 0.15,
                 "travelInfrastructure": 0.15,
                 "crowding": 0.10,
             },
             1.0,
         ),
     },
-    "ecommerce": {
-        "label": "E-Commerce & Retail",
+    "luxury": {
+        "label": "Luxury",
         "weights": _with_trajectory(
             {
-                "tourismInfrastructure": 0.25,
+                "tourismInfrastructure": 0.20,
                 "accessibility": 0.10,
-                "costIndex": 0.15,
-                "safetyAndEntry": 0.10,
-                "travelInfrastructure": 0.25,
+                "costIndex": 0.05,
+                "safetyAndEntry": 0.20,
+                "travelInfrastructure": 0.30,
                 "crowding": 0.15,
             },
             1.0,
         ),
     },
-    "energy": {
-        "label": "Energy & Renewables",
+    "budget": {
+        "label": "Budget",
         "weights": _with_trajectory(
             {
-                "tourismInfrastructure": 0.15,
-                "accessibility": 0.10,
-                "costIndex": 0.15,
-                "safetyAndEntry": 0.25,
-                "travelInfrastructure": 0.25,
-                "crowding": 0.10,
-            },
-            0.7,
-        ),
-    },
-    "professional": {
-        "label": "Professional Services",
-        "weights": _with_trajectory(
-            {
-                "tourismInfrastructure": 0.15,
-                "accessibility": 0.30,
-                "costIndex": 0.15,
+                "tourismInfrastructure": 0.10,
+                "accessibility": 0.15,
+                "costIndex": 0.35,
                 "safetyAndEntry": 0.15,
                 "travelInfrastructure": 0.10,
                 "crowding": 0.15,
             },
-            1.0,
-        ),
-    },
-    "logistics": {
-        "label": "Logistics & Supply Chain",
-        "weights": _with_trajectory(
-            {
-                "tourismInfrastructure": 0.20,
-                "accessibility": 0.05,
-                "costIndex": 0.15,
-                "safetyAndEntry": 0.15,
-                "travelInfrastructure": 0.35,
-                "crowding": 0.10,
-            },
-            1.0,
-        ),
-    },
-    "telecom": {
-        "label": "Telecommunications",
-        "weights": _with_trajectory(
-            {
-                "tourismInfrastructure": 0.20,
-                "accessibility": 0.15,
-                "costIndex": 0.10,
-                "safetyAndEntry": 0.20,
-                "travelInfrastructure": 0.25,
-                "crowding": 0.10,
-            },
             1.3,
         ),
     },
-    "consumer_goods": {
-        "label": "Consumer Goods & CPG",
-        "weights": _with_trajectory(
-            {
-                "tourismInfrastructure": 0.25,
-                "accessibility": 0.10,
-                "costIndex": 0.10,
-                "safetyAndEntry": 0.15,
-                "travelInfrastructure": 0.20,
-                "crowding": 0.20,
-            },
-            1.0,
-        ),
-    },
 }
 
-# Legacy equal-weight map used by compute_tvi batch (DB industry_vertical key).
-VERTICAL_WEIGHTS = {
-    "all_industries": INDUSTRY_VERTICALS["all"]["weights"],
+# Batch compute writes one row per geography under the balanced profile key.
+PROFILE_WEIGHTS = {
+    "balanced": TRAVELER_PROFILES["balanced"]["weights"],
 }
 
-INDUSTRY_VERTICAL = "all_industries"
+STORED_PROFILE = "balanced"
 MIN_DIMENSIONS_FOR_OVERALL = 3

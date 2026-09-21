@@ -8,9 +8,10 @@
  */
 
 import {
-  INDUSTRY_VERTICAL_KEYS,
-  INDUSTRY_VERTICAL_LABELS,
-  type IndustryVerticalKey,
+  DEFAULT_TRAVELER_PROFILE,
+  TRAVELER_PROFILE_KEYS,
+  TRAVELER_PROFILE_LABELS,
+  type TravelerProfileKey,
 } from '@outbound/core';
 
 export const TVI_SCORING_VERSION = '0.1.0';
@@ -285,25 +286,25 @@ export const SOURCE_CATALOG: Record<
   },
 };
 
-/** DB key used by compute_tvi.py / destination_scores.industry_vertical (equal-weight batch). */
-export const STORED_TVI_VERTICAL = 'all_industries';
+/** DB key used by compute_tvi.py / destination_scores.profile (balanced batch). */
+export const STORED_TVI_PROFILE = 'balanced';
 
 export type DimensionWeights = Record<DimensionKey, number>;
 
-export interface IndustryVertical {
-  key: IndustryVerticalKey;
+export interface TravelerProfile {
+  key: TravelerProfileKey;
   label: string;
   weights: DimensionWeights;
 }
 
 /**
- * Industry vertical weight profiles for on-the-fly overall TVI recomputation.
- * COUPLING: TypeScript vertical keys/labels now live in @outbound/core (verticals.ts).
- * Weights remain here. Keep in sync with server/workers/scoring_config.py INDUSTRY_VERTICALS.
- * Dimension scores are stored once (equal-weight); overall is reweighted at query time.
+ * Traveler profile weight maps for on-the-fly overall TVI recomputation.
+ * COUPLING: TypeScript profile keys/labels live in @outbound/core (travelerProfiles.ts).
+ * Weights remain here. Keep in sync with server/workers/scoring_config.py TRAVELER_PROFILES.
+ * Dimension scores are stored once (balanced); overall is reweighted at query time.
  *
  * Trajectory multipliers (relative to avg of the original six):
- *   tech_saas / telecom → 1.3; manufacturing / energy → 0.7; else → 1.0
+ *   solo_backpacker / budget → 1.3; family → 0.7; else → 1.0
  */
 /** Add trajectory weight = avg(base) * multiplier (rounded to 3 decimals). */
 export function withTrajectory(
@@ -318,76 +319,76 @@ export function withTrajectory(
   };
 }
 
-export const INDUSTRY_VERTICALS: IndustryVertical[] = [
+export const TRAVELER_PROFILES: TravelerProfile[] = [
   {
-    key: 'all',
-    label: INDUSTRY_VERTICAL_LABELS['all'],
+    key: 'balanced',
+    label: TRAVELER_PROFILE_LABELS.balanced,
     weights: withTrajectory(
       {
-        tourismInfrastructure: 0.167,
-        accessibility: 0.167,
-        costIndex: 0.167,
-        safetyAndEntry: 0.167,
-        travelInfrastructure: 0.167,
-        crowding: 0.167,
+        tourismInfrastructure: 0.17,
+        accessibility: 0.17,
+        costIndex: 0.17,
+        safetyAndEntry: 0.17,
+        travelInfrastructure: 0.17,
+        crowding: 0.15,
       },
       1.0
     ),
   },
   {
-    key: 'tech_saas',
-    label: INDUSTRY_VERTICAL_LABELS['tech_saas'],
+    key: 'solo_backpacker',
+    label: TRAVELER_PROFILE_LABELS.solo_backpacker,
     weights: withTrajectory(
       {
-        tourismInfrastructure: 0.15,
-        accessibility: 0.25,
-        costIndex: 0.15,
-        safetyAndEntry: 0.1,
-        travelInfrastructure: 0.2,
-        crowding: 0.15,
+        tourismInfrastructure: 0.1,
+        accessibility: 0.2,
+        costIndex: 0.3,
+        safetyAndEntry: 0.2,
+        travelInfrastructure: 0.1,
+        crowding: 0.1,
       },
       1.3
     ),
   },
   {
-    key: 'financial',
-    label: INDUSTRY_VERTICAL_LABELS['financial'],
+    key: 'couple',
+    label: TRAVELER_PROFILE_LABELS.couple,
     weights: withTrajectory(
       {
-        tourismInfrastructure: 0.2,
+        tourismInfrastructure: 0.15,
         accessibility: 0.15,
-        costIndex: 0.2,
+        costIndex: 0.15,
         safetyAndEntry: 0.25,
-        travelInfrastructure: 0.1,
+        travelInfrastructure: 0.2,
         crowding: 0.1,
       },
       1.0
     ),
   },
   {
-    key: 'manufacturing',
-    label: INDUSTRY_VERTICAL_LABELS['manufacturing'],
+    key: 'family',
+    label: TRAVELER_PROFILE_LABELS.family,
     weights: withTrajectory(
       {
-        tourismInfrastructure: 0.15,
-        accessibility: 0.1,
+        tourismInfrastructure: 0.1,
+        accessibility: 0.15,
         costIndex: 0.15,
-        safetyAndEntry: 0.2,
-        travelInfrastructure: 0.25,
-        crowding: 0.15,
+        safetyAndEntry: 0.3,
+        travelInfrastructure: 0.2,
+        crowding: 0.1,
       },
       0.7
     ),
   },
   {
-    key: 'healthcare',
-    label: INDUSTRY_VERTICAL_LABELS['healthcare'],
+    key: 'group',
+    label: TRAVELER_PROFILE_LABELS.group,
     weights: withTrajectory(
       {
         tourismInfrastructure: 0.2,
-        accessibility: 0.2,
-        costIndex: 0.1,
-        safetyAndEntry: 0.25,
+        accessibility: 0.25,
+        costIndex: 0.15,
+        safetyAndEntry: 0.15,
         travelInfrastructure: 0.15,
         crowding: 0.1,
       },
@@ -395,123 +396,63 @@ export const INDUSTRY_VERTICALS: IndustryVertical[] = [
     ),
   },
   {
-    key: 'ecommerce',
-    label: INDUSTRY_VERTICAL_LABELS['ecommerce'],
+    key: 'luxury',
+    label: TRAVELER_PROFILE_LABELS.luxury,
     weights: withTrajectory(
       {
-        tourismInfrastructure: 0.25,
+        tourismInfrastructure: 0.2,
         accessibility: 0.1,
-        costIndex: 0.15,
-        safetyAndEntry: 0.1,
-        travelInfrastructure: 0.25,
+        costIndex: 0.05,
+        safetyAndEntry: 0.2,
+        travelInfrastructure: 0.3,
         crowding: 0.15,
       },
       1.0
     ),
   },
   {
-    key: 'energy',
-    label: INDUSTRY_VERTICAL_LABELS['energy'],
+    key: 'budget',
+    label: TRAVELER_PROFILE_LABELS.budget,
     weights: withTrajectory(
       {
-        tourismInfrastructure: 0.15,
-        accessibility: 0.1,
-        costIndex: 0.15,
-        safetyAndEntry: 0.25,
-        travelInfrastructure: 0.25,
-        crowding: 0.1,
-      },
-      0.7
-    ),
-  },
-  {
-    key: 'professional',
-    label: INDUSTRY_VERTICAL_LABELS['professional'],
-    weights: withTrajectory(
-      {
-        tourismInfrastructure: 0.15,
-        accessibility: 0.3,
-        costIndex: 0.15,
+        tourismInfrastructure: 0.1,
+        accessibility: 0.15,
+        costIndex: 0.35,
         safetyAndEntry: 0.15,
         travelInfrastructure: 0.1,
         crowding: 0.15,
       },
-      1.0
-    ),
-  },
-  {
-    key: 'logistics',
-    label: INDUSTRY_VERTICAL_LABELS['logistics'],
-    weights: withTrajectory(
-      {
-        tourismInfrastructure: 0.2,
-        accessibility: 0.05,
-        costIndex: 0.15,
-        safetyAndEntry: 0.15,
-        travelInfrastructure: 0.35,
-        crowding: 0.1,
-      },
-      1.0
-    ),
-  },
-  {
-    key: 'telecom',
-    label: INDUSTRY_VERTICAL_LABELS['telecom'],
-    weights: withTrajectory(
-      {
-        tourismInfrastructure: 0.2,
-        accessibility: 0.15,
-        costIndex: 0.1,
-        safetyAndEntry: 0.2,
-        travelInfrastructure: 0.25,
-        crowding: 0.1,
-      },
       1.3
-    ),
-  },
-  {
-    key: 'consumer_goods',
-    label: INDUSTRY_VERTICAL_LABELS['consumer_goods'],
-    weights: withTrajectory(
-      {
-        tourismInfrastructure: 0.25,
-        accessibility: 0.1,
-        costIndex: 0.1,
-        safetyAndEntry: 0.15,
-        travelInfrastructure: 0.2,
-        crowding: 0.2,
-      },
-      1.0
     ),
   },
 ];
 
-if (INDUSTRY_VERTICALS.length !== INDUSTRY_VERTICAL_KEYS.length) {
+if (TRAVELER_PROFILES.length !== TRAVELER_PROFILE_KEYS.length) {
   throw new Error(
-    'INDUSTRY_VERTICALS length must match INDUSTRY_VERTICAL_KEYS from @outbound/core'
+    'TRAVELER_PROFILES length must match TRAVELER_PROFILE_KEYS from @outbound/core'
   );
 }
 
-export const DEFAULT_VERTICAL = 'all';
+export const DEFAULT_PROFILE = DEFAULT_TRAVELER_PROFILE;
 
-const VERTICAL_BY_KEY = new Map<string, IndustryVertical>(
-  INDUSTRY_VERTICALS.map((v) => [v.key, v])
+const PROFILE_BY_KEY = new Map<string, TravelerProfile>(
+  TRAVELER_PROFILES.map((v) => [v.key, v])
 );
 
-export function resolveVerticalKey(raw: unknown): string {
-  if (typeof raw !== 'string' || !raw.trim()) return DEFAULT_VERTICAL;
+export function resolveProfileKey(raw: unknown): string {
+  if (typeof raw !== 'string' || !raw.trim()) return DEFAULT_PROFILE;
   const key = raw.trim();
-  // Legacy DB / URL alias
-  if (key === 'all_industries') return DEFAULT_VERTICAL;
-  if (VERTICAL_BY_KEY.has(key)) return key;
-  return DEFAULT_VERTICAL;
+  // Legacy DB / URL aliases from industry-vertical era
+  if (key === 'all_industries' || key === 'all') return DEFAULT_PROFILE;
+  if (PROFILE_BY_KEY.has(key)) return key;
+  return DEFAULT_PROFILE;
 }
 
-export function getVerticalWeights(verticalKey: string): DimensionWeights {
-  const resolved = resolveVerticalKey(verticalKey);
+export function getProfileWeights(profileKey: string): DimensionWeights {
+  const resolved = resolveProfileKey(profileKey);
   return (
-    VERTICAL_BY_KEY.get(resolved)?.weights ??
-    VERTICAL_BY_KEY.get(DEFAULT_VERTICAL)!.weights
+    PROFILE_BY_KEY.get(resolved)?.weights ??
+    PROFILE_BY_KEY.get(DEFAULT_PROFILE)!.weights
   );
 }
 
@@ -542,11 +483,11 @@ export function computeWeightedOverallWithWeights(
 /** Weighted overall from stored dimension scores; renormalizes over non-null dims. */
 export function computeWeightedOverall(
   dimensions: Partial<Record<DimensionKey, number | null>> | null | undefined,
-  verticalKey: string = DEFAULT_VERTICAL
+  profileKey: string = DEFAULT_PROFILE
 ): number | null {
   if (!dimensions) return null;
   return computeWeightedOverallWithWeights(
     dimensions,
-    getVerticalWeights(verticalKey)
+    getProfileWeights(profileKey)
   );
 }

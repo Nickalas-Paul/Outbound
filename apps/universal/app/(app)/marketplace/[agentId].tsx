@@ -36,12 +36,12 @@ const styles = StyleSheet.create({
 /*
 ORIGINAL IMPLEMENTATION (preserved):
 import {
-  INDUSTRY_VERTICAL_LABELS,
+  TRAVELER_PROFILE_LABELS,
   RESPONSE_TIME_LABELS,
   getAgentCategoryLabel,
   type Agent,
   type AgentReview,
-  type IndustryVerticalKey,
+  type TravelerProfileKey,
   type ResponseTime,
 } from '@outbound/core';
 import { Link, router, useLocalSearchParams } from 'expo-router';
@@ -429,13 +429,13 @@ export default function AgentProfileScreen() {
 
             {(agent.industryVerticals?.length ?? 0) > 0 ? (
               <View style={styles.section}>
-                <Text style={styles.sectionTitle}>Industry verticals</Text>
+                <Text style={styles.sectionTitle}>Traveler profiles</Text>
                 <View style={styles.chipRow}>
                   {agent.industryVerticals.map((key) => (
                     <View key={key} style={styles.verticalChip}>
                       <Text style={styles.verticalChipText}>
-                        {INDUSTRY_VERTICAL_LABELS[
-                          key as IndustryVerticalKey
+                        {TRAVELER_PROFILE_LABELS[
+                          key as TravelerProfileKey
                         ] ?? key}
                       </Text>
                     </View>
