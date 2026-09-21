@@ -12,5 +12,8 @@ coverage
 .DS_Store
 *.tsbuildinfo
 server/workers/data/
+!server/workers/data/.gitkeep
+!server/workers/data/ef_epi_scores.json
+!server/workers/data/visa_free_scores.json
 server/workers/logs/
 

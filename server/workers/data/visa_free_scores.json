@@ -1,0 +1,907 @@
+[
+  {
+    "country_iso3": "AFG",
+    "score": 28,
+    "year": 2024
+  },
+  {
+    "country_iso3": "AGO",
+    "score": 50,
+    "year": 2024
+  },
+  {
+    "country_iso3": "ALB",
+    "score": 120,
+    "year": 2024
+  },
+  {
+    "country_iso3": "AND",
+    "score": 170,
+    "year": 2024
+  },
+  {
+    "country_iso3": "ARE",
+    "score": 181,
+    "year": 2024
+  },
+  {
+    "country_iso3": "ARG",
+    "score": 171,
+    "year": 2024
+  },
+  {
+    "country_iso3": "ARM",
+    "score": 66,
+    "year": 2024
+  },
+  {
+    "country_iso3": "ATG",
+    "score": 150,
+    "year": 2024
+  },
+  {
+    "country_iso3": "AUS",
+    "score": 188,
+    "year": 2024
+  },
+  {
+    "country_iso3": "AUT",
+    "score": 190,
+    "year": 2024
+  },
+  {
+    "country_iso3": "AZE",
+    "score": 72,
+    "year": 2024
+  },
+  {
+    "country_iso3": "BEL",
+    "score": 189,
+    "year": 2024
+  },
+  {
+    "country_iso3": "BEN",
+    "score": 58,
+    "year": 2024
+  },
+  {
+    "country_iso3": "BFA",
+    "score": 58,
+    "year": 2024
+  },
+  {
+    "country_iso3": "BGD",
+    "score": 42,
+    "year": 2024
+  },
+  {
+    "country_iso3": "BGR",
+    "score": 178,
+    "year": 2024
+  },
+  {
+    "country_iso3": "BHR",
+    "score": 87,
+    "year": 2024
+  },
+  {
+    "country_iso3": "BHS",
+    "score": 156,
+    "year": 2024
+  },
+  {
+    "country_iso3": "BIH",
+    "score": 120,
+    "year": 2024
+  },
+  {
+    "country_iso3": "BLR",
+    "score": 78,
+    "year": 2024
+  },
+  {
+    "country_iso3": "BLZ",
+    "score": 101,
+    "year": 2024
+  },
+  {
+    "country_iso3": "BOL",
+    "score": 80,
+    "year": 2024
+  },
+  {
+    "country_iso3": "BRA",
+    "score": 171,
+    "year": 2024
+  },
+  {
+    "country_iso3": "BRB",
+    "score": 163,
+    "year": 2024
+  },
+  {
+    "country_iso3": "BRN",
+    "score": 164,
+    "year": 2024
+  },
+  {
+    "country_iso3": "BTN",
+    "score": 55,
+    "year": 2024
+  },
+  {
+    "country_iso3": "BWA",
+    "score": 87,
+    "year": 2024
+  },
+  {
+    "country_iso3": "CAF",
+    "score": 49,
+    "year": 2024
+  },
+  {
+    "country_iso3": "CAN",
+    "score": 187,
+    "year": 2024
+  },
+  {
+    "country_iso3": "CHE",
+    "score": 187,
+    "year": 2024
+  },
+  {
+    "country_iso3": "CHL",
+    "score": 176,
+    "year": 2024
+  },
+  {
+    "country_iso3": "CHN",
+    "score": 85,
+    "year": 2024
+  },
+  {
+    "country_iso3": "CIV",
+    "score": 58,
+    "year": 2024
+  },
+  {
+    "country_iso3": "CMR",
+    "score": 50,
+    "year": 2024
+  },
+  {
+    "country_iso3": "COD",
+    "score": 48,
+    "year": 2024
+  },
+  {
+    "country_iso3": "COL",
+    "score": 135,
+    "year": 2024
+  },
+  {
+    "country_iso3": "CRI",
+    "score": 151,
+    "year": 2024
+  },
+  {
+    "country_iso3": "CUB",
+    "score": 65,
+    "year": 2024
+  },
+  {
+    "country_iso3": "CYP",
+    "score": 179,
+    "year": 2024
+  },
+  {
+    "country_iso3": "CZE",
+    "score": 187,
+    "year": 2024
+  },
+  {
+    "country_iso3": "DEU",
+    "score": 192,
+    "year": 2024
+  },
+  {
+    "country_iso3": "DJI",
+    "score": 45,
+    "year": 2024
+  },
+  {
+    "country_iso3": "DMA",
+    "score": 140,
+    "year": 2024
+  },
+  {
+    "country_iso3": "DNK",
+    "score": 190,
+    "year": 2024
+  },
+  {
+    "country_iso3": "DOM",
+    "score": 70,
+    "year": 2024
+  },
+  {
+    "country_iso3": "DZA",
+    "score": 52,
+    "year": 2024
+  },
+  {
+    "country_iso3": "ECU",
+    "score": 95,
+    "year": 2024
+  },
+  {
+    "country_iso3": "EGY",
+    "score": 52,
+    "year": 2024
+  },
+  {
+    "country_iso3": "ERI",
+    "score": 38,
+    "year": 2024
+  },
+  {
+    "country_iso3": "ESP",
+    "score": 191,
+    "year": 2024
+  },
+  {
+    "country_iso3": "EST",
+    "score": 185,
+    "year": 2024
+  },
+  {
+    "country_iso3": "ETH",
+    "score": 42,
+    "year": 2024
+  },
+  {
+    "country_iso3": "FIN",
+    "score": 191,
+    "year": 2024
+  },
+  {
+    "country_iso3": "FJI",
+    "score": 90,
+    "year": 2024
+  },
+  {
+    "country_iso3": "FRA",
+    "score": 192,
+    "year": 2024
+  },
+  {
+    "country_iso3": "FSM",
+    "score": 120,
+    "year": 2024
+  },
+  {
+    "country_iso3": "GAB",
+    "score": 55,
+    "year": 2024
+  },
+  {
+    "country_iso3": "GBR",
+    "score": 188,
+    "year": 2024
+  },
+  {
+    "country_iso3": "GEO",
+    "score": 118,
+    "year": 2024
+  },
+  {
+    "country_iso3": "GHA",
+    "score": 66,
+    "year": 2024
+  },
+  {
+    "country_iso3": "GIN",
+    "score": 55,
+    "year": 2024
+  },
+  {
+    "country_iso3": "GMB",
+    "score": 65,
+    "year": 2024
+  },
+  {
+    "country_iso3": "GRC",
+    "score": 187,
+    "year": 2024
+  },
+  {
+    "country_iso3": "GRD",
+    "score": 144,
+    "year": 2024
+  },
+  {
+    "country_iso3": "GTM",
+    "score": 137,
+    "year": 2024
+  },
+  {
+    "country_iso3": "GUY",
+    "score": 85,
+    "year": 2024
+  },
+  {
+    "country_iso3": "HKG",
+    "score": 172,
+    "year": 2024
+  },
+  {
+    "country_iso3": "HND",
+    "score": 136,
+    "year": 2024
+  },
+  {
+    "country_iso3": "HRV",
+    "score": 175,
+    "year": 2024
+  },
+  {
+    "country_iso3": "HTI",
+    "score": 50,
+    "year": 2024
+  },
+  {
+    "country_iso3": "HUN",
+    "score": 186,
+    "year": 2024
+  },
+  {
+    "country_iso3": "IDN",
+    "score": 75,
+    "year": 2024
+  },
+  {
+    "country_iso3": "IND",
+    "score": 62,
+    "year": 2024
+  },
+  {
+    "country_iso3": "IRL",
+    "score": 190,
+    "year": 2024
+  },
+  {
+    "country_iso3": "IRN",
+    "score": 43,
+    "year": 2024
+  },
+  {
+    "country_iso3": "IRQ",
+    "score": 30,
+    "year": 2024
+  },
+  {
+    "country_iso3": "ISL",
+    "score": 184,
+    "year": 2024
+  },
+  {
+    "country_iso3": "ISR",
+    "score": 165,
+    "year": 2024
+  },
+  {
+    "country_iso3": "ITA",
+    "score": 192,
+    "year": 2024
+  },
+  {
+    "country_iso3": "JAM",
+    "score": 85,
+    "year": 2024
+  },
+  {
+    "country_iso3": "JOR",
+    "score": 52,
+    "year": 2024
+  },
+  {
+    "country_iso3": "JPN",
+    "score": 193,
+    "year": 2024
+  },
+  {
+    "country_iso3": "KAZ",
+    "score": 88,
+    "year": 2024
+  },
+  {
+    "country_iso3": "KEN",
+    "score": 70,
+    "year": 2024
+  },
+  {
+    "country_iso3": "KHM",
+    "score": 55,
+    "year": 2024
+  },
+  {
+    "country_iso3": "KIR",
+    "score": 120,
+    "year": 2024
+  },
+  {
+    "country_iso3": "KNA",
+    "score": 155,
+    "year": 2024
+  },
+  {
+    "country_iso3": "KOR",
+    "score": 191,
+    "year": 2024
+  },
+  {
+    "country_iso3": "KWT",
+    "score": 98,
+    "year": 2024
+  },
+  {
+    "country_iso3": "LAO",
+    "score": 50,
+    "year": 2024
+  },
+  {
+    "country_iso3": "LBR",
+    "score": 55,
+    "year": 2024
+  },
+  {
+    "country_iso3": "LBY",
+    "score": 40,
+    "year": 2024
+  },
+  {
+    "country_iso3": "LCA",
+    "score": 145,
+    "year": 2024
+  },
+  {
+    "country_iso3": "LIE",
+    "score": 183,
+    "year": 2024
+  },
+  {
+    "country_iso3": "LKA",
+    "score": 45,
+    "year": 2024
+  },
+  {
+    "country_iso3": "LSO",
+    "score": 75,
+    "year": 2024
+  },
+  {
+    "country_iso3": "LTU",
+    "score": 185,
+    "year": 2024
+  },
+  {
+    "country_iso3": "LVA",
+    "score": 185,
+    "year": 2024
+  },
+  {
+    "country_iso3": "MAC",
+    "score": 144,
+    "year": 2024
+  },
+  {
+    "country_iso3": "MAR",
+    "score": 64,
+    "year": 2024
+  },
+  {
+    "country_iso3": "MDA",
+    "score": 122,
+    "year": 2024
+  },
+  {
+    "country_iso3": "MDG",
+    "score": 55,
+    "year": 2024
+  },
+  {
+    "country_iso3": "MDV",
+    "score": 90,
+    "year": 2024
+  },
+  {
+    "country_iso3": "MEX",
+    "score": 159,
+    "year": 2024
+  },
+  {
+    "country_iso3": "MHL",
+    "score": 125,
+    "year": 2024
+  },
+  {
+    "country_iso3": "MKD",
+    "score": 124,
+    "year": 2024
+  },
+  {
+    "country_iso3": "MLI",
+    "score": 54,
+    "year": 2024
+  },
+  {
+    "country_iso3": "MLT",
+    "score": 187,
+    "year": 2024
+  },
+  {
+    "country_iso3": "MMR",
+    "score": 46,
+    "year": 2024
+  },
+  {
+    "country_iso3": "MNE",
+    "score": 126,
+    "year": 2024
+  },
+  {
+    "country_iso3": "MNG",
+    "score": 64,
+    "year": 2024
+  },
+  {
+    "country_iso3": "MOZ",
+    "score": 60,
+    "year": 2024
+  },
+  {
+    "country_iso3": "MRT",
+    "score": 55,
+    "year": 2024
+  },
+  {
+    "country_iso3": "MUS",
+    "score": 150,
+    "year": 2024
+  },
+  {
+    "country_iso3": "MYS",
+    "score": 182,
+    "year": 2024
+  },
+  {
+    "country_iso3": "NAM",
+    "score": 78,
+    "year": 2024
+  },
+  {
+    "country_iso3": "NER",
+    "score": 53,
+    "year": 2024
+  },
+  {
+    "country_iso3": "NGA",
+    "score": 46,
+    "year": 2024
+  },
+  {
+    "country_iso3": "NIC",
+    "score": 129,
+    "year": 2024
+  },
+  {
+    "country_iso3": "NLD",
+    "score": 190,
+    "year": 2024
+  },
+  {
+    "country_iso3": "NOR",
+    "score": 189,
+    "year": 2024
+  },
+  {
+    "country_iso3": "NPL",
+    "score": 40,
+    "year": 2024
+  },
+  {
+    "country_iso3": "NRU",
+    "score": 88,
+    "year": 2024
+  },
+  {
+    "country_iso3": "NZL",
+    "score": 187,
+    "year": 2024
+  },
+  {
+    "country_iso3": "OMN",
+    "score": 85,
+    "year": 2024
+  },
+  {
+    "country_iso3": "PAK",
+    "score": 34,
+    "year": 2024
+  },
+  {
+    "country_iso3": "PAN",
+    "score": 145,
+    "year": 2024
+  },
+  {
+    "country_iso3": "PER",
+    "score": 140,
+    "year": 2024
+  },
+  {
+    "country_iso3": "PHL",
+    "score": 66,
+    "year": 2024
+  },
+  {
+    "country_iso3": "PLW",
+    "score": 120,
+    "year": 2024
+  },
+  {
+    "country_iso3": "PNG",
+    "score": 70,
+    "year": 2024
+  },
+  {
+    "country_iso3": "POL",
+    "score": 186,
+    "year": 2024
+  },
+  {
+    "country_iso3": "PRK",
+    "score": 39,
+    "year": 2024
+  },
+  {
+    "country_iso3": "PRT",
+    "score": 187,
+    "year": 2024
+  },
+  {
+    "country_iso3": "PRY",
+    "score": 146,
+    "year": 2024
+  },
+  {
+    "country_iso3": "QAT",
+    "score": 100,
+    "year": 2024
+  },
+  {
+    "country_iso3": "ROU",
+    "score": 178,
+    "year": 2024
+  },
+  {
+    "country_iso3": "RUS",
+    "score": 119,
+    "year": 2024
+  },
+  {
+    "country_iso3": "RWA",
+    "score": 62,
+    "year": 2024
+  },
+  {
+    "country_iso3": "SAU",
+    "score": 89,
+    "year": 2024
+  },
+  {
+    "country_iso3": "SDN",
+    "score": 42,
+    "year": 2024
+  },
+  {
+    "country_iso3": "SEN",
+    "score": 56,
+    "year": 2024
+  },
+  {
+    "country_iso3": "SGP",
+    "score": 192,
+    "year": 2024
+  },
+  {
+    "country_iso3": "SLB",
+    "score": 70,
+    "year": 2024
+  },
+  {
+    "country_iso3": "SLE",
+    "score": 60,
+    "year": 2024
+  },
+  {
+    "country_iso3": "SLV",
+    "score": 137,
+    "year": 2024
+  },
+  {
+    "country_iso3": "SMR",
+    "score": 171,
+    "year": 2024
+  },
+  {
+    "country_iso3": "SOM",
+    "score": 35,
+    "year": 2024
+  },
+  {
+    "country_iso3": "SRB",
+    "score": 138,
+    "year": 2024
+  },
+  {
+    "country_iso3": "SSD",
+    "score": 40,
+    "year": 2024
+  },
+  {
+    "country_iso3": "SUR",
+    "score": 80,
+    "year": 2024
+  },
+  {
+    "country_iso3": "SVK",
+    "score": 184,
+    "year": 2024
+  },
+  {
+    "country_iso3": "SVN",
+    "score": 185,
+    "year": 2024
+  },
+  {
+    "country_iso3": "SWE",
+    "score": 191,
+    "year": 2024
+  },
+  {
+    "country_iso3": "SWZ",
+    "score": 74,
+    "year": 2024
+  },
+  {
+    "country_iso3": "SYC",
+    "score": 155,
+    "year": 2024
+  },
+  {
+    "country_iso3": "TCD",
+    "score": 50,
+    "year": 2024
+  },
+  {
+    "country_iso3": "TGO",
+    "score": 56,
+    "year": 2024
+  },
+  {
+    "country_iso3": "THA",
+    "score": 80,
+    "year": 2024
+  },
+  {
+    "country_iso3": "TLS",
+    "score": 95,
+    "year": 2024
+  },
+  {
+    "country_iso3": "TON",
+    "score": 90,
+    "year": 2024
+  },
+  {
+    "country_iso3": "TTO",
+    "score": 150,
+    "year": 2024
+  },
+  {
+    "country_iso3": "TUN",
+    "score": 70,
+    "year": 2024
+  },
+  {
+    "country_iso3": "TUR",
+    "score": 116,
+    "year": 2024
+  },
+  {
+    "country_iso3": "TUV",
+    "score": 125,
+    "year": 2024
+  },
+  {
+    "country_iso3": "TWN",
+    "score": 145,
+    "year": 2024
+  },
+  {
+    "country_iso3": "TZA",
+    "score": 68,
+    "year": 2024
+  },
+  {
+    "country_iso3": "UGA",
+    "score": 66,
+    "year": 2024
+  },
+  {
+    "country_iso3": "UKR",
+    "score": 148,
+    "year": 2024
+  },
+  {
+    "country_iso3": "URY",
+    "score": 153,
+    "year": 2024
+  },
+  {
+    "country_iso3": "USA",
+    "score": 186,
+    "year": 2024
+  },
+  {
+    "country_iso3": "VCT",
+    "score": 148,
+    "year": 2024
+  },
+  {
+    "country_iso3": "VEN",
+    "score": 75,
+    "year": 2024
+  },
+  {
+    "country_iso3": "VNM",
+    "score": 60,
+    "year": 2024
+  },
+  {
+    "country_iso3": "VUT",
+    "score": 95,
+    "year": 2024
+  },
+  {
+    "country_iso3": "WSM",
+    "score": 130,
+    "year": 2024
+  },
+  {
+    "country_iso3": "XKX",
+    "score": 45,
+    "year": 2024
+  },
+  {
+    "country_iso3": "YEM",
+    "score": 35,
+    "year": 2024
+  },
+  {
+    "country_iso3": "ZAF",
+    "score": 106,
+    "year": 2024
+  },
+  {
+    "country_iso3": "ZMB",
+    "score": 68,
+    "year": 2024
+  },
+  {
+    "country_iso3": "ZWE",
+    "score": 64,
+    "year": 2024
+  }
+]

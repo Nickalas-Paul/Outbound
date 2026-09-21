@@ -54,7 +54,7 @@ DIMENSIONS = {
             {
                 "source": "ef_epi",
                 "code": "ef_epi_score",
-                "name": "Environmental Performance Index score",
+                "name": "EF English Proficiency Index score",
                 "weight": 0.30,
                 "direction": "higher_is_better",
                 "normalization": "linear",
