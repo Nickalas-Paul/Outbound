@@ -12,12 +12,12 @@ The Travel Viability Index is a **0–100** score that summarizes how attractive
 
 | Dimension key | Label | What it captures |
 |---|---|---|
-| `marketSizeAndGrowth` | Market Size & Growth | Economic scale, growth, and population |
-| `talentDensity` | Talent Density | Education attainment, tertiary enrollment, skilled labor force |
-| `taxEnvironment` | Tax Environment | Statutory corporate tax and effective tax burden |
-| `regulatoryEase` | Regulatory Ease | Governance quality, corruption control, and economic freedom |
-| `infrastructure` | Infrastructure | Digital access, electricity, logistics, and air transport |
-| `competitorSaturation` | Competitor Saturation | Intensity of new business formation (market activity proxy) |
+| `tourismInfrastructure` | Market Size & Growth | Economic scale, growth, and population |
+| `accessibility` | Talent Density | Education attainment, tertiary enrollment, skilled labor force |
+| `costIndex` | Tax Environment | Statutory corporate tax and effective tax burden |
+| `safetyAndEntry` | Regulatory Ease | Governance quality, corruption control, and economic freedom |
+| `travelInfrastructure` | Infrastructure | Digital access, electricity, logistics, and air transport |
+| `crowding` | Competitor Saturation | Intensity of new business formation (market activity proxy) |
 | `trajectory` | Trajectory | **Composite** momentum from trend direction/rate across the other six dimensions |
 
 Each base dimension is scored **0–100**. Missing dimensions are stored as `null` (not zero). Zero means “measured and weak,” not “no data.” Trajectory is derived after base dimensions and trends are computed — it has no raw indicators of its own.
@@ -107,26 +107,26 @@ Six indicators (broadband, mobile, electricity, air transport, plus internet use
 
 ### Trajectory (composite)
 
-Trajectory is computed from `trend_scores` after the six base dimensions are scored. It summarizes trend direction and annualized rate across base dimensions into a 0–100 momentum score. It does not replace any base dimension; it is an additional input to the overall TVI (and is re-weighted per industry vertical).
+Trajectory is computed from `trend_scores` after the six base dimensions are scored. It summarizes trend direction and annualized rate across base dimensions into a 0–100 momentum score. It does not replace any base dimension; it is an additional input to the overall TVI (and is re-weighted per traveler profile).
 
 ## How the overall score is computed
 
-For the default vertical `all` / `all_industries`, the seven dimensions (six base + trajectory) are combined with near-equal base weights and trajectory at 1.0× the average base weight.
+For the default profile `balanced`, the seven dimensions (six base + trajectory) are combined with near-equal base weights and trajectory at 1.0× the average base weight.
 
 1. Keep only dimensions with a real score.
 2. Redistribute weights among available dimensions.
 3. Overall = weighted average, rounded to the nearest integer (0–100).
 4. If fewer than **three** dimensions have scores → overall is `null` (insufficient data).
 
-### Industry verticals
+### Traveler profiles
 
-**Active.** Eleven verticals apply different weight profiles at query time (API / explorer filters). Examples:
+**Active.** Seven traveler profiles apply different weight maps at query time (API / explorer filters). Examples:
 
-- **Technology & SaaS / Telecommunications:** trajectory weighted **1.3×**
-- **Manufacturing / Energy & Renewables:** trajectory weighted **0.7×**
-- Other verticals (financial, healthcare, ecommerce, professional, logistics, consumer goods, all): trajectory **1.0×**
+- **Solo Backpacker / Budget:** trajectory weighted **1.3×**
+- **Family:** trajectory weighted **0.7×**
+- Other profiles (balanced, couple, group, luxury): trajectory **1.0×**
 
-Base dimension emphasis also shifts (e.g. talent-heavy for tech/professional, infrastructure-heavy for logistics).
+Base dimension emphasis also shifts (e.g. cost-heavy for budget/solo, safety-heavy for family/couple).
 
 ## Confidence levels
 
@@ -211,7 +211,7 @@ Re-running the engine with the same `raw_indicators` produces the **same** base 
 
 ## Design principles
 
-1. **Transparent** — every score can be traced to `(source, indicator, year)` tuples in `mvi_scores.sources`.
+1. **Transparent** — every score can be traced to `(source, indicator, year)` tuples in `destination_scores.sources`.
 2. **Honest about gaps** — nulls and confidence flags beat false precision.
 3. **Configurable** — indicator maps and weights live in `scoring_config.py`; the engine does not hardcode them.
 4. **Canonical naming** — dimension keys match the TypeScript `TVIScore.dimensions` contract (`dimensions`, never `dimension_scores`).

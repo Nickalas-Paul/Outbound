@@ -14,11 +14,11 @@ import { pool } from '../config/database';
 import {
   computeWeightedOverall,
   DimensionKey,
-  INDUSTRY_VERTICALS,
+  TRAVELER_PROFILES,
   TVI_DIMENSIONS,
   TVI_SCORING_VERSION,
-  resolveVerticalKey,
-  STORED_TVI_VERTICAL,
+  resolveProfileKey,
+  STORED_TVI_PROFILE,
 } from '../config/tvi';
 import { optionalAuth } from '../middleware/optionalAuth';
 import { requireTier } from '../middleware/requireTier';
@@ -63,7 +63,7 @@ type ExportBundle = {
 };
 
 function verticalLabel(key: string): string {
-  return INDUSTRY_VERTICALS.find((v) => v.key === key)?.label ?? key;
+  return TRAVELER_PROFILES.find((v) => v.key === key)?.label ?? key;
 }
 
 function formatDateStamp(d = new Date()): string {
@@ -172,7 +172,7 @@ async function loadExportBundle(
   const geo = await resolveGeographyId(idOrIso);
   if (!geo) return null;
 
-  const vertical = resolveVerticalKey(verticalRaw);
+  const vertical = resolveProfileKey(verticalRaw);
   const tviResult = await pool.query<{
     overall_score: string | null;
     dimensions: DimMap | null;
@@ -182,11 +182,11 @@ async function loadExportBundle(
   }>(
     `
     SELECT overall_score, dimensions, confidence, data_freshness, sources
-    FROM mvi_scores
-    WHERE geography_id = $1 AND industry_vertical = $2
+    FROM destination_scores
+    WHERE geography_id = $1 AND profile = $2
     LIMIT 1
     `,
-    [geo.id, STORED_TVI_VERTICAL]
+    [geo.id, STORED_TVI_PROFILE]
   );
   const tvi = tviResult.rows[0];
   const dimensions = (tvi?.dimensions ?? {}) as DimMap;
@@ -268,12 +268,12 @@ function csvHeaders(): string[] {
     'Region',
     'Overall TVI',
     'Confidence',
-    'Market Size & Growth',
-    'Talent Density',
-    'Tax Environment',
-    'Regulatory Ease',
-    'Infrastructure',
-    'Competitor Saturation',
+    'Tourism Infrastructure & Capacity',
+    'Accessibility & Ease of Travel',
+    'Cost Index',
+    'Entry Requirements & Safety',
+    'Travel Infrastructure',
+    'Tourism Crowding',
     'Trajectory',
     'Population',
     'GDP PPP',
@@ -295,12 +295,12 @@ function bundleToCsvRow(b: ExportBundle): (string | number | null)[] {
     b.region,
     b.overall != null ? Math.round(b.overall * 100) / 100 : null,
     b.confidence,
-    d.marketSizeAndGrowth ?? null,
-    d.talentDensity ?? null,
-    d.taxEnvironment ?? null,
-    d.regulatoryEase ?? null,
-    d.infrastructure ?? null,
-    d.competitorSaturation ?? null,
+    d.tourismInfrastructure ?? null,
+    d.accessibility ?? null,
+    d.costIndex ?? null,
+    d.safetyAndEntry ?? null,
+    d.travelInfrastructure ?? null,
+    d.crowding ?? null,
     d.trajectory ?? null,
     b.quickFacts.population != null ? Math.round(b.quickFacts.population) : null,
     gdpUsd,
@@ -351,7 +351,7 @@ function buildPdf(bundle: ExportBundle): Promise<Buffer> {
         `Overall Score: ${bundle.overall != null ? Math.round(bundle.overall) : '—'} / 100`
       )
       .text(`Confidence: ${bundle.confidence ?? '—'}`)
-      .text(`Industry Vertical: ${bundle.verticalLabel}`)
+      .text(`Traveler Profile: ${bundle.verticalLabel}`)
       .text(`Data Freshness: ${bundle.dataFreshness ?? '—'}`);
     doc.moveDown(1);
 
@@ -453,7 +453,7 @@ function buildPdf(bundle: ExportBundle): Promise<Buffer> {
 router.get('/geography/:id/pdf', optionalAuth, requireTier('pro'), async (req: Request, res: Response) => {
   try {
     const id = String(req.params.id ?? '').trim();
-    const bundle = await loadExportBundle(id, req.query.vertical);
+    const bundle = await loadExportBundle(id, req.query.profile ?? req.query.vertical);
     if (!bundle) {
       res.status(404).json(apiError('Geography not found'));
       return;
@@ -477,7 +477,7 @@ router.get('/geography/:id/pdf', optionalAuth, requireTier('pro'), async (req: R
 router.get('/geography/:id/csv', optionalAuth, requireTier('pro'), async (req: Request, res: Response) => {
   try {
     const id = String(req.params.id ?? '').trim();
-    const bundle = await loadExportBundle(id, req.query.vertical);
+    const bundle = await loadExportBundle(id, req.query.profile ?? req.query.vertical);
     if (!bundle) {
       res.status(404).json(apiError('Geography not found'));
       return;
@@ -516,7 +516,7 @@ router.get('/compare/csv', optionalAuth, requireTier('pro'), async (req: Request
 
     const rows: (string | number | null)[][] = [csvHeaders()];
     for (const iso of isos) {
-      const bundle = await loadExportBundle(iso, req.query.vertical);
+      const bundle = await loadExportBundle(iso, req.query.profile ?? req.query.vertical);
       if (bundle) rows.push(bundleToCsvRow(bundle));
     }
     if (rows.length === 1) {

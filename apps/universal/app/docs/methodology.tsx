@@ -168,14 +168,14 @@ export default function MethodologyScreen() {
           data).
         </Bullet>
 
-        <Text style={styles.subHeading}>Industry verticals</Text>
+        <Text style={styles.subHeading}>Traveler profiles</Text>
         <Body>
-          Industry verticals (Technology & SaaS, Financial Services, Manufacturing,
-          and others) reweight dimensions at query time. Dimension scores are stored
-          once under equal-weight; the overall TVI is recomputed on the fly for the
-          selected vertical — same underlying dimensions, different emphasis.
-          Some verticals emphasize Trajectory (e.g. tech) or de-emphasize it
-          (e.g. manufacturing).
+          Traveler profiles (Balanced, Solo Backpacker, Couple / Honeymoon, Family,
+          Group / Tour, Luxury, Budget) reweight dimensions at query time. Dimension
+          scores are stored once under the balanced profile; the overall TVI is
+          recomputed on the fly for the selected profile — same underlying
+          dimensions, different emphasis. Some profiles emphasize Trajectory
+          (e.g. solo backpacker, budget) or de-emphasize it (e.g. family).
         </Body>
       </Section>
 
@@ -194,7 +194,7 @@ export default function MethodologyScreen() {
         </Bullet>
         <Bullet>
           By default Trajectory is weighted equally with the other dimensions;
-          industry verticals may raise or lower that weight.
+          traveler profiles may raise or lower that weight.
         </Bullet>
         <Bullet>
           Trajectory quantifies observed momentum. It is not a prediction of future

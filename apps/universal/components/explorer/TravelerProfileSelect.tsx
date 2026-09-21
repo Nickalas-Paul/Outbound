@@ -10,9 +10,9 @@ import {
 } from 'react-native';
 
 import {
-  INDUSTRY_VERTICAL_OPTIONS,
-  verticalLabel,
-} from '@/lib/industryVerticals';
+  TRAVELER_PROFILE_OPTIONS,
+  profileLabel,
+} from '@/lib/travelerProfiles';
 
 type Props = {
   value: string;
@@ -30,16 +30,22 @@ const webScrollStyle =
       } as object)
     : null;
 
-export default function IndustryVerticalSelect({ value, onChange, locked = false }: Props) {
+export default function TravelerProfileSelect({
+  value,
+  onChange,
+  locked = false,
+}: Props) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
   const wrapRef = useRef<View>(null);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return INDUSTRY_VERTICAL_OPTIONS;
-    return INDUSTRY_VERTICAL_OPTIONS.filter((v) =>
-      v.label.toLowerCase().includes(q)
+    if (!q) return TRAVELER_PROFILE_OPTIONS;
+    return TRAVELER_PROFILE_OPTIONS.filter(
+      (v) =>
+        v.label.toLowerCase().includes(q) ||
+        (v.description?.toLowerCase().includes(q) ?? false)
     );
   }, [query]);
 
@@ -66,22 +72,21 @@ export default function IndustryVerticalSelect({ value, onChange, locked = false
     };
   }, [open]);
 
-  // Inject dark scrollbar styles once on web
   useEffect(() => {
     if (Platform.OS !== 'web') return;
-    const id = 'outbound-industry-vertical-scrollbar';
+    const id = 'outbound-traveler-profile-scrollbar';
     if (document.getElementById(id)) return;
     const el = document.createElement('style');
     el.id = id;
     el.textContent = `
-      [data-outbound-vertical-scroll="1"]::-webkit-scrollbar { width: 6px; }
-      [data-outbound-vertical-scroll="1"]::-webkit-scrollbar-track {
+      [data-outbound-profile-scroll="1"]::-webkit-scrollbar { width: 6px; }
+      [data-outbound-profile-scroll="1"]::-webkit-scrollbar-track {
         background: #0e0e16; border-radius: 3px;
       }
-      [data-outbound-vertical-scroll="1"]::-webkit-scrollbar-thumb {
+      [data-outbound-profile-scroll="1"]::-webkit-scrollbar-thumb {
         background: #3a3a52; border-radius: 3px;
       }
-      [data-outbound-vertical-scroll="1"]::-webkit-scrollbar-thumb:hover {
+      [data-outbound-profile-scroll="1"]::-webkit-scrollbar-thumb:hover {
         background: #55557a;
       }
     `;
@@ -100,7 +105,7 @@ export default function IndustryVerticalSelect({ value, onChange, locked = false
         }}
       >
         <Text style={styles.triggerText} numberOfLines={1}>
-          {verticalLabel(value)}
+          {profileLabel(value)}
         </Text>
         <Text style={styles.chevron}>{locked ? '🔒' : open ? '▴' : '▾'}</Text>
       </Pressable>
@@ -110,7 +115,7 @@ export default function IndustryVerticalSelect({ value, onChange, locked = false
           <TextInput
             value={query}
             onChangeText={setQuery}
-            placeholder="Search verticals..."
+            placeholder="Search profiles..."
             placeholderTextColor="rgba(255,255,255,0.35)"
             style={styles.search}
             autoFocus={Platform.OS === 'web'}
@@ -121,7 +126,7 @@ export default function IndustryVerticalSelect({ value, onChange, locked = false
             nestedScrollEnabled
             keyboardShouldPersistTaps="handled"
             // @ts-expect-error RN web data attribute for scrollbar CSS
-            dataSet={{ outboundVerticalScroll: '1' }}
+            dataSet={{ outboundProfileScroll: '1' }}
           >
             {filtered.map((opt) => {
               const selected = opt.key === value;
@@ -150,7 +155,7 @@ export default function IndustryVerticalSelect({ value, onChange, locked = false
               );
             })}
             {filtered.length === 0 ? (
-              <Text style={styles.empty}>No matching verticals</Text>
+              <Text style={styles.empty}>No matching profiles</Text>
             ) : null}
           </ScrollView>
         </View>
@@ -187,8 +192,6 @@ const styles = StyleSheet.create({
     color: 'rgba(255,255,255,0.45)',
     fontSize: 12,
   },
-  // In-flow list (not absolute) so ScrollView parent layout reserves space
-  // and touches aren't clipped by siblings under an absolute overlay.
   dropdown: {
     marginTop: 6,
     backgroundColor: '#12121c',

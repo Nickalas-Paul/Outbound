@@ -11,26 +11,26 @@ Status values use the Source Status Key at the bottom of this document.
 | Natural Earth 1:110m Admin-0 Countries | https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_110m_admin_0_countries.geojson | GeoJSON | ~177 admin units | Public domain | **Active** | Used by `seed_geographies.py`. |
 | Natural Earth 1:50m Admin-1 States/Provinces | https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_50m_admin_1_states_provinces.geojson | GeoJSON | Subnational | Public domain | **Active** | Optional higher-res seed (`seed_50m_geographies.py`). |
 
-### TVI Dimension: Market Size & Growth (`dimensions.marketSizeAndGrowth`)
+### TVI Dimension: Market Size & Growth (`dimensions.tourismInfrastructure`)
 | Source | URL/API | Indicators | Format | Refresh | Status |
 |--------|---------|------------|--------|---------|--------|
 | World Bank Open Data (WDI) | `https://api.worldbank.org/v2/country/all/indicator/{CODE}?format=json&date=2015:2024` | `NY.GDP.MKTP.CD`, `NY.GDP.MKTP.KD.ZG`, `SP.POP.TOTL` | JSON | Annual | **Active** — worker: `ingest_world_bank.py` |
 | IMF World Economic Outlook (WEO) | SDMX / bulk Excel via data.imf.org | `imf_gdp_ppp` (scored); `imf_gdp_nominal` (ingested, **not scored**) | CSV/Excel | Biannual | **Active** — worker: `ingest_imf.py` |
 
-### TVI Dimension: Talent Density (`dimensions.talentDensity`)
+### TVI Dimension: Talent Density (`dimensions.accessibility`)
 | Source | URL/API | Indicators | Format | Refresh | Status |
 |--------|---------|------------|--------|---------|--------|
 | Education / UNESCO via WDI | World Bank Indicators API `date=2010:2024` | `SE.TER.CUAT.BA.ZS`, `SE.TER.ENRR`, `SL.TLF.ADVN.ZS`, `SE.XPD.TOTL.GD.ZS` | JSON | Annual | **Active** — worker: `ingest_education.py` (~196 countries) |
 | ILO via WDI | World Bank Indicators API | `SL.TLF.CACT.ZS`, `SL.UEM.TOTL.ZS` | JSON | Annual | **Active** — worker: `ingest_ilo.py` (~181 countries) |
 | OECD / WB education proxy | Legacy OECD-member tertiary series | `oecd_tertiary_attainment` | JSON | Annual | **Superseded** — `ingest_oecd.py` removed; historical `oecd` rows may remain. Scoring uses `education` + `ilo`. STEM share (`oecd_stem_share`) is no longer inserted (source unreliable). |
 
-### TVI Dimension: Tax Environment (`dimensions.taxEnvironment`)
+### TVI Dimension: Tax Environment (`dimensions.costIndex`)
 | Source | URL/API | Indicators | Format | Refresh | Status |
 |--------|---------|------------|--------|---------|--------|
 | Tax Foundation ITCI | GitHub CSV / taxfoundation.org | `corp_tax_rate` | CSV | Annual | **Active** — worker: `ingest_tax.py` (~38 countries) |
 | Tax global (World Bank) | WDI `date=2010:2024` | `GC.TAX.TOTL.GD.ZS`, `GC.TAX.GSRV.RV.ZS` | JSON | Annual | **Active** — worker: `ingest_tax_global.py` (expands coverage to ~155) |
 
-### TVI Dimension: Regulatory Ease (`dimensions.regulatoryEase`)
+### TVI Dimension: Regulatory Ease (`dimensions.safetyAndEntry`)
 | Source | URL/API | Indicators | Format | Refresh | Status |
 |--------|---------|------------|--------|---------|--------|
 | World Bank WGI | Sources API / Indicators API | `RQ.PER.RNK`, `GE.PER.RNK`, `RL.PER.RNK` | JSON | Annual | **Active** — `ingest_world_bank.py` (`--wgi-only` path) |
@@ -38,13 +38,13 @@ Status values use the Source Status Key at the bottom of this document.
 | Heritage Foundation Index of Economic Freedom | Download hub / Excel | `heritage_overall`, business/trade/investment freedom (2022–2023 vintage) | XLS/CSV | Annual | **Active** — worker: `ingest_heritage.py` (~175). `heritage_financial_freedom` ingested but **not scored**. |
 | World Bank Doing Business | Historical archive | Ease of Doing Business | Archive | Frozen ~2020 | **Archive** — not used in current scoring |
 
-### TVI Dimension: Infrastructure (`dimensions.infrastructure`)
+### TVI Dimension: Infrastructure (`dimensions.travelInfrastructure`)
 | Source | URL/API | Indicators | Format | Refresh | Status |
 |--------|---------|------------|--------|---------|--------|
 | World Bank — Internet / LPI | WDI | `IT.NET.USER.ZS`, `LP.LPI.OVRL.XQ` | JSON | Annual / periodic | **Active** — `ingest_world_bank.py` |
 | Infrastructure expanded (ITU–WDI) | WDI `date=2010:2024` | `EG.ELC.ACCS.ZS`, `IT.NET.BBND.P2`, `IT.CEL.SETS.P2`, `IS.AIR.DPRT` | JSON | Annual | **Active** — worker: `ingest_infrastructure.py` (source tag `infrastructure_expanded`) |
 
-### TVI Dimension: Competitor Saturation (`dimensions.competitorSaturation`)
+### TVI Dimension: Competitor Saturation (`dimensions.crowding`)
 | Source | URL/API | Indicators | Format | Refresh | Status |
 |--------|---------|------------|--------|---------|--------|
 | World Bank — New business density | WDI | `IC.BUS.NDNS.ZS` | JSON | Annual | **Active** — `ingest_world_bank.py` |

@@ -9,12 +9,12 @@ export interface Geography {
 export interface TVIScore {
   overall: number;
   dimensions: {
-    marketSizeAndGrowth: number;
-    talentDensity: number;
-    taxEnvironment: number;
-    regulatoryEase: number;
-    infrastructure: number;
-    competitorSaturation: number;
+    tourismInfrastructure: number;
+    accessibility: number;
+    costIndex: number;
+    safetyAndEntry: number;
+    travelInfrastructure: number;
+    crowding: number;
     trajectory: number;
   };
   confidence: "high" | "medium" | "low";
@@ -73,12 +73,16 @@ export {
 // Agents
 export * from "./agents";
 
-// Industry Verticals
-export * from "./verticals";
+// Traveler Profiles (formerly industry verticals)
+export * from "./travelerProfiles";
 
 // Market Signals (Layer 2)
 export {
+  SIGNAL_TYPE_KEYS,
+  SIGNAL_TYPE_LABELS,
+  SIGNAL_TYPE_DESCRIPTIONS,
   type MarketSignal,
   type SignalDirection,
   type SignalSummaryMap,
+  type SignalType,
 } from "./signals";

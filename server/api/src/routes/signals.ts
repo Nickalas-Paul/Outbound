@@ -3,6 +3,12 @@
  */
 
 import { Router, Request, Response } from 'express';
+import {
+  SIGNAL_TYPE_DESCRIPTIONS,
+  SIGNAL_TYPE_KEYS,
+  SIGNAL_TYPE_LABELS,
+  type SignalType,
+} from '@outbound/core';
 import { pool } from '../config/database';
 // MARKETPLACE: commented out for Outbound — preserved for future vendor/guide marketplace
 // import { createNotification } from '../services/notifications';
@@ -26,6 +32,21 @@ function parseLimit(raw: unknown): number {
   if (!Number.isFinite(n) || n < 1) return 10;
   return Math.min(n, 100);
 }
+
+/** GET /api/signals/types — travel signal category catalog. */
+router.get('/types', async (_req: Request, res: Response) => {
+  try {
+    const data = SIGNAL_TYPE_KEYS.map((key: SignalType) => ({
+      key,
+      label: SIGNAL_TYPE_LABELS[key],
+      description: SIGNAL_TYPE_DESCRIPTIONS[key],
+    }));
+    res.json(apiResponse(data, { totalTypes: data.length }));
+  } catch (err) {
+    console.error('[signals] types error:', err);
+    res.status(500).json(apiError('Internal server error'));
+  }
+});
 
 router.get('/', async (req: Request, res: Response) => {
   try {

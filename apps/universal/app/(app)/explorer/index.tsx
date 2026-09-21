@@ -84,7 +84,7 @@ export default function ExplorerScreen() {
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
-    void fetchGeographiesGeojson(filters.industryVertical, filters.horizon)
+    void fetchGeographiesGeojson(filters.profile, filters.horizon)
       .then((fc) => {
         if (!cancelled) {
           setGeojson(fc);
@@ -102,7 +102,7 @@ export default function ExplorerScreen() {
     return () => {
       cancelled = true;
     };
-  }, [filters.industryVertical, filters.horizon]);
+  }, [filters.profile, filters.horizon]);
 
   const selectGeography = useCallback(
     (opts: {
@@ -255,7 +255,7 @@ export default function ExplorerScreen() {
       {showDesktopChrome && selectedKey ? (
         <GeographyDrillDown
           geographyIdOrIso={selectedKey}
-          vertical={filters.industryVertical}
+          profile={filters.profile}
           onClose={closeSelection}
         />
       ) : null}
@@ -333,7 +333,7 @@ export default function ExplorerScreen() {
         <BottomSheet visible onClose={closeSelection} height="70%">
           <GeographyDrillDown
             geographyIdOrIso={selectedKey}
-            vertical={filters.industryVertical}
+            profile={filters.profile}
             onClose={closeSelection}
             variant="sheet"
             style={styles.mobileDrill}

@@ -2,7 +2,7 @@
 Ingest NewsAPI topic articles into market_signals (Layer 2).
 
 Auth: NEWSAPI_KEY in repo-root .env
-Runs exactly 8 topic queries per execution (~8 requests/day).
+Runs topic queries per execution (travel signal categories).
 """
 
 from __future__ import annotations
@@ -31,40 +31,37 @@ DEFAULT_SEVERITY = 3
 
 NEWSAPI_QUERIES: list[dict[str, Any]] = [
     {
-        "q": '"trade tariff" OR "import duty" OR "tariff increase"',
-        "signal_type": "tariff_risk",
-        "direction": "negative",
-        "dims": ["taxEnvironment", "competitorSaturation"],
-    },
-    {
         "q": '"economic sanctions" OR "trade embargo" OR "sanctions imposed"',
         "signal_type": "sanctions",
         "direction": "negative",
-        "dims": ["regulatoryEase", "marketSizeAndGrowth"],
+        "dims": ["safetyAndEntry", "accessibility"],
     },
     {
-        "q": '"trade agreement" OR "free trade deal" OR "trade pact signed"',
-        "signal_type": "trade_agreement",
-        "direction": "positive",
-        "dims": ["marketSizeAndGrowth", "competitorSaturation"],
-    },
-    {
-        "q": '"new regulation" OR "regulatory reform" OR "deregulation"',
-        "signal_type": "regulatory_change",
+        "q": '"visa ban" OR "visa requirement" OR "border closure" OR "entry ban"',
+        "signal_type": "entry_policy_change",
         "direction": "neutral",
-        "dims": ["regulatoryEase"],
+        "dims": ["safetyAndEntry", "accessibility"],
     },
     {
-        "q": '"political crisis" OR "coup" OR "civil unrest" OR "mass protest"',
+        "q": '"political crisis" OR "coup" OR "political instability"',
         "signal_type": "political_instability",
         "direction": "negative",
-        "dims": ["regulatoryEase"],
+        "dims": ["safetyAndEntry", "crowding"],
+    },
+    {
+        "q": (
+            '"civil unrest" OR "mass protest" OR '
+            '"general strike" OR "riots"'
+        ),
+        "signal_type": "civil_unrest",
+        "direction": "negative",
+        "dims": ["safetyAndEntry", "crowding"],
     },
     {
         "q": '"currency devaluation" OR "currency crisis" OR "hyperinflation"',
         "signal_type": "currency_crisis",
         "direction": "negative",
-        "dims": ["taxEnvironment", "marketSizeAndGrowth"],
+        "dims": ["costIndex"],
     },
     {
         "q": (
@@ -73,16 +70,34 @@ NEWSAPI_QUERIES: list[dict[str, Any]] = [
         ),
         "signal_type": "natural_disaster",
         "direction": "negative",
-        "dims": ["infrastructure", "marketSizeAndGrowth"],
+        "dims": ["safetyAndEntry", "travelInfrastructure"],
     },
     {
         "q": (
-            '"labor strike" OR "workers strike" OR '
-            '"general strike" OR "labor unrest"'
+            '"disease outbreak" OR "health emergency" OR '
+            '"WHO declares" OR "public health emergency"'
         ),
-        "signal_type": "labor_unrest",
+        "signal_type": "health_emergency",
         "direction": "negative",
-        "dims": ["talentDensity", "competitorSaturation"],
+        "dims": ["safetyAndEntry", "travelInfrastructure"],
+    },
+    {
+        "q": (
+            '"extreme weather" OR "heat wave" OR '
+            '"severe storm" OR "wildfire smoke"'
+        ),
+        "signal_type": "extreme_weather",
+        "direction": "negative",
+        "dims": ["safetyAndEntry", "travelInfrastructure"],
+    },
+    {
+        "q": (
+            '"airline strike" OR "flight cancellations" OR '
+            '"flights cancelled" OR "airport shutdown"'
+        ),
+        "signal_type": "airline_disruption",
+        "direction": "negative",
+        "dims": ["accessibility", "tourismInfrastructure"],
     },
 ]
 

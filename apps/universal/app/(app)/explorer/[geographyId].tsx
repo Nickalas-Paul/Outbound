@@ -57,12 +57,12 @@ function openExportUrl(url: string): void {
 function geographyExportUrl(
   idOrIso: string,
   format: 'pdf' | 'csv',
-  vertical: string
+  profile: string
 ): string {
   const base = getApiUrl().replace(/\/$/, '');
   const qs =
-    vertical && vertical !== 'all'
-      ? `?vertical=${encodeURIComponent(vertical)}`
+    profile && profile !== 'balanced'
+      ? `?profile=${encodeURIComponent(profile)}`
       : '';
   return `${base}/api/exports/geography/${encodeURIComponent(idOrIso)}/${format}${qs}`;
 }
@@ -300,10 +300,13 @@ export default function GeographyDetailScreen() {
   const { width } = useWindowDimensions();
   const params = useLocalSearchParams<{
     geographyId: string;
+    profile?: string;
     vertical?: string;
   }>();
   const geographyId = String(params.geographyId ?? '').trim();
-  const vertical = String(params.vertical ?? 'all').trim() || 'all';
+  const profile =
+    String(params.profile ?? params.vertical ?? 'balanced').trim() ||
+    'balanced';
 
   const {
     selected,
@@ -336,7 +339,7 @@ export default function GeographyDetailScreen() {
     setTrendsLoading(true);
     setSignals([]);
     setError(null);
-    void getGeographyDetail(geographyId, vertical)
+    void getGeographyDetail(geographyId, profile)
       .then((geo) => {
         if (!cancelled) setData(geo);
       })
@@ -365,7 +368,7 @@ export default function GeographyDetailScreen() {
     return () => {
       cancelled = true;
     };
-  }, [geographyId, vertical]);
+  }, [geographyId, profile]);
 
   const overall = data?.tvi?.overall ?? null;
   const overallColor = tviScoreColor(overall);
@@ -653,7 +656,7 @@ export default function GeographyDetailScreen() {
                             return;
                           }
                           const id = data.isoCode ?? data.id;
-                          openExportUrl(geographyExportUrl(id, 'pdf', vertical));
+                          openExportUrl(geographyExportUrl(id, 'pdf', profile));
                           setExportMenuOpen(false);
                         }}
                       >
@@ -672,7 +675,7 @@ export default function GeographyDetailScreen() {
                             return;
                           }
                           const id = data.isoCode ?? data.id;
-                          openExportUrl(geographyExportUrl(id, 'csv', vertical));
+                          openExportUrl(geographyExportUrl(id, 'csv', profile));
                           setExportMenuOpen(false);
                         }}
                       >

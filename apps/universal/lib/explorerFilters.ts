@@ -1,34 +1,34 @@
 import type { GeographyFilters } from '@/services/geographies';
-import { DEFAULT_INDUSTRY_VERTICAL } from '@/lib/industryVerticals';
+import { DEFAULT_TRAVELER_PROFILE } from '@/lib/travelerProfiles';
 
 export type TimeHorizon = 'current' | '2yr' | '5yr';
 
 export type ExplorerFilterState = {
-  industryVertical: string;
+  profile: string;
   horizon: TimeHorizon;
   minPopulation: number;
-  maxCorpTaxRate: number;
-  minTalentDensity: number;
-  maxCompetitorSaturation: number;
-  minRegulatoryEase: number;
+  minCostIndex: number;
+  minAccessibility: number;
+  maxCrowding: number;
+  minSafetyAndEntry: number;
 };
 
 export const DEFAULT_FILTERS: ExplorerFilterState = {
-  industryVertical: DEFAULT_INDUSTRY_VERTICAL,
+  profile: DEFAULT_TRAVELER_PROFILE,
   horizon: 'current',
   minPopulation: 0,
-  maxCorpTaxRate: 50,
-  minTalentDensity: 0,
-  maxCompetitorSaturation: 100,
-  minRegulatoryEase: 0,
+  minCostIndex: 0,
+  minAccessibility: 0,
+  maxCrowding: 100,
+  minSafetyAndEntry: 0,
 };
 
 export const FILTER_LIMITS = {
   minPopulation: { min: 0, max: 100_000_000, step: 1_000_000 },
-  maxCorpTaxRate: { min: 0, max: 50, step: 1 },
-  minTalentDensity: { min: 0, max: 100, step: 1 },
-  maxCompetitorSaturation: { min: 0, max: 100, step: 1 },
-  minRegulatoryEase: { min: 0, max: 100, step: 1 },
+  minCostIndex: { min: 0, max: 100, step: 1 },
+  minAccessibility: { min: 0, max: 100, step: 1 },
+  maxCrowding: { min: 0, max: 100, step: 1 },
+  minSafetyAndEntry: { min: 0, max: 100, step: 1 },
 } as const;
 
 export function formatPopulation(value: number): string {
@@ -58,27 +58,32 @@ export function formatMaxScore(value: number): string {
 export function toApiFilters(state: ExplorerFilterState): GeographyFilters {
   const filters: GeographyFilters = {};
   if (state.minPopulation > 0) filters.minPopulation = state.minPopulation;
-  if (state.maxCorpTaxRate < FILTER_LIMITS.maxCorpTaxRate.max) {
-    filters.maxCorpTaxRate = state.maxCorpTaxRate;
+  if (state.minCostIndex > 0) filters.minCostIndex = state.minCostIndex;
+  if (state.minAccessibility > 0) filters.minAccessibility = state.minAccessibility;
+  if (state.maxCrowding < 100) {
+    filters.maxCrowding = state.maxCrowding;
   }
-  if (state.minTalentDensity > 0) filters.minTalentDensity = state.minTalentDensity;
-  if (state.maxCompetitorSaturation < 100) {
-    filters.maxCompetitorSaturation = state.maxCompetitorSaturation;
-  }
-  if (state.minRegulatoryEase > 0) filters.minRegulatoryEase = state.minRegulatoryEase;
+  if (state.minSafetyAndEntry > 0) filters.minSafetyAndEntry = state.minSafetyAndEntry;
   return filters;
 }
 
 export function filtersEqual(a: ExplorerFilterState, b: ExplorerFilterState): boolean {
   return (
-    a.industryVertical === b.industryVertical &&
+    a.profile === b.profile &&
     a.horizon === b.horizon &&
     a.minPopulation === b.minPopulation &&
-    a.maxCorpTaxRate === b.maxCorpTaxRate &&
-    a.minTalentDensity === b.minTalentDensity &&
-    a.maxCompetitorSaturation === b.maxCompetitorSaturation &&
-    a.minRegulatoryEase === b.minRegulatoryEase
+    a.minCostIndex === b.minCostIndex &&
+    a.minAccessibility === b.minAccessibility &&
+    a.maxCrowding === b.maxCrowding &&
+    a.minSafetyAndEntry === b.minSafetyAndEntry
   );
+}
+
+function normalizeProfileKey(raw: string | undefined): string {
+  if (!raw || raw === 'all_industries' || raw === 'all') {
+    return DEFAULT_FILTERS.profile;
+  }
+  return raw;
 }
 
 export function parseFiltersFromParams(
@@ -100,19 +105,16 @@ export function parseFiltersFromParams(
     horizonRaw === '2yr' || horizonRaw === '5yr' ? horizonRaw : 'current';
 
   return {
-    industryVertical:
-      one('vertical') === 'all_industries'
-        ? DEFAULT_FILTERS.industryVertical
-        : one('vertical') || DEFAULT_FILTERS.industryVertical,
+    profile: normalizeProfileKey(one('profile') ?? one('vertical')),
     horizon,
     minPopulation: num('minPopulation', DEFAULT_FILTERS.minPopulation),
-    maxCorpTaxRate: num('maxCorpTaxRate', DEFAULT_FILTERS.maxCorpTaxRate),
-    minTalentDensity: num('minTalentDensity', DEFAULT_FILTERS.minTalentDensity),
-    maxCompetitorSaturation: num(
-      'maxCompetitorSaturation',
-      DEFAULT_FILTERS.maxCompetitorSaturation
+    minCostIndex: num('minCostIndex', DEFAULT_FILTERS.minCostIndex),
+    minAccessibility: num('minAccessibility', DEFAULT_FILTERS.minAccessibility),
+    maxCrowding: num(
+      'maxCrowding',
+      DEFAULT_FILTERS.maxCrowding
     ),
-    minRegulatoryEase: num('minRegulatoryEase', DEFAULT_FILTERS.minRegulatoryEase),
+    minSafetyAndEntry: num('minSafetyAndEntry', DEFAULT_FILTERS.minSafetyAndEntry),
   };
 }
 
@@ -120,8 +122,8 @@ export function filtersToQueryRecord(
   state: ExplorerFilterState
 ): Record<string, string> {
   const out: Record<string, string> = {};
-  if (state.industryVertical !== DEFAULT_FILTERS.industryVertical) {
-    out.vertical = state.industryVertical;
+  if (state.profile !== DEFAULT_FILTERS.profile) {
+    out.profile = state.profile;
   }
   if (state.horizon !== DEFAULT_FILTERS.horizon) {
     out.horizon = state.horizon;
@@ -129,17 +131,17 @@ export function filtersToQueryRecord(
   if (state.minPopulation !== DEFAULT_FILTERS.minPopulation) {
     out.minPopulation = String(state.minPopulation);
   }
-  if (state.maxCorpTaxRate !== DEFAULT_FILTERS.maxCorpTaxRate) {
-    out.maxCorpTaxRate = String(state.maxCorpTaxRate);
+  if (state.minCostIndex !== DEFAULT_FILTERS.minCostIndex) {
+    out.minCostIndex = String(state.minCostIndex);
   }
-  if (state.minTalentDensity !== DEFAULT_FILTERS.minTalentDensity) {
-    out.minTalentDensity = String(state.minTalentDensity);
+  if (state.minAccessibility !== DEFAULT_FILTERS.minAccessibility) {
+    out.minAccessibility = String(state.minAccessibility);
   }
-  if (state.maxCompetitorSaturation !== DEFAULT_FILTERS.maxCompetitorSaturation) {
-    out.maxCompetitorSaturation = String(state.maxCompetitorSaturation);
+  if (state.maxCrowding !== DEFAULT_FILTERS.maxCrowding) {
+    out.maxCrowding = String(state.maxCrowding);
   }
-  if (state.minRegulatoryEase !== DEFAULT_FILTERS.minRegulatoryEase) {
-    out.minRegulatoryEase = String(state.minRegulatoryEase);
+  if (state.minSafetyAndEntry !== DEFAULT_FILTERS.minSafetyAndEntry) {
+    out.minSafetyAndEntry = String(state.minSafetyAndEntry);
   }
   return out;
 }
@@ -147,17 +149,22 @@ export function filtersToQueryRecord(
 /** Portable JSONB shape stored in saved_searches.filters. */
 export type SavedFilterPayload = {
   population?: number;
+  /** @deprecated replaced by minCostIndex */
   maxCorpTaxRate?: number;
-  regulatoryEase?: number;
-  talentDensity?: number;
-  competitorSaturation?: number;
+  minCostIndex?: number;
+  costIndex?: number;
+  safetyAndEntry?: number;
+  accessibility?: number;
+  crowding?: number;
+  profile?: string;
+  /** @deprecated use profile */
   vertical?: string;
   horizon?: TimeHorizon | string;
-  // Also accept explorer-native keys for forward compatibility.
   minPopulation?: number;
-  minTalentDensity?: number;
-  maxCompetitorSaturation?: number;
-  minRegulatoryEase?: number;
+  minAccessibility?: number;
+  maxCrowding?: number;
+  minSafetyAndEntry?: number;
+  /** @deprecated use profile */
   industryVertical?: string;
 };
 
@@ -166,11 +173,11 @@ export function stateToSavedFilters(
 ): SavedFilterPayload {
   return {
     population: state.minPopulation,
-    maxCorpTaxRate: state.maxCorpTaxRate,
-    regulatoryEase: state.minRegulatoryEase,
-    talentDensity: state.minTalentDensity,
-    competitorSaturation: state.maxCompetitorSaturation,
-    vertical: state.industryVertical,
+    minCostIndex: state.minCostIndex,
+    safetyAndEntry: state.minSafetyAndEntry,
+    accessibility: state.minAccessibility,
+    crowding: state.maxCrowding,
+    profile: state.profile,
     horizon: state.horizon,
   };
 }
@@ -195,34 +202,36 @@ export function savedFiltersToState(
   const horizon: TimeHorizon =
     horizonRaw === '2yr' || horizonRaw === '5yr' ? horizonRaw : 'current';
 
-  const vertical =
-    (typeof f.vertical === 'string' && f.vertical) ||
-    (typeof f.industryVertical === 'string' && f.industryVertical) ||
-    DEFAULT_FILTERS.industryVertical;
+  const profile = normalizeProfileKey(
+    (typeof f.profile === 'string' && f.profile) ||
+      (typeof f.vertical === 'string' && f.vertical) ||
+      (typeof f.industryVertical === 'string' && f.industryVertical) ||
+      undefined
+  );
 
   return {
-    industryVertical: vertical === 'all_industries' ? DEFAULT_INDUSTRY_VERTICAL : vertical,
+    profile,
     horizon,
     minPopulation: numField(f, ['population', 'minPopulation'], DEFAULT_FILTERS.minPopulation),
-    maxCorpTaxRate: numField(
+    minCostIndex: numField(
       f,
-      ['maxCorpTaxRate'],
-      DEFAULT_FILTERS.maxCorpTaxRate
+      ['minCostIndex', 'costIndex'],
+      DEFAULT_FILTERS.minCostIndex
     ),
-    minTalentDensity: numField(
+    minAccessibility: numField(
       f,
-      ['talentDensity', 'minTalentDensity'],
-      DEFAULT_FILTERS.minTalentDensity
+      ['accessibility', 'minAccessibility'],
+      DEFAULT_FILTERS.minAccessibility
     ),
-    maxCompetitorSaturation: numField(
+    maxCrowding: numField(
       f,
-      ['competitorSaturation', 'maxCompetitorSaturation'],
-      DEFAULT_FILTERS.maxCompetitorSaturation
+      ['crowding', 'maxCrowding'],
+      DEFAULT_FILTERS.maxCrowding
     ),
-    minRegulatoryEase: numField(
+    minSafetyAndEntry: numField(
       f,
-      ['regulatoryEase', 'minRegulatoryEase'],
-      DEFAULT_FILTERS.minRegulatoryEase
+      ['safetyAndEntry', 'minSafetyAndEntry'],
+      DEFAULT_FILTERS.minSafetyAndEntry
     ),
   };
 }

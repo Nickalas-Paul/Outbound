@@ -23,18 +23,18 @@ Phase 7.5 — institutional indicators, trend projections, and Layer 2 market si
 | `ingest_tax_global.py` | Global effective tax burden (World Bank) |
 | `ingest_education.py` | Global education / talent indicators |
 | `ingest_ilo.py` | ILO labor-force series |
-| `ingest_infrastructure.py` | Expanded infrastructure (broadband, power, air, etc.) |
+| `ingest_infrastructure.py` | Expanded travelInfrastructure (broadband, power, air, etc.) |
 | `ingest_cpi.py` | Transparency / Control of Corruption path |
 | `ingest_predictions.py` | Polymarket → `market_signals` (+ notification hook) |
 | `ingest_events.py` | GDELT / seed events → `market_signals` (+ notification hook) |
 | `compute_trends.py` | OLS trends, 2yr/5yr projections, signal adjustments |
-| `compute_tvi.py` | Batch TVI scoring (`mvi_scores`) |
+| `compute_tvi.py` | Batch TVI scoring (`destination_scores`) |
 
 ## Run order
 
 1. **Ingest workers** — any order among `ingest_*` / seed scripts.
 2. **`compute_trends.py`** — builds `trend_scores` and applies active signal adjustments to projections.
-3. **`compute_tvi.py`** — writes `mvi_scores` (including composite Trajectory).
+3. **`compute_tvi.py`** — writes `destination_scores` (including composite Trajectory).
 
 Signal workers (`ingest_predictions.py`, `ingest_events.py`) may run on a separate cadence. After writing signals they call `POST /api/signals/process-notifications` via `notify_signals.py` so verified agents covering those geographies get `market_event` notifications. Notification failures are logged and do not fail ingestion.
 

@@ -61,6 +61,65 @@ INDICATORS = [
         "per_1000_people",
         HISTORICAL_DATE_RANGE,
     ),
+    # Tourism / travel indicators (Phase 1 Step 6)
+    (
+        "ST.INT.ARVL",
+        "ST.INT.ARVL",
+        "International tourism, number of arrivals",
+        "count",
+        HISTORICAL_DATE_RANGE,
+    ),
+    (
+        "ST.INT.TVLX.CD",
+        "ST.INT.TVLX.CD",
+        "International tourism, expenditures (current US$)",
+        "USD",
+        HISTORICAL_DATE_RANGE,
+    ),
+    (
+        "SH.MED.PHYS.ZS",
+        "SH.MED.PHYS.ZS",
+        "Physicians (per 1,000 people)",
+        "per_1000_people",
+        HISTORICAL_DATE_RANGE,
+    ),
+    (
+        "FP.CPI.TOTL",
+        "FP.CPI.TOTL",
+        "Consumer price index (2010 = 100)",
+        "index",
+        HISTORICAL_DATE_RANGE,
+    ),
+    # Also under infrastructure_expanded — duplicated here so scoring_config
+    # world_bank source tags resolve without a separate worker run.
+    (
+        "IS.AIR.DPRT",
+        "IS.AIR.DPRT",
+        "Air transport, registered carrier departures worldwide",
+        "count",
+        HISTORICAL_DATE_RANGE,
+    ),
+    (
+        "IT.CEL.SETS.P2",
+        "IT.CEL.SETS.P2",
+        "Mobile cellular subscriptions (per 100 people)",
+        "per_100_people",
+        HISTORICAL_DATE_RANGE,
+    ),
+    (
+        "EG.ELC.ACCS.ZS",
+        "EG.ELC.ACCS.ZS",
+        "Access to electricity (% of population)",
+        "percent",
+        HISTORICAL_DATE_RANGE,
+    ),
+    (
+        "IT.NET.BBND.P2",
+        "IT.NET.BBND.P2",
+        "Fixed broadband subscriptions (per 100 people)",
+        "per_100_people",
+        HISTORICAL_DATE_RANGE,
+    ),
     # Worldwide Governance Indicators (0-100 scores; stored as canonical PER.RNK codes)
     (
         "RQ.PER.RNK",
@@ -80,6 +139,13 @@ INDICATORS = [
         "RL.PER.RNK",
         "GOV_WGI_RL.SC",
         "Rule of Law — Percentile Rank",
+        "percentile",
+        HISTORICAL_DATE_RANGE,
+    ),
+    (
+        "PV.PER.RNK",
+        "GOV_WGI_PV.SC",
+        "Political Stability / Absence of Violence — Percentile Rank",
         "percentile",
         HISTORICAL_DATE_RANGE,
     ),

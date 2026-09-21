@@ -12,13 +12,15 @@ import { Request, Response, NextFunction } from 'express';
 const BODY_KEY_TO_FILTER: Record<string, FilterKey> = {
   population: 'population',
   minPopulation: 'population',
-  maxCorpTaxRate: 'maxCorpTaxRate',
-  regulatoryEase: 'regulatoryEase',
-  minRegulatoryEase: 'regulatoryEase',
-  talentDensity: 'talentDensity',
-  minTalentDensity: 'talentDensity',
-  competitorSaturation: 'competitorSaturation',
-  maxCompetitorSaturation: 'competitorSaturation',
+  maxCorpTaxRate: 'costIndex',
+  minCostIndex: 'costIndex',
+  costIndex: 'costIndex',
+  safetyAndEntry: 'safetyAndEntry',
+  minSafetyAndEntry: 'safetyAndEntry',
+  accessibility: 'accessibility',
+  minAccessibility: 'accessibility',
+  crowding: 'crowding',
+  maxCrowding: 'crowding',
 };
 
 function normalizeTier(raw: string | undefined): SubscriptionTier {

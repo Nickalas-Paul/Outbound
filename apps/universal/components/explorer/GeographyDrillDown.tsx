@@ -32,12 +32,12 @@ const DIMENSIONS: Array<{
   label: string;
   color: string;
 }> = [
-  { key: 'marketSizeAndGrowth', label: 'Market Size & Growth', color: '#5b8def' },
-  { key: 'talentDensity', label: 'Talent Density', color: '#3ecf8e' },
-  { key: 'taxEnvironment', label: 'Tax Environment', color: '#e0a03a' },
-  { key: 'regulatoryEase', label: 'Regulatory Ease', color: '#9b7bde' },
-  { key: 'infrastructure', label: 'Infrastructure', color: '#2eb8a6' },
-  { key: 'competitorSaturation', label: 'Competitor Saturation', color: '#d96b6b' },
+  { key: 'tourismInfrastructure', label: 'Tourism Infrastructure & Capacity', color: '#5b8def' },
+  { key: 'accessibility', label: 'Accessibility & Ease of Travel', color: '#3ecf8e' },
+  { key: 'costIndex', label: 'Cost Index', color: '#e0a03a' },
+  { key: 'safetyAndEntry', label: 'Entry Requirements & Safety', color: '#9b7bde' },
+  { key: 'travelInfrastructure', label: 'Travel Infrastructure', color: '#2eb8a6' },
+  { key: 'crowding', label: 'Tourism Crowding', color: '#d96b6b' },
   { key: 'trajectory', label: 'Trajectory', color: '#6b9bd1' },
 ];
 
@@ -50,7 +50,7 @@ function confidenceColor(c: string | null | undefined): string {
 
 type Props = {
   geographyIdOrIso: string | null;
-  vertical?: string;
+  profile?: string;
   onClose: () => void;
   variant?: 'panel' | 'sheet';
   style?: object;
@@ -58,7 +58,7 @@ type Props = {
 
 export default function GeographyDrillDown({
   geographyIdOrIso,
-  vertical = 'all',
+  profile = 'balanced',
   onClose,
   variant = 'panel',
   style,
@@ -81,7 +81,7 @@ export default function GeographyDrillDown({
     setLoading(true);
     setError(null);
     setSignals([]);
-    void fetchGeographyById(geographyIdOrIso, vertical)
+    void fetchGeographyById(geographyIdOrIso, profile)
       .then((geo) => {
         if (!cancelled) setData(geo);
       })
@@ -101,7 +101,7 @@ export default function GeographyDrillDown({
     return () => {
       cancelled = true;
     };
-  }, [geographyIdOrIso, vertical]);
+  }, [geographyIdOrIso, profile]);
 
   if (!geographyIdOrIso) return null;
 
@@ -274,8 +274,8 @@ export default function GeographyDrillDown({
               onPress={() => {
                 const base = `/explorer/${encodeURIComponent(geoKey)}`;
                 const href =
-                  vertical && vertical !== 'all'
-                    ? `${base}?vertical=${encodeURIComponent(vertical)}`
+                  profile && profile !== 'balanced'
+                    ? `${base}?profile=${encodeURIComponent(profile)}`
                     : base;
                 router.push(href as `/explorer/${string}`);
               }}

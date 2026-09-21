@@ -5,12 +5,12 @@ export type GeographyFeatureProperties = {
   name: string;
   isoCode: string | null;
   overall: number | null;
-  marketSizeAndGrowth: number | null;
-  talentDensity: number | null;
-  taxEnvironment: number | null;
-  regulatoryEase: number | null;
-  infrastructure: number | null;
-  competitorSaturation: number | null;
+  tourismInfrastructure: number | null;
+  accessibility: number | null;
+  costIndex: number | null;
+  safetyAndEntry: number | null;
+  travelInfrastructure: number | null;
+  crowding: number | null;
   trajectory: number | null;
   confidence: 'high' | 'medium' | 'low' | null;
   population: number | null;
@@ -46,12 +46,12 @@ export type GeographyListItem = {
   tvi: {
     overall: number | null;
     dimensions: {
-      marketSizeAndGrowth: number | null;
-      talentDensity: number | null;
-      taxEnvironment: number | null;
-      regulatoryEase: number | null;
-      infrastructure: number | null;
-      competitorSaturation: number | null;
+      tourismInfrastructure: number | null;
+      accessibility: number | null;
+      costIndex: number | null;
+      safetyAndEntry: number | null;
+      travelInfrastructure: number | null;
+      crowding: number | null;
       trajectory: number | null;
     } | null;
     confidence: 'high' | 'medium' | 'low' | null;
@@ -63,10 +63,12 @@ export type GeographyListItem = {
 
 export type GeographyFilters = {
   minPopulation?: number;
+  minCostIndex?: number;
+  /** @deprecated use minCostIndex */
   maxCorpTaxRate?: number;
-  minTalentDensity?: number;
-  maxCompetitorSaturation?: number;
-  minRegulatoryEase?: number;
+  minAccessibility?: number;
+  maxCrowding?: number;
+  minSafetyAndEntry?: number;
 };
 
 type ApiEnvelope<T> = {
@@ -93,7 +95,7 @@ export async function fetchGeographiesGeojson(
   horizon?: '2yr' | '5yr' | 'current' | null
 ): Promise<GeographyFeatureCollection> {
   const params = new URLSearchParams();
-  if (vertical) params.set('vertical', vertical);
+  if (vertical) params.set('profile', vertical);
   if (horizon === '2yr' || horizon === '5yr') params.set('horizon', horizon);
   const qs = params.toString() ? `?${params.toString()}` : '';
   const response = await fetch(`${getApiUrl()}/api/geographies/geojson${qs}`);
@@ -117,7 +119,7 @@ export async function filterGeographies(
   filters: GeographyFilters,
   options?: {
     limit?: number;
-    vertical?: string;
+    profile?: string;
     horizon?: '2yr' | '5yr';
   }
 ): Promise<{ data: GeographyListItem[]; total: number }> {
@@ -125,7 +127,7 @@ export async function filterGeographies(
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      vertical: options?.vertical ?? 'all',
+      profile: options?.profile ?? 'balanced',
       horizon: options?.horizon,
       filters,
       sort: { field: 'overall', direction: 'desc' },
@@ -143,7 +145,7 @@ export async function fetchGeographyById(
   idOrIso: string,
   vertical?: string
 ): Promise<GeographyListItem> {
-  const qs = vertical ? `?vertical=${encodeURIComponent(vertical)}` : '';
+  const qs = vertical ? `?profile=${encodeURIComponent(vertical)}` : '';
   const response = await fetch(
     `${getApiUrl()}/api/geographies/${encodeURIComponent(idOrIso)}${qs}`
   );
@@ -186,18 +188,18 @@ export type GeographyDetail = {
   tvi: {
     overall: number | null;
     dimensions: {
-      marketSizeAndGrowth: number | null;
-      talentDensity: number | null;
-      taxEnvironment: number | null;
-      regulatoryEase: number | null;
-      infrastructure: number | null;
-      competitorSaturation: number | null;
+      tourismInfrastructure: number | null;
+      accessibility: number | null;
+      costIndex: number | null;
+      safetyAndEntry: number | null;
+      travelInfrastructure: number | null;
+      crowding: number | null;
       trajectory: number | null;
     } | null;
     confidence: 'high' | 'medium' | 'low' | null;
     dataFreshness: string | null;
     calculatedAt: string | null;
-    vertical: string;
+    profile: string;
     sources: TviSourceRef[];
   } | null;
   quickFacts: QuickFacts | null;
@@ -209,7 +211,7 @@ export async function getGeographyDetail(
   vertical?: string
 ): Promise<GeographyDetail> {
   const params = new URLSearchParams();
-  if (vertical) params.set('vertical', vertical);
+  if (vertical) params.set('profile', vertical);
   const qs = params.toString() ? `?${params.toString()}` : '';
   const response = await fetch(
     `${getApiUrl()}/api/geographies/${encodeURIComponent(id)}${qs}`

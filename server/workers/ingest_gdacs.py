@@ -25,7 +25,7 @@ EVENT_URL = "https://www.gdacs.org/"
 REQUEST_TIMEOUT_SEC = 90
 WINDOW_DAYS = 30
 EXPIRE_DAYS = 14
-AFFECTED_DIMENSIONS = ["infrastructure", "marketSizeAndGrowth"]
+AFFECTED_DIMENSIONS = ["safetyAndEntry", "travelInfrastructure"]
 
 EVENT_TYPE_LABELS = {
     "EQ": "earthquake",

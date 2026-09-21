@@ -1,8 +1,8 @@
 """
 TVI scoring engine.
 
-Reads raw_indicators + scoring_config, writes mvi_scores for industry_vertical
-'all_industries'. Deterministic: same inputs produce the same scores.
+Reads raw_indicators + scoring_config, writes destination_scores for profile
+'balanced'. Deterministic: same inputs produce the same scores.
 
 Dependency order:
     1. python compute_trends.py   # writes trend_scores used for Trajectory
@@ -31,9 +31,9 @@ from db import get_cursor
 from scoring_config import (
     BASE_DIMENSION_KEYS,
     DIMENSIONS,
-    INDUSTRY_VERTICAL,
     MIN_DIMENSIONS_FOR_OVERALL,
-    VERTICAL_WEIGHTS,
+    PROFILE_WEIGHTS,
+    STORED_PROFILE,
 )
 
 
@@ -195,6 +195,37 @@ def compute_confidence(
     return "low"
 
 
+def compute_overall_score(
+    dimensions: dict[str, float | int | None],
+    vertical_weights: dict[str, float],
+    *,
+    min_dimensions: int | None = None,
+) -> int | None:
+    """
+    Weighted overall from available dimension scores.
+    Missing / zero-weight dimensions are dropped and weights renormalize.
+    Returns None when fewer than min_dimensions scores are available.
+    """
+    threshold = (
+        MIN_DIMENSIONS_FOR_OVERALL if min_dimensions is None else min_dimensions
+    )
+    overall_parts: list[tuple[float, float]] = []
+    for dim_key, score in dimensions.items():
+        if score is None:
+            continue
+        weight = float(vertical_weights.get(dim_key, 0.0))
+        if weight <= 0:
+            continue
+        overall_parts.append((float(score), weight))
+
+    if len(overall_parts) < threshold:
+        return None
+    overall_raw = weighted_average(overall_parts)
+    if overall_raw is None:
+        return None
+    return round_score(overall_raw)
+
+
 def upsert_tvi_score(
     cursor,
     geography_id: str,
@@ -206,9 +237,9 @@ def upsert_tvi_score(
 ) -> None:
     cursor.execute(
         """
-        INSERT INTO mvi_scores (
+        INSERT INTO destination_scores (
             geography_id,
-            industry_vertical,
+            profile,
             overall_score,
             dimensions,
             confidence,
@@ -218,7 +249,7 @@ def upsert_tvi_score(
         )
         VALUES (
             %(geography_id)s,
-            %(industry_vertical)s,
+            %(profile)s,
             %(overall_score)s,
             %(dimensions)s,
             %(confidence)s,
@@ -226,7 +257,7 @@ def upsert_tvi_score(
             %(sources)s,
             NOW()
         )
-        ON CONFLICT (geography_id, industry_vertical)
+        ON CONFLICT (geography_id, profile)
         DO UPDATE SET
             overall_score = EXCLUDED.overall_score,
             dimensions = EXCLUDED.dimensions,
@@ -237,7 +268,7 @@ def upsert_tvi_score(
         """,
         {
             "geography_id": geography_id,
-            "industry_vertical": INDUSTRY_VERTICAL,
+            "profile": STORED_PROFILE,
             "overall_score": overall_score,
             "dimensions": Json(dimensions),
             "confidence": confidence,
@@ -248,7 +279,7 @@ def upsert_tvi_score(
 
 
 def compute_all() -> None:
-    vertical_weights = VERTICAL_WEIGHTS[INDUSTRY_VERTICAL]
+    vertical_weights = PROFILE_WEIGHTS[STORED_PROFILE]
     total_configured_indicators = sum(
         len(dim["indicators"])
         for dim in DIMENSIONS.values()
@@ -266,9 +297,9 @@ def compute_all() -> None:
         )
         geography_ids = [row[0] for row in cursor.fetchall()]
         logger.info(
-            "Scoring %s countries for vertical=%s (7-dimension model)",
+            "Scoring %s countries for profile=%s (7-dimension model)",
             len(geography_ids),
-            INDUSTRY_VERTICAL,
+            STORED_PROFILE,
         )
 
         trend_rates = fetch_trend_rates(cursor)
@@ -358,24 +389,15 @@ def compute_all() -> None:
                 dimensions_out["trajectory"] = None
 
             # Overall from available dimensions (up to 7)
-            overall_parts: list[tuple[float, float]] = []
-            for dim_key, score in dimensions_out.items():
-                if score is None:
-                    continue
-                weight = float(vertical_weights.get(dim_key, 0.0))
-                if weight <= 0:
-                    continue
-                overall_parts.append((float(score), weight))
-
-            dimensions_scored = len(overall_parts)
+            dimensions_scored = sum(
+                1
+                for dim_key, score in dimensions_out.items()
+                if score is not None
+                and float(vertical_weights.get(dim_key, 0.0)) > 0
+            )
             if dimensions_scored < MIN_DIMENSIONS_FOR_OVERALL:
-                overall_score: int | None = None
                 null_overall += 1
-            else:
-                overall_raw = weighted_average(overall_parts)
-                overall_score = (
-                    round_score(overall_raw) if overall_raw is not None else None
-                )
+            overall_score = compute_overall_score(dimensions_out, vertical_weights)
 
             confidence = compute_confidence(
                 dimensions_scored=dimensions_scored,
@@ -405,7 +427,7 @@ def compute_all() -> None:
             scored += 1
 
         logger.info(
-            "Wrote %s mvi_scores rows (null_overall=%s trajectory=%s) confidence=%s",
+            "Wrote %s destination_scores rows (null_overall=%s trajectory=%s) confidence=%s",
             scored,
             null_overall,
             trajectory_present,

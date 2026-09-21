@@ -34,8 +34,8 @@ Z_90 = 1.6448536269514722
 EPS = 1e-4
 
 # Domain-aware regression transforms for projections
-LOG_SCORE_DIMS = {"marketSizeAndGrowth"}
-LOGIT_SCORE_DIMS = {"regulatoryEase"}
+LOG_SCORE_DIMS = {"tourismInfrastructure"}
+LOGIT_SCORE_DIMS = {"safetyAndEntry"}
 
 # Signal → projection adjustment guardrails
 SIGNAL_HARD_CAP = 8.0

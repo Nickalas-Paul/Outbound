@@ -12,14 +12,13 @@ import {
   FILTER_LIMITS,
   formatMaxScore,
   formatMinScore,
-  formatPercentCap,
   formatPopulation,
   type ExplorerFilterState,
   type TimeHorizon,
 } from '@/lib/explorerFilters';
-import { DEFAULT_INDUSTRY_VERTICAL } from '@/lib/industryVerticals';
+import { DEFAULT_TRAVELER_PROFILE } from '@/lib/travelerProfiles';
 
-import IndustryVerticalSelect from './IndustryVerticalSelect';
+import TravelerProfileSelect from './TravelerProfileSelect';
 import SavedSearchesPanel from './SavedSearchesPanel';
 
 type Props = {
@@ -151,13 +150,13 @@ export default function FilterSidebar({ filters, onChange, onReset, style }: Pro
   const {
     canUseFilter,
     canUseHorizon,
-    canUseIndustryVertical,
+    canUseTravelerProfile,
   } = useTierAccess();
   const [promptKey, setPromptKey] = useState<string | null>(null);
 
-  const talentLocked = !canUseFilter('talentDensity');
-  const competitorLocked = !canUseFilter('competitorSaturation');
-  const industryLocked = !canUseIndustryVertical();
+  const talentLocked = !canUseFilter('accessibility');
+  const competitorLocked = !canUseFilter('crowding');
+  const profileLocked = !canUseTravelerProfile();
 
   const showPrompt = (key: string) => {
     setPromptKey(key);
@@ -174,26 +173,26 @@ export default function FilterSidebar({ filters, onChange, onReset, style }: Pro
 
       <View style={StyleSheet.flatten([styles.row, styles.verticalRow])}>
         <Text style={styles.rowLabel}>
-          {industryLocked ? 'Industry Vertical 🔒' : 'Industry Vertical'}
+          {profileLocked ? 'Traveler Profile 🔒' : 'Traveler Profile'}
         </Text>
-        {industryLocked ? (
+        {profileLocked ? (
           <Pressable
             style={styles.lockedBlock}
-            onPress={() => showPrompt('industry')}
+            onPress={() => showPrompt('profile')}
           >
-            <IndustryVerticalSelect
-              value={DEFAULT_INDUSTRY_VERTICAL}
+            <TravelerProfileSelect
+              value={DEFAULT_TRAVELER_PROFILE}
               onChange={() => undefined}
               locked
             />
-            {promptKey === 'industry' ? (
+            {promptKey === 'profile' ? (
               <Text style={styles.upgradePrompt}>{UPGRADE_PROMPT}</Text>
             ) : null}
           </Pressable>
         ) : (
-          <IndustryVerticalSelect
-            value={filters.industryVertical}
-            onChange={(industryVertical) => onChange({ industryVertical })}
+          <TravelerProfileSelect
+            value={filters.profile}
+            onChange={(profile) => onChange({ profile })}
           />
         )}
       </View>
@@ -253,16 +252,16 @@ export default function FilterSidebar({ filters, onChange, onReset, style }: Pro
       </FilterRow>
 
       <FilterRow
-        label="Corp. Tax Rate Cap"
-        valueLabel={formatPercentCap(filters.maxCorpTaxRate)}
+        label="Cost Index Min."
+        valueLabel={formatMinScore(filters.minCostIndex)}
       >
         <RangeSlider
-          value={filters.maxCorpTaxRate}
-          min={FILTER_LIMITS.maxCorpTaxRate.min}
-          max={FILTER_LIMITS.maxCorpTaxRate.max}
-          step={FILTER_LIMITS.maxCorpTaxRate.step}
+          value={filters.minCostIndex}
+          min={FILTER_LIMITS.minCostIndex.min}
+          max={FILTER_LIMITS.minCostIndex.max}
+          step={FILTER_LIMITS.minCostIndex.step}
           accent="#e0a03a"
-          onChange={(maxCorpTaxRate) => onChange({ maxCorpTaxRate })}
+          onChange={(minCostIndex) => onChange({ minCostIndex })}
         />
       </FilterRow>
 
@@ -272,15 +271,15 @@ export default function FilterSidebar({ filters, onChange, onReset, style }: Pro
           style={styles.lockedBlock}
         >
           <FilterRow
-            label="Talent Density Min."
-            valueLabel={formatMinScore(filters.minTalentDensity)}
+            label="Accessibility Min."
+            valueLabel={formatMinScore(filters.minAccessibility)}
             locked
           >
             <RangeSlider
-              value={filters.minTalentDensity}
-              min={FILTER_LIMITS.minTalentDensity.min}
-              max={FILTER_LIMITS.minTalentDensity.max}
-              step={FILTER_LIMITS.minTalentDensity.step}
+              value={filters.minAccessibility}
+              min={FILTER_LIMITS.minAccessibility.min}
+              max={FILTER_LIMITS.minAccessibility.max}
+              step={FILTER_LIMITS.minAccessibility.step}
               accent="#3ecf8e"
               disabled
               onChange={() => undefined}
@@ -292,16 +291,16 @@ export default function FilterSidebar({ filters, onChange, onReset, style }: Pro
         </Pressable>
       ) : (
         <FilterRow
-          label="Talent Density Min."
-          valueLabel={formatMinScore(filters.minTalentDensity)}
+          label="Accessibility Min."
+          valueLabel={formatMinScore(filters.minAccessibility)}
         >
           <RangeSlider
-            value={filters.minTalentDensity}
-            min={FILTER_LIMITS.minTalentDensity.min}
-            max={FILTER_LIMITS.minTalentDensity.max}
-            step={FILTER_LIMITS.minTalentDensity.step}
+            value={filters.minAccessibility}
+            min={FILTER_LIMITS.minAccessibility.min}
+            max={FILTER_LIMITS.minAccessibility.max}
+            step={FILTER_LIMITS.minAccessibility.step}
             accent="#3ecf8e"
-            onChange={(minTalentDensity) => onChange({ minTalentDensity })}
+            onChange={(minAccessibility) => onChange({ minAccessibility })}
           />
         </FilterRow>
       )}
@@ -312,15 +311,15 @@ export default function FilterSidebar({ filters, onChange, onReset, style }: Pro
           style={styles.lockedBlock}
         >
           <FilterRow
-            label="Competitor Saturation"
-            valueLabel={formatMaxScore(filters.maxCompetitorSaturation)}
+            label="Tourism Crowding Max."
+            valueLabel={formatMaxScore(filters.maxCrowding)}
             locked
           >
             <RangeSlider
-              value={filters.maxCompetitorSaturation}
-              min={FILTER_LIMITS.maxCompetitorSaturation.min}
-              max={FILTER_LIMITS.maxCompetitorSaturation.max}
-              step={FILTER_LIMITS.maxCompetitorSaturation.step}
+              value={filters.maxCrowding}
+              min={FILTER_LIMITS.maxCrowding.min}
+              max={FILTER_LIMITS.maxCrowding.max}
+              step={FILTER_LIMITS.maxCrowding.step}
               accent="#d96b6b"
               disabled
               onChange={() => undefined}
@@ -332,33 +331,33 @@ export default function FilterSidebar({ filters, onChange, onReset, style }: Pro
         </Pressable>
       ) : (
         <FilterRow
-          label="Competitor Saturation"
-          valueLabel={formatMaxScore(filters.maxCompetitorSaturation)}
+          label="Tourism Crowding Max."
+          valueLabel={formatMaxScore(filters.maxCrowding)}
         >
           <RangeSlider
-            value={filters.maxCompetitorSaturation}
-            min={FILTER_LIMITS.maxCompetitorSaturation.min}
-            max={FILTER_LIMITS.maxCompetitorSaturation.max}
-            step={FILTER_LIMITS.maxCompetitorSaturation.step}
+            value={filters.maxCrowding}
+            min={FILTER_LIMITS.maxCrowding.min}
+            max={FILTER_LIMITS.maxCrowding.max}
+            step={FILTER_LIMITS.maxCrowding.step}
             accent="#d96b6b"
-            onChange={(maxCompetitorSaturation) =>
-              onChange({ maxCompetitorSaturation })
+            onChange={(maxCrowding) =>
+              onChange({ maxCrowding })
             }
           />
         </FilterRow>
       )}
 
       <FilterRow
-        label="Regulatory Ease Floor"
-        valueLabel={formatMinScore(filters.minRegulatoryEase)}
+        label="Safety & Entry Floor"
+        valueLabel={formatMinScore(filters.minSafetyAndEntry)}
       >
         <RangeSlider
-          value={filters.minRegulatoryEase}
-          min={FILTER_LIMITS.minRegulatoryEase.min}
-          max={FILTER_LIMITS.minRegulatoryEase.max}
-          step={FILTER_LIMITS.minRegulatoryEase.step}
+          value={filters.minSafetyAndEntry}
+          min={FILTER_LIMITS.minSafetyAndEntry.min}
+          max={FILTER_LIMITS.minSafetyAndEntry.max}
+          step={FILTER_LIMITS.minSafetyAndEntry.step}
           accent="#9b7bde"
-          onChange={(minRegulatoryEase) => onChange({ minRegulatoryEase })}
+          onChange={(minSafetyAndEntry) => onChange({ minSafetyAndEntry })}
         />
       </FilterRow>
 

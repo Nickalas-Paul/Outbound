@@ -4,17 +4,16 @@
  *   - server/api/src/config/tvi.ts
  *   - server/workers/scoring_config.py
  *
- * Adding a dimension here (e.g. Trajectory) automatically surfaces it on
- * the geography detail page and the public methodology page.
+ * Phase 1 Step 3: travel-intelligence dimensions (Outbound).
  */
 
 export type DimensionKey =
-  | 'marketSizeAndGrowth'
-  | 'talentDensity'
-  | 'taxEnvironment'
-  | 'regulatoryEase'
-  | 'infrastructure'
-  | 'competitorSaturation'
+  | 'tourismInfrastructure'
+  | 'accessibility'
+  | 'costIndex'
+  | 'safetyAndEntry'
+  | 'travelInfrastructure'
+  | 'crowding'
   | 'trajectory';
 
 export type IndicatorDirection = 'higher_is_better' | 'lower_is_better';
@@ -44,169 +43,250 @@ export type DimensionDisplay = {
 
 export const TVI_DIMENSION_DISPLAY: DimensionDisplay[] = [
   {
-    key: 'marketSizeAndGrowth',
-    label: 'Market Size & Growth',
-    description: 'GDP, growth rates, population, and PPP-adjusted economic scale',
+    key: 'tourismInfrastructure',
+    label: 'Tourism Infrastructure & Capacity',
+    description:
+      'Visitor volume, air connectivity, and tourism spend that indicate destination capacity and maturity',
     indicatorCodes: [
-      'NY.GDP.MKTP.CD',
-      'NY.GDP.MKTP.KD.ZG',
-      'SP.POP.TOTL',
-      'imf_gdp_ppp',
+      'ST.INT.ARVL',
+      'IS.AIR.DPRT',
+      'ST.INT.TVLX.CD',
+      'tourism_receipts_per_arrival',
+      'unesco_site_count',
     ],
     indicators: [
       {
-        code: 'NY.GDP.MKTP.CD',
-        name: 'GDP (current US$)',
+        code: 'ST.INT.ARVL',
+        name: 'International tourism, number of arrivals',
         source: 'world_bank',
-        weight: 0.35,
+        weight: 0.3,
         direction: 'higher_is_better',
         normalization: 'log_scale',
       },
       {
-        code: 'NY.GDP.MKTP.KD.ZG',
-        name: 'GDP growth (annual %)',
+        code: 'IS.AIR.DPRT',
+        name: 'Air transport, registered carrier departures worldwide',
         source: 'world_bank',
-        weight: 0.35,
+        weight: 0.2,
+        direction: 'higher_is_better',
+        normalization: 'log_scale',
+      },
+      {
+        code: 'ST.INT.TVLX.CD',
+        name: 'International tourism, expenditures (current US$)',
+        source: 'world_bank',
+        weight: 0.2,
+        direction: 'higher_is_better',
+        normalization: 'log_scale',
+      },
+      {
+        code: 'tourism_receipts_per_arrival',
+        name: 'Tourism receipts per arrival',
+        source: 'world_bank_derived',
+        weight: 0.1,
         direction: 'higher_is_better',
         normalization: 'linear',
       },
       {
-        code: 'SP.POP.TOTL',
-        name: 'Population',
-        source: 'world_bank',
-        weight: 0.15,
-        direction: 'higher_is_better',
-        normalization: 'log_scale',
-      },
-      {
-        code: 'imf_gdp_ppp',
-        name: 'GDP PPP',
-        source: 'imf_weo',
-        weight: 0.15,
+        code: 'unesco_site_count',
+        name: 'UNESCO World Heritage site count',
+        source: 'unesco',
+        weight: 0.2,
         direction: 'higher_is_better',
         normalization: 'log_scale',
       },
     ],
   },
   {
-    key: 'talentDensity',
-    label: 'Talent Density',
-    description: 'Tertiary education attainment and skilled workforce density',
-    indicatorCodes: ['oecd_tertiary_attainment'],
-    indicators: [
-      {
-        code: 'oecd_tertiary_attainment',
-        name: 'Tertiary education attainment (%)',
-        source: 'oecd',
-        weight: 1.0,
-        direction: 'higher_is_better',
-        normalization: 'linear',
-        isProxy: true,
-        notes:
-          'Currently backed by a World Bank bachelor+ attainment series for OECD members — treated as proxy data.',
-      },
-    ],
-  },
-  {
-    key: 'taxEnvironment',
-    label: 'Tax Environment',
-    description: 'Corporate tax competitiveness for travelers and operators',
-    indicatorCodes: ['corp_tax_rate'],
-    indicators: [
-      {
-        code: 'corp_tax_rate',
-        name: 'Corporate tax rate (%)',
-        source: 'tax_foundation',
-        weight: 1.0,
-        direction: 'lower_is_better',
-        normalization: 'linear',
-        notes: 'Coverage today is roughly OECD economies (~38 countries).',
-      },
-    ],
-  },
-  {
-    key: 'regulatoryEase',
-    label: 'Regulatory Ease',
-    description: 'Economic freedom and ease of operating a business',
+    key: 'accessibility',
+    label: 'Accessibility & Ease of Travel',
+    description:
+      'Visa openness, digital connectivity, and English proficiency that affect how easily travelers can visit and navigate a destination',
     indicatorCodes: [
-      'RQ.PER.RNK',
-      'GE.PER.RNK',
-      'RL.PER.RNK',
-      'heritage_overall',
-      'heritage_business_freedom',
-      'heritage_trade_freedom',
-      'heritage_investment_freedom',
+      'ef_epi_score',
+      'visa_free_score',
+      'IT.NET.USER.ZS',
+      'IT.CEL.SETS.P2',
     ],
     indicators: [
       {
-        code: 'RQ.PER.RNK',
-        name: 'Regulatory Quality (WGI Percentile)',
-        source: 'world_bank',
+        code: 'ef_epi_score',
+        name: 'EF English Proficiency Index score',
+        source: 'ef_epi',
         weight: 0.3,
         direction: 'higher_is_better',
         normalization: 'linear',
       },
       {
-        code: 'GE.PER.RNK',
-        name: 'Government Effectiveness (WGI Percentile)',
+        code: 'visa_free_score',
+        name: 'Visa-free access score',
+        source: 'visa_index',
+        weight: 0.3,
+        direction: 'higher_is_better',
+        normalization: 'linear',
+      },
+      {
+        code: 'IT.NET.USER.ZS',
+        name: 'Internet users (% of population)',
         source: 'world_bank',
         weight: 0.2,
         direction: 'higher_is_better',
         normalization: 'linear',
       },
       {
-        code: 'RL.PER.RNK',
-        name: 'Rule of Law (WGI Percentile)',
+        code: 'IT.CEL.SETS.P2',
+        name: 'Mobile cellular subscriptions (per 100 people)',
         source: 'world_bank',
-        weight: 0.15,
-        direction: 'higher_is_better',
-        normalization: 'linear',
-      },
-      {
-        code: 'heritage_overall',
-        name: 'Economic Freedom Index (overall)',
-        source: 'heritage',
-        weight: 0.14,
-        direction: 'higher_is_better',
-        normalization: 'linear',
-      },
-      {
-        code: 'heritage_business_freedom',
-        name: 'Business Freedom',
-        source: 'heritage',
-        weight: 0.11,
-        direction: 'higher_is_better',
-        normalization: 'linear',
-      },
-      {
-        code: 'heritage_trade_freedom',
-        name: 'Trade Freedom',
-        source: 'heritage',
-        weight: 0.05,
-        direction: 'higher_is_better',
-        normalization: 'linear',
-      },
-      {
-        code: 'heritage_investment_freedom',
-        name: 'Investment Freedom',
-        source: 'heritage',
-        weight: 0.05,
+        weight: 0.2,
         direction: 'higher_is_better',
         normalization: 'linear',
       },
     ],
   },
   {
-    key: 'infrastructure',
-    label: 'Infrastructure',
-    description: 'Digital connectivity and logistics performance',
-    indicatorCodes: ['IT.NET.USER.ZS', 'LP.LPI.OVRL.XQ'],
+    key: 'costIndex',
+    label: 'Cost Index',
+    description:
+      'Relative cost of visiting and operating in a destination — purchasing power, inflation, tourism spend intensity, and FX volatility',
+    indicatorCodes: [
+      'gdp_ppp_per_capita',
+      'FP.CPI.TOTL',
+      'tourism_receipts_per_arrival',
+      'fx_volatility',
+    ],
     indicators: [
+      {
+        code: 'gdp_ppp_per_capita',
+        name: 'GDP PPP per capita',
+        source: 'world_bank_derived',
+        weight: 0.3,
+        direction: 'lower_is_better',
+        normalization: 'linear',
+      },
+      {
+        code: 'FP.CPI.TOTL',
+        name: 'Consumer price index (2010 = 100)',
+        source: 'world_bank',
+        weight: 0.3,
+        direction: 'lower_is_better',
+        normalization: 'linear',
+      },
+      {
+        code: 'tourism_receipts_per_arrival',
+        name: 'Tourism receipts per arrival',
+        source: 'world_bank_derived',
+        weight: 0.2,
+        direction: 'lower_is_better',
+        normalization: 'linear',
+      },
+      {
+        code: 'fx_volatility',
+        name: 'FX volatility (USD cross)',
+        source: 'ecb_fx_derived',
+        weight: 0.2,
+        direction: 'lower_is_better',
+        normalization: 'linear',
+      },
+    ],
+  },
+  {
+    key: 'safetyAndEntry',
+    label: 'Entry Requirements & Safety',
+    description:
+      'Travel advisories, political stability, rule of law, corruption control, and visa openness for entry risk',
+    indicatorCodes: [
+      'travel_advisory_level',
+      'fcdo_advisory_level',
+      'RL.PER.RNK',
+      'CC.PER.RNK',
+      'PV.PER.RNK',
+      'visa_free_score',
+    ],
+    indicators: [
+      {
+        code: 'travel_advisory_level',
+        name: 'US State Department travel advisory level',
+        source: 'state_dept_advisory',
+        weight: 0.22,
+        direction: 'lower_is_better',
+        normalization: 'linear',
+      },
+      {
+        code: 'fcdo_advisory_level',
+        name: 'UK FCDO travel advisory level',
+        source: 'fcdo',
+        weight: 0.18,
+        direction: 'lower_is_better',
+        normalization: 'linear',
+      },
+      {
+        code: 'RL.PER.RNK',
+        name: 'Rule of Law (WGI Percentile)',
+        source: 'world_bank',
+        weight: 0.18,
+        direction: 'higher_is_better',
+        normalization: 'linear',
+      },
+      {
+        code: 'CC.PER.RNK',
+        name: 'Control of Corruption (WGI score)',
+        source: 'transparency',
+        weight: 0.15,
+        direction: 'higher_is_better',
+        normalization: 'linear',
+      },
+      {
+        code: 'PV.PER.RNK',
+        name: 'Political Stability / Absence of Violence (WGI Percentile)',
+        source: 'world_bank',
+        weight: 0.17,
+        direction: 'higher_is_better',
+        normalization: 'linear',
+      },
+      {
+        code: 'visa_free_score',
+        name: 'Visa-free access score',
+        source: 'visa_index',
+        weight: 0.1,
+        direction: 'higher_is_better',
+        normalization: 'linear',
+      },
+    ],
+  },
+  {
+    key: 'travelInfrastructure',
+    label: 'Travel Infrastructure',
+    description:
+      'Power, connectivity, logistics, and healthcare capacity that support traveler movement and operations',
+    indicatorCodes: [
+      'EG.ELC.ACCS.ZS',
+      'IT.NET.USER.ZS',
+      'IT.NET.BBND.P2',
+      'LP.LPI.OVRL.XQ',
+      'SH.MED.PHYS.ZS',
+    ],
+    indicators: [
+      {
+        code: 'EG.ELC.ACCS.ZS',
+        name: 'Access to electricity (% of population)',
+        source: 'world_bank',
+        weight: 0.2,
+        direction: 'higher_is_better',
+        normalization: 'linear',
+      },
       {
         code: 'IT.NET.USER.ZS',
         name: 'Internet users (% of population)',
         source: 'world_bank',
-        weight: 0.5,
+        weight: 0.2,
+        direction: 'higher_is_better',
+        normalization: 'linear',
+      },
+      {
+        code: 'IT.NET.BBND.P2',
+        name: 'Fixed broadband subscriptions (per 100 people)',
+        source: 'world_bank',
+        weight: 0.2,
         direction: 'higher_is_better',
         normalization: 'linear',
       },
@@ -214,28 +294,45 @@ export const TVI_DIMENSION_DISPLAY: DimensionDisplay[] = [
         code: 'LP.LPI.OVRL.XQ',
         name: 'Logistics Performance Index',
         source: 'world_bank',
-        weight: 0.5,
+        weight: 0.2,
         direction: 'higher_is_better',
         normalization: 'linear',
-        notes: 'LPI updates infrequently; engine uses the latest non-null observation.',
+      },
+      {
+        code: 'SH.MED.PHYS.ZS',
+        name: 'Physicians (per 1,000 people)',
+        source: 'world_bank',
+        weight: 0.2,
+        direction: 'higher_is_better',
+        normalization: 'linear',
       },
     ],
   },
   {
-    key: 'competitorSaturation',
-    label: 'Competitor Saturation',
-    description: 'New business formation intensity as a market-activity proxy',
-    indicatorCodes: ['IC.BUS.NDNS.ZS'],
+    key: 'crowding',
+    label: 'Tourism Crowding',
+    description:
+      'Tourist intensity relative to population — higher crowding scores mean denser visitor pressure',
+    indicatorCodes: [
+      'tourist_arrivals_per_capita',
+      'tourism_receipts_per_capita',
+    ],
     indicators: [
       {
-        code: 'IC.BUS.NDNS.ZS',
-        name: 'New business density (per 1,000 people)',
-        source: 'world_bank',
-        weight: 1.0,
-        direction: 'higher_is_better',
+        code: 'tourist_arrivals_per_capita',
+        name: 'Tourist arrivals per capita',
+        source: 'world_bank_derived',
+        weight: 0.55,
+        direction: 'lower_is_better',
         normalization: 'linear',
-        notes:
-          'Higher formation rates score higher as a market-activity proxy — not industry HHI.',
+      },
+      {
+        code: 'tourism_receipts_per_capita',
+        name: 'Tourism receipts per capita',
+        source: 'world_bank_derived',
+        weight: 0.45,
+        direction: 'lower_is_better',
+        normalization: 'linear',
       },
     ],
   },
@@ -253,10 +350,14 @@ export const TVI_DIMENSION_DISPLAY: DimensionDisplay[] = [
 /** Short source labels for pills on the detail / methodology pages. */
 export const SOURCE_DISPLAY_NAMES: Record<string, string> = {
   world_bank: 'World Bank',
-  imf_weo: 'IMF WEO',
-  heritage: 'Heritage Foundation',
-  tax_foundation: 'Tax Foundation',
-  oecd: 'OECD',
+  world_bank_derived: 'World Bank (derived)',
+  ef_epi: 'EF EPI',
+  visa_index: 'Visa Index',
+  transparency: 'WGI / Transparency',
+  state_dept_advisory: 'US State Dept',
+  fcdo: 'UK FCDO',
+  unesco: 'UNESCO',
+  ecb_fx_derived: 'ECB FX (derived)',
 };
 
 export type SourceCatalogEntry = {
@@ -271,38 +372,66 @@ export type SourceCatalogEntry = {
 export const TVI_SOURCE_CATALOG: SourceCatalogEntry[] = [
   {
     key: 'world_bank',
-    name: 'World Bank Open Data / WGI',
-    role: 'GDP, growth, population, internet, LPI, business density, WGI governance scores',
-    coverageApprox: '~190–200 countries',
+    name: 'World Bank Open Data',
+    role: 'Tourism arrivals/expenditures, air departures, connectivity, LPI, CPI, WGI, healthcare',
+    coverageApprox: '~150–200 countries',
     refreshCadence: 'Annual',
   },
   {
-    key: 'imf_weo',
-    name: 'IMF World Economic Outlook',
-    role: 'GDP PPP',
+    key: 'world_bank_derived',
+    name: 'World Bank derived ratios',
+    role: 'Receipts per arrival, arrivals/receipts per capita, GDP PPP per capita',
+    coverageApprox: 'Where underlying series exist',
+    refreshCadence: 'Annual',
+  },
+  {
+    key: 'ef_epi',
+    name: 'EF English Proficiency Index',
+    role: 'English proficiency for accessibility / ease of travel',
+    coverageApprox: '~110 countries',
+    refreshCadence: 'Annual',
+  },
+  {
+    key: 'visa_index',
+    name: 'Visa / passport openness indexes',
+    role: 'Visa-free access scoring',
     coverageApprox: '~190 countries',
-    refreshCadence: 'Biannual (Apr/Oct)',
-  },
-  {
-    key: 'heritage',
-    name: 'Heritage Foundation Index of Economic Freedom',
-    role: 'Regulatory / freedom components',
-    coverageApprox: '~165–175 countries',
     refreshCadence: 'Annual',
   },
   {
-    key: 'tax_foundation',
-    name: 'Tax Foundation ITCI',
-    role: 'Corporate tax rates',
-    coverageApprox: '~38 countries (OECD-focused)',
+    key: 'state_dept_advisory',
+    name: 'US State Department travel advisories',
+    role: 'Advisory level for entry/safety',
+    coverageApprox: 'Global destinations',
+    refreshCadence: 'Continuous',
+  },
+  {
+    key: 'fcdo',
+    name: 'UK FCDO travel advice',
+    role: 'UK advisory level for entry/safety',
+    coverageApprox: 'Global destinations',
+    refreshCadence: 'Continuous',
+  },
+  {
+    key: 'unesco',
+    name: 'UNESCO World Heritage List',
+    role: 'Heritage site count for tourism infrastructure',
+    coverageApprox: '~170 countries with sites',
     refreshCadence: 'Annual',
   },
   {
-    key: 'oecd',
-    name: 'OECD / World Bank education proxy',
-    role: 'Talent density tertiary attainment proxy',
-    coverageApprox: '~38 countries',
+    key: 'transparency',
+    name: 'WGI Control of Corruption',
+    role: 'Governance / safety dimension',
+    coverageApprox: '~200 countries',
     refreshCadence: 'Annual',
+  },
+  {
+    key: 'ecb_fx_derived',
+    name: 'ECB / Frankfurter FX (derived)',
+    role: 'Currency volatility for cost index',
+    coverageApprox: 'Major USD crosses',
+    refreshCadence: 'Daily → monthly aggregate',
   },
 ];
 

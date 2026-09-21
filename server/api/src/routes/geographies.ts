@@ -9,12 +9,12 @@ import { Router, Request, Response } from 'express';
 import { pool } from '../config/database';
 import {
   computeWeightedOverall,
-  DEFAULT_VERTICAL,
+  DEFAULT_PROFILE,
   DimensionKey,
   TVI_DIMENSIONS,
   TVI_SCORING_VERSION,
-  resolveVerticalKey,
-  STORED_TVI_VERTICAL,
+  resolveProfileKey,
+  STORED_TVI_PROFILE,
 } from '../config/tvi';
 import { optionalAuth } from '../middleware/optionalAuth';
 import { requireFilterAccess } from '../middleware/requireFilterAccess';
@@ -94,12 +94,12 @@ const router = Router();
 type Confidence = 'high' | 'medium' | 'low';
 
 interface TviDimensions {
-  marketSizeAndGrowth: number | null;
-  talentDensity: number | null;
-  taxEnvironment: number | null;
-  regulatoryEase: number | null;
-  infrastructure: number | null;
-  competitorSaturation: number | null;
+  tourismInfrastructure: number | null;
+  accessibility: number | null;
+  costIndex: number | null;
+  safetyAndEntry: number | null;
+  travelInfrastructure: number | null;
+  crowding: number | null;
   trajectory: number | null;
 }
 
@@ -147,8 +147,8 @@ const GEO_SELECT = `
   m.calculated_at
 `;
 
-function parseVertical(raw: unknown): string {
-  return resolveVerticalKey(raw);
+function parseProfile(raw: unknown): string {
+  return resolveProfileKey(raw);
 }
 
 function parseFields(raw: unknown): Set<string> {
@@ -187,7 +187,7 @@ function buildTvi(
     calculatedAt: row.calculated_at
       ? new Date(row.calculated_at).toISOString()
       : null,
-    vertical: verticalKey || DEFAULT_VERTICAL,
+    profile: verticalKey || DEFAULT_PROFILE,
   };
   if (includeSources) {
     tvi.sources = row.sources ?? [];
@@ -310,11 +310,11 @@ function mapGeography(
   opts: {
     includeGeometry?: boolean;
     includeSources?: boolean;
-    vertical?: string;
+    profile?: string;
     quickFacts?: QuickFactsPayload | null;
   } = {}
 ): Record<string, unknown> {
-  const vertical = resolveVerticalKey(opts.vertical);
+  const vertical = resolveProfileKey(opts.profile);
   const population =
     opts.quickFacts?.population ??
     (row.population != null ? Number(row.population) : null);
@@ -364,12 +364,12 @@ async function metaCounts(): Promise<{ total: number; scored: number }> {
       count(*)::text AS total,
       count(*) FILTER (WHERE m.overall_score IS NOT NULL)::text AS scored
     FROM geographies g
-    LEFT JOIN mvi_scores m
+    LEFT JOIN destination_scores m
       ON m.geography_id = g.id
-     AND m.industry_vertical = $1
+     AND m.profile = $1
     WHERE g.region_type = 'country'
     `,
-    [STORED_TVI_VERTICAL]
+    [STORED_TVI_PROFILE]
   );
   return {
     total: Number(result.rows[0]?.total ?? 0),
@@ -380,7 +380,7 @@ async function metaCounts(): Promise<{ total: number; scored: number }> {
 /** GET /api/geographies */
 router.get('/', async (req: Request, res: Response) => {
   try {
-    const vertical = parseVertical(req.query.vertical);
+    const vertical = parseProfile(req.query.profile ?? req.query.vertical);
     const fields = parseFields(req.query.fields);
     const includeGeometry = fields.has('geometry');
     const includeSources = fields.has('sources');
@@ -389,7 +389,7 @@ router.get('/', async (req: Request, res: Response) => {
         ? req.query.region_type.trim()
         : 'country';
 
-    const params: unknown[] = [STORED_TVI_VERTICAL, regionType];
+    const params: unknown[] = [STORED_TVI_PROFILE, regionType];
     const where: string[] = ['g.region_type = $2'];
 
     if (req.query.min_score != null && String(req.query.min_score).length) {
@@ -414,9 +414,9 @@ router.get('/', async (req: Request, res: Response) => {
       `
       SELECT ${GEO_SELECT}${geometrySelect}${sourcesSelect}
       FROM geographies g
-      LEFT JOIN mvi_scores m
+      LEFT JOIN destination_scores m
         ON m.geography_id = g.id
-       AND m.industry_vertical = $1
+       AND m.profile = $1
       WHERE ${where.join(' AND ')}
       ORDER BY g.name ASC
       `,
@@ -425,14 +425,14 @@ router.get('/', async (req: Request, res: Response) => {
 
     const counts = await metaCounts();
     const data = result.rows.map((row) =>
-      mapGeography(row, { includeGeometry, includeSources, vertical })
+      mapGeography(row, { includeGeometry, includeSources, profile: vertical })
     );
 
     res.json(
       apiResponse(data, {
         total: counts.total,
         scored: counts.scored,
-        vertical,
+        profile: vertical,
         dataVersion: TVI_SCORING_VERSION,
         returned: data.length,
       })
@@ -446,7 +446,7 @@ router.get('/', async (req: Request, res: Response) => {
 /** GET /api/geographies/search — spatial bbox or point+radius */
 router.get('/search', async (req: Request, res: Response) => {
   try {
-    const vertical = parseVertical(req.query.vertical);
+    const vertical = parseProfile(req.query.profile ?? req.query.vertical);
     const hasBbox = typeof req.query.bbox === 'string' && req.query.bbox.trim();
     const hasPoint = typeof req.query.point === 'string' && req.query.point.trim();
     const hasRadius = req.query.radius != null && String(req.query.radius).length > 0;
@@ -464,7 +464,7 @@ router.get('/search', async (req: Request, res: Response) => {
       return;
     }
 
-    const params: unknown[] = [STORED_TVI_VERTICAL];
+    const params: unknown[] = [STORED_TVI_PROFILE];
     let spatialClause = '';
 
     if (hasBbox) {
@@ -507,9 +507,9 @@ router.get('/search', async (req: Request, res: Response) => {
       `
       SELECT ${GEO_SELECT}
       FROM geographies g
-      LEFT JOIN mvi_scores m
+      LEFT JOIN destination_scores m
         ON m.geography_id = g.id
-       AND m.industry_vertical = $1
+       AND m.profile = $1
       WHERE g.region_type = 'country'
         ${spatialClause}
       ORDER BY g.name ASC
@@ -517,11 +517,11 @@ router.get('/search', async (req: Request, res: Response) => {
       params
     );
 
-    const data = result.rows.map((row) => mapGeography(row, { vertical }));
+    const data = result.rows.map((row) => mapGeography(row, { profile: vertical }));
     res.json(
       apiResponse(data, {
         total: data.length,
-        vertical,
+        profile: vertical,
         dataVersion: TVI_SCORING_VERSION,
       })
     );
@@ -534,7 +534,7 @@ router.get('/search', async (req: Request, res: Response) => {
 /** GET /api/geographies/geojson — FeatureCollection for Mapbox */
 router.get('/geojson', optionalAuth, async (req: Request, res: Response) => {
   try {
-    const vertical = parseVertical(req.query.vertical);
+    const vertical = parseProfile(req.query.profile ?? req.query.vertical);
     let horizonQuery = req.query.horizon;
     if (isGatingEnabled()) {
       const tier = req.user?.subscriptionTier ?? 'free';
@@ -581,14 +581,14 @@ router.get('/geojson', optionalAuth, async (req: Request, res: Response) => {
         m.confidence,
         ST_AsGeoJSON(${geomExpr}) AS geometry_geojson
       FROM geographies g
-      LEFT JOIN mvi_scores m
+      LEFT JOIN destination_scores m
         ON m.geography_id = g.id
-       AND m.industry_vertical = $1
+       AND m.profile = $1
       WHERE g.region_type = 'country'
         AND g.geometry IS NOT NULL
       ORDER BY g.name ASC
       `,
-      [STORED_TVI_VERTICAL]
+      [STORED_TVI_PROFILE]
     );
 
     const projectedByGeo = horizon ? await loadProjectedByGeo(horizon) : null;
@@ -608,16 +608,16 @@ router.get('/geojson', optionalAuth, async (req: Request, res: Response) => {
           isoCode: row.iso_code,
           overall,
           overallScore: overall,
-          marketSizeAndGrowth: overallDims.marketSizeAndGrowth ?? null,
-          talentDensity: overallDims.talentDensity ?? null,
-          taxEnvironment: overallDims.taxEnvironment ?? null,
-          regulatoryEase: overallDims.regulatoryEase ?? null,
-          infrastructure: overallDims.infrastructure ?? null,
-          competitorSaturation: overallDims.competitorSaturation ?? null,
+          tourismInfrastructure: overallDims.tourismInfrastructure ?? null,
+          accessibility: overallDims.accessibility ?? null,
+          costIndex: overallDims.costIndex ?? null,
+          safetyAndEntry: overallDims.safetyAndEntry ?? null,
+          travelInfrastructure: overallDims.travelInfrastructure ?? null,
+          crowding: overallDims.crowding ?? null,
           trajectory: overallDims.trajectory ?? null,
           confidence: row.confidence,
           population: row.population != null ? Number(row.population) : null,
-          vertical,
+          profile: vertical,
           horizon: horizon ?? null,
         },
         geometry: row.geometry_geojson ? JSON.parse(row.geometry_geojson) : null,
@@ -629,7 +629,7 @@ router.get('/geojson', optionalAuth, async (req: Request, res: Response) => {
       type: 'FeatureCollection',
       features,
       meta: {
-        vertical,
+        profile: vertical,
         dataVersion: TVI_SCORING_VERSION,
         horizon: horizon ?? null,
       },
@@ -643,14 +643,14 @@ router.get('/geojson', optionalAuth, async (req: Request, res: Response) => {
 /**
  * POST /api/geographies/filter
  *
- * Dimension filters use mvi_scores.dimensions JSONB (0–100 scores).
+ * Dimension filters use destination_scores.dimensions JSONB (0–100 scores).
  * maxCorpTaxRate joins raw_indicators for the latest tax_foundation corp_tax_rate
  * (raw percent), matching the mockup filter semantics.
  */
 router.post('/filter', optionalAuth, requireFilterAccess, async (req: Request, res: Response) => {
   try {
     const body = req.body ?? {};
-    const vertical = parseVertical(body.vertical);
+    const vertical = parseProfile(body.profile ?? body.vertical);
     const horizon = parseHorizon(body.horizon);
     if (body.horizon !== undefined && body.horizon !== null && body.horizon !== '' && horizon == null) {
       res.status(400).json(apiError('horizon must be 2yr or 5yr'));
@@ -666,6 +666,7 @@ router.post('/filter', optionalAuth, requireFilterAccess, async (req: Request, r
       if (
         key === 'filters' ||
         key === 'vertical' ||
+        key === 'profile' ||
         key === 'sort' ||
         key === 'limit' ||
         key === 'horizon'
@@ -687,7 +688,7 @@ router.post('/filter', optionalAuth, requireFilterAccess, async (req: Request, r
     if (Number.isNaN(limit) || limit < 1) limit = 50;
     if (limit > 200) limit = 200;
 
-    const params: unknown[] = [STORED_TVI_VERTICAL];
+    const params: unknown[] = [STORED_TVI_PROFILE];
     const where: string[] = [`g.region_type = 'country'`];
 
     const addNumFilter = (value: unknown, sql: string) => {
@@ -705,28 +706,28 @@ router.post('/filter', optionalAuth, requireFilterAccess, async (req: Request, r
     // When projecting, dimension score filters are applied in memory on projected dims.
     if (!horizon) {
       addNumFilter(
-        filters.minTalentDensity,
-        `(m.dimensions->>'talentDensity')::numeric >= ?`
+        filters.minAccessibility,
+        `(m.dimensions->>'accessibility')::numeric >= ?`
       );
       addNumFilter(
-        filters.maxCompetitorSaturation,
-        `(m.dimensions->>'competitorSaturation')::numeric <= ?`
+        filters.maxCrowding,
+        `(m.dimensions->>'crowding')::numeric <= ?`
       );
       addNumFilter(
-        filters.minRegulatoryEase,
-        `(m.dimensions->>'regulatoryEase')::numeric >= ?`
+        filters.minSafetyAndEntry,
+        `(m.dimensions->>'safetyAndEntry')::numeric >= ?`
       );
       addNumFilter(
-        filters.minInfrastructure,
-        `(m.dimensions->>'infrastructure')::numeric >= ?`
+        filters.minTravelInfrastructure,
+        `(m.dimensions->>'travelInfrastructure')::numeric >= ?`
       );
       addNumFilter(
-        filters.minMarketSizeAndGrowth,
-        `(m.dimensions->>'marketSizeAndGrowth')::numeric >= ?`
+        filters.minTourismInfrastructure,
+        `(m.dimensions->>'tourismInfrastructure')::numeric >= ?`
       );
       addNumFilter(
-        filters.minTaxEnvironment,
-        `(m.dimensions->>'taxEnvironment')::numeric >= ?`
+        filters.minCostIndex,
+        `(m.dimensions->>'costIndex')::numeric >= ?`
       );
       addNumFilter(
         filters.minTrajectory,
@@ -765,13 +766,19 @@ router.post('/filter', optionalAuth, requireFilterAccess, async (req: Request, r
     const sortDir =
       String(sort.direction ?? 'desc').toLowerCase() === 'asc' ? 'ASC' : 'DESC';
     const dimensionSortKeys = new Set([
+      'tourisminfrastructure',
+      'accessibility',
+      'costindex',
+      'safetyandentry',
+      'travelinfrastructure',
+      'crowding',
+      'trajectory',
+      // Legacy GEXIS-era aliases (pre–Phase 1 Step 3)
       'marketsizeandgrowth',
       'talentdensity',
       'taxenvironment',
       'regulatoryease',
-      'infrastructure',
       'competitorsaturation',
-      'trajectory',
     ]);
 
     // Fetch without relying on stored overall for final ranking when vertical weights apply.
@@ -779,13 +786,18 @@ router.post('/filter', optionalAuth, requireFilterAccess, async (req: Request, r
     let orderBy = `g.name ASC`;
     if (sortField !== 'overall' && dimensionSortKeys.has(sortField.replace(/_/g, ''))) {
       const keyMap: Record<string, string> = {
-        marketsizeandgrowth: 'marketSizeAndGrowth',
-        talentdensity: 'talentDensity',
-        taxenvironment: 'taxEnvironment',
-        regulatoryease: 'regulatoryEase',
-        infrastructure: 'infrastructure',
-        competitorsaturation: 'competitorSaturation',
+        tourisminfrastructure: 'tourismInfrastructure',
+        accessibility: 'accessibility',
+        costindex: 'costIndex',
+        safetyandentry: 'safetyAndEntry',
+        travelinfrastructure: 'travelInfrastructure',
+        crowding: 'crowding',
         trajectory: 'trajectory',
+        marketsizeandgrowth: 'tourismInfrastructure',
+        talentdensity: 'accessibility',
+        taxenvironment: 'costIndex',
+        regulatoryease: 'safetyAndEntry',
+        competitorsaturation: 'crowding',
       };
       const dimKey = keyMap[sortField.replace(/_/g, '')];
       orderBy = `(m.dimensions->>'${dimKey}')::numeric ${sortDir} NULLS LAST, g.name ASC`;
@@ -798,9 +810,9 @@ router.post('/filter', optionalAuth, requireFilterAccess, async (req: Request, r
       `
       SELECT ${GEO_SELECT}
       FROM geographies g
-      LEFT JOIN mvi_scores m
+      LEFT JOIN destination_scores m
         ON m.geography_id = g.id
-       AND m.industry_vertical = $1
+       AND m.profile = $1
       WHERE ${where.join(' AND ')}
       ORDER BY ${orderBy}
       LIMIT $${params.length}
@@ -811,7 +823,7 @@ router.post('/filter', optionalAuth, requireFilterAccess, async (req: Request, r
     const projectedByGeo = horizon ? await loadProjectedByGeo(horizon) : null;
 
     let data = result.rows.map((row) => {
-      const mapped = mapGeography(row, { vertical });
+      const mapped = mapGeography(row, { profile: vertical });
       if (!horizon || !mapped.tvi) return mapped;
       const dims = applyProjectedDimensions(
         (mapped.tvi as { dimensions?: TviDimensions | null }).dimensions,
@@ -854,12 +866,12 @@ router.post('/filter', optionalAuth, requireFilterAccess, async (req: Request, r
           return v != null && v <= n;
         };
         return (
-          checkMin(filters.minTalentDensity, 'talentDensity') &&
-          checkMax(filters.maxCompetitorSaturation, 'competitorSaturation') &&
-          checkMin(filters.minRegulatoryEase, 'regulatoryEase') &&
-          checkMin(filters.minInfrastructure, 'infrastructure') &&
-          checkMin(filters.minMarketSizeAndGrowth, 'marketSizeAndGrowth') &&
-          checkMin(filters.minTaxEnvironment, 'taxEnvironment') &&
+          checkMin(filters.minAccessibility, 'accessibility') &&
+          checkMax(filters.maxCrowding, 'crowding') &&
+          checkMin(filters.minSafetyAndEntry, 'safetyAndEntry') &&
+          checkMin(filters.minTravelInfrastructure, 'travelInfrastructure') &&
+          checkMin(filters.minTourismInfrastructure, 'tourismInfrastructure') &&
+          checkMin(filters.minCostIndex, 'costIndex') &&
           checkMin(filters.minTrajectory, 'trajectory')
         );
       };
@@ -882,7 +894,7 @@ router.post('/filter', optionalAuth, requireFilterAccess, async (req: Request, r
     res.json(
       apiResponse(data, {
         total: data.length,
-        vertical,
+        profile: vertical,
         horizon: horizon ?? null,
         dataVersion: TVI_SCORING_VERSION,
         limit,
@@ -1028,7 +1040,7 @@ router.get('/:id/trends', optionalAuth, requireTier('pro'), async (req: Request,
 router.get('/:id', async (req: Request, res: Response) => {
   try {
     const id = String(req.params.id ?? '').trim();
-    const vertical = parseVertical(req.query.vertical);
+    const vertical = parseProfile(req.query.profile ?? req.query.vertical);
     const isIso = /^[A-Za-z]{3}$/.test(id);
 
     const result = await pool.query<DbGeoRow>(
@@ -1038,13 +1050,13 @@ router.get('/:id', async (req: Request, res: Response) => {
         ST_AsGeoJSON(g.geometry) AS geometry_geojson,
         m.sources
       FROM geographies g
-      LEFT JOIN mvi_scores m
+      LEFT JOIN destination_scores m
         ON m.geography_id = g.id
-       AND m.industry_vertical = $1
+       AND m.profile = $1
       WHERE ${isIso ? 'upper(g.iso_code) = upper($2)' : 'g.id = $2::uuid'}
       LIMIT 1
       `,
-      [STORED_TVI_VERTICAL, isIso ? id.toUpperCase() : id]
+      [STORED_TVI_PROFILE, isIso ? id.toUpperCase() : id]
     );
 
     if (result.rows.length === 0) {
@@ -1060,7 +1072,7 @@ router.get('/:id', async (req: Request, res: Response) => {
         mapGeography(row, {
           includeGeometry: true,
           includeSources: true,
-          vertical,
+          profile: vertical,
           quickFacts,
         })
       )

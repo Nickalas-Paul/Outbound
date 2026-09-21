@@ -12,6 +12,7 @@ import {
   TVI_DIMENSIONS,
   TVI_SCORING_VERSION,
   SOURCE_CATALOG,
+  TRAVELER_PROFILES,
 } from '../config/tvi';
 import { apiError, apiResponse } from '../utils/response';
 
@@ -149,6 +150,26 @@ router.get('/sources', async (_req: Request, res: Response) => {
     );
   } catch (err) {
     console.error('[tvi] sources error:', err);
+    res.status(500).json(apiError('Internal server error'));
+  }
+});
+
+router.get('/profiles', async (_req: Request, res: Response) => {
+  try {
+    const data = TRAVELER_PROFILES.map((p) => ({
+      key: p.key,
+      label: p.label,
+      weights: p.weights,
+    }));
+    res.json(
+      apiResponse(data, {
+        totalProfiles: data.length,
+        scoringVersion: TVI_SCORING_VERSION,
+        defaultProfile: 'balanced',
+      })
+    );
+  } catch (err) {
+    console.error('[tvi] profiles error:', err);
     res.status(500).json(apiError('Internal server error'));
   }
 });

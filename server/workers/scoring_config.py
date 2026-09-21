@@ -6,143 +6,154 @@ The scoring engine reads this config — it does not hardcode indicator mappings
 
 Dimension keys match TVIScore.dimensions in packages/core/src/index.ts.
 Source names must match raw_indicators.source values from the ingestion workers.
+
+Phase 1 Step 3: travel-intelligence dimensions (Outbound).
 """
 
 DIMENSIONS = {
-    "marketSizeAndGrowth": {
-        "label": "Market Size & Growth",
-        # Note: imf_gdp_nominal is available in raw_indicators (ingest_imf.py) but
-        # excluded from scoring because NY.GDP.MKTP.CD from World Bank has better
-        # coverage and the same underlying GDP-current-USD concept.
+    "tourismInfrastructure": {
+        "label": "Tourism Infrastructure & Capacity",
         "indicators": [
             {
                 "source": "world_bank",
-                "code": "NY.GDP.MKTP.CD",
-                "name": "GDP (current US$)",
-                "weight": 0.35,
+                "code": "ST.INT.ARVL",
+                "name": "International tourism, number of arrivals",
+                "weight": 0.30,
                 "direction": "higher_is_better",
                 "normalization": "log_scale",
             },
             {
                 "source": "world_bank",
-                "code": "NY.GDP.MKTP.KD.ZG",
-                "name": "GDP growth (annual %)",
-                "weight": 0.35,
+                "code": "IS.AIR.DPRT",
+                "name": "Air transport, registered carrier departures worldwide",
+                "weight": 0.20,
+                "direction": "higher_is_better",
+                "normalization": "log_scale",
+            },
+            {
+                "source": "world_bank",
+                "code": "ST.INT.TVLX.CD",
+                "name": "International tourism, expenditures (current US$)",
+                "weight": 0.20,
+                "direction": "higher_is_better",
+                "normalization": "log_scale",
+            },
+            {
+                "source": "world_bank_derived",
+                "code": "tourism_receipts_per_arrival",
+                "name": "Tourism receipts per arrival",
+                "weight": 0.10,
                 "direction": "higher_is_better",
                 "normalization": "linear",
             },
             {
-                "source": "world_bank",
-                "code": "SP.POP.TOTL",
-                "name": "Population",
-                "weight": 0.15,
-                "direction": "higher_is_better",
-                "normalization": "log_scale",
-            },
-            {
-                # Ingestion worker stores source as imf_weo (not "imf").
-                "source": "imf_weo",
-                "code": "imf_gdp_ppp",
-                "name": "GDP PPP",
-                "weight": 0.15,
+                "source": "unesco",
+                "code": "unesco_site_count",
+                "name": "UNESCO World Heritage site count",
+                "weight": 0.20,
                 "direction": "higher_is_better",
                 "normalization": "log_scale",
             },
         ],
     },
-    "talentDensity": {
-        "label": "Talent Density",
+    "accessibility": {
+        "label": "Accessibility & Ease of Travel",
         "indicators": [
             {
-                "source": "education",
-                "code": "SE.TER.CUAT.BA.ZS",
-                "name": "Educational attainment, at least Bachelor's or equivalent (% of population 25+)",
-                "weight": 0.25,
+                "source": "ef_epi",
+                "code": "ef_epi_score",
+                "name": "EF English Proficiency Index score",
+                "weight": 0.30,
                 "direction": "higher_is_better",
                 "normalization": "linear",
             },
             {
-                "source": "education",
-                "code": "SE.TER.ENRR",
-                "name": "School enrollment, tertiary (% gross)",
+                "source": "visa_index",
+                "code": "visa_free_score",
+                "name": "Visa-free access score",
+                "weight": 0.30,
+                "direction": "higher_is_better",
+                "normalization": "linear",
+            },
+            {
+                "source": "world_bank",
+                "code": "IT.NET.USER.ZS",
+                "name": "Internet users (% of population)",
                 "weight": 0.20,
                 "direction": "higher_is_better",
                 "normalization": "linear",
             },
             {
-                "source": "education",
-                "code": "SL.TLF.ADVN.ZS",
-                "name": "Labor force with advanced education (% of total working-age population)",
+                "source": "world_bank",
+                "code": "IT.CEL.SETS.P2",
+                "name": "Mobile cellular subscriptions (per 100 people)",
                 "weight": 0.20,
                 "direction": "higher_is_better",
                 "normalization": "linear",
             },
-            {
-                "source": "ilo",
-                "code": "SL.TLF.CACT.ZS",
-                "name": "Labor force participation rate (% of total population ages 15+)",
-                "weight": 0.15,
-                "direction": "higher_is_better",
-                "normalization": "linear",
-            },
-            {
-                "source": "ilo",
-                "code": "SL.UEM.TOTL.ZS",
-                "name": "Unemployment, total (% of total labor force)",
-                "weight": 0.10,
-                "direction": "lower_is_better",
-                "normalization": "linear",
-            },
-            {
-                "source": "education",
-                "code": "SE.XPD.TOTL.GD.ZS",
-                "name": "Government expenditure on education (% of GDP)",
-                "weight": 0.10,
-                "direction": "higher_is_better",
-                "normalization": "linear",
-            },
         ],
     },
-    "taxEnvironment": {
-        "label": "Tax Environment",
+    "costIndex": {
+        "label": "Cost Index",
         "indicators": [
             {
-                "source": "tax_foundation",
-                "code": "corp_tax_rate",
-                "name": "Corporate tax rate (%)",
-                "weight": 0.40,
+                "source": "world_bank_derived",
+                "code": "gdp_ppp_per_capita",
+                "name": "GDP PPP per capita",
+                "weight": 0.30,
                 "direction": "lower_is_better",
                 "normalization": "linear",
             },
-            {
-                "source": "tax_global",
-                "code": "GC.TAX.TOTL.GD.ZS",
-                "name": "Tax revenue (% of GDP)",
-                "weight": 0.35,
-                "direction": "lower_is_better",
-                "normalization": "linear",
-            },
-            {
-                "source": "tax_global",
-                "code": "GC.TAX.GSRV.RV.ZS",
-                "name": "Taxes on goods and services (% of revenue)",
-                "weight": 0.25,
-                "direction": "lower_is_better",
-                "normalization": "linear",
-            },
-        ],
-    },
-    "regulatoryEase": {
-        "label": "Regulatory Ease",
-        # Note: heritage_financial_freedom is available in raw_indicators
-        # (ingest_heritage.py) but excluded because it overlaps with WGI
-        # Government Effectiveness (GE.PER.RNK).
-        "indicators": [
             {
                 "source": "world_bank",
-                "code": "RQ.PER.RNK",
-                "name": "Regulatory Quality (WGI Percentile)",
-                "weight": 0.25,
+                "code": "FP.CPI.TOTL",
+                "name": "Consumer price index (2010 = 100)",
+                "weight": 0.30,
+                "direction": "lower_is_better",
+                "normalization": "linear",
+            },
+            {
+                "source": "world_bank_derived",
+                "code": "tourism_receipts_per_arrival",
+                "name": "Tourism receipts per arrival",
+                "weight": 0.20,
+                "direction": "lower_is_better",
+                "normalization": "linear",
+            },
+            {
+                "source": "ecb_fx_derived",
+                "code": "fx_volatility",
+                "name": "FX volatility (USD cross)",
+                "weight": 0.20,
+                "direction": "lower_is_better",
+                "normalization": "linear",
+            },
+        ],
+    },
+    "safetyAndEntry": {
+        "label": "Entry Requirements & Safety",
+        "indicators": [
+            {
+                "source": "state_dept_advisory",
+                "code": "travel_advisory_level",
+                "name": "US State Department travel advisory level",
+                "weight": 0.22,
+                "direction": "lower_is_better",
+                "normalization": "linear",
+            },
+            {
+                "source": "fcdo",
+                "code": "fcdo_advisory_level",
+                "name": "UK FCDO travel advisory level",
+                "weight": 0.18,
+                "direction": "lower_is_better",
+                "normalization": "linear",
+            },
+            {
+                "source": "world_bank",
+                "code": "RL.PER.RNK",
+                "name": "Rule of Law (WGI Percentile)",
+                "weight": 0.18,
                 "direction": "higher_is_better",
                 "normalization": "linear",
             },
@@ -156,59 +167,27 @@ DIMENSIONS = {
             },
             {
                 "source": "world_bank",
-                "code": "GE.PER.RNK",
-                "name": "Government Effectiveness (WGI Percentile)",
-                "weight": 0.15,
+                "code": "PV.PER.RNK",
+                "name": "Political Stability / Absence of Violence (WGI Percentile)",
+                "weight": 0.17,
                 "direction": "higher_is_better",
                 "normalization": "linear",
             },
             {
-                "source": "heritage",
-                "code": "heritage_overall",
-                "name": "Economic Freedom Index (overall)",
-                "weight": 0.13,
-                "direction": "higher_is_better",
-                "normalization": "linear",
-            },
-            {
-                "source": "world_bank",
-                "code": "RL.PER.RNK",
-                "name": "Rule of Law (WGI Percentile)",
-                "weight": 0.12,
-                "direction": "higher_is_better",
-                "normalization": "linear",
-            },
-            {
-                "source": "heritage",
-                "code": "heritage_business_freedom",
-                "name": "Business Freedom",
+                "source": "visa_index",
+                "code": "visa_free_score",
+                "name": "Visa-free access score",
                 "weight": 0.10,
-                "direction": "higher_is_better",
-                "normalization": "linear",
-            },
-            {
-                "source": "heritage",
-                "code": "heritage_trade_freedom",
-                "name": "Trade Freedom",
-                "weight": 0.05,
-                "direction": "higher_is_better",
-                "normalization": "linear",
-            },
-            {
-                "source": "heritage",
-                "code": "heritage_investment_freedom",
-                "name": "Investment Freedom",
-                "weight": 0.05,
                 "direction": "higher_is_better",
                 "normalization": "linear",
             },
         ],
     },
-    "infrastructure": {
-        "label": "Infrastructure",
+    "travelInfrastructure": {
+        "label": "Travel Infrastructure",
         "indicators": [
             {
-                "source": "infrastructure_expanded",
+                "source": "world_bank",
                 "code": "EG.ELC.ACCS.ZS",
                 "name": "Access to electricity (% of population)",
                 "weight": 0.20,
@@ -216,7 +195,15 @@ DIMENSIONS = {
                 "normalization": "linear",
             },
             {
-                "source": "infrastructure_expanded",
+                "source": "world_bank",
+                "code": "IT.NET.USER.ZS",
+                "name": "Internet users (% of population)",
+                "weight": 0.20,
+                "direction": "higher_is_better",
+                "normalization": "linear",
+            },
+            {
+                "source": "world_bank",
                 "code": "IT.NET.BBND.P2",
                 "name": "Fixed broadband subscriptions (per 100 people)",
                 "weight": 0.20,
@@ -233,39 +220,31 @@ DIMENSIONS = {
             },
             {
                 "source": "world_bank",
-                "code": "IT.NET.USER.ZS",
-                "name": "Internet users (% of population)",
-                "weight": 0.15,
+                "code": "SH.MED.PHYS.ZS",
+                "name": "Physicians (per 1,000 people)",
+                "weight": 0.20,
                 "direction": "higher_is_better",
                 "normalization": "linear",
-            },
-            {
-                "source": "infrastructure_expanded",
-                "code": "IT.CEL.SETS.P2",
-                "name": "Mobile cellular subscriptions (per 100 people)",
-                "weight": 0.15,
-                "direction": "higher_is_better",
-                "normalization": "linear",
-            },
-            {
-                "source": "infrastructure_expanded",
-                "code": "IS.AIR.DPRT",
-                "name": "Air transport, registered carrier departures worldwide",
-                "weight": 0.10,
-                "direction": "higher_is_better",
-                "normalization": "log_scale",
             },
         ],
     },
-    "competitorSaturation": {
-        "label": "Competitor Saturation",
+    "crowding": {
+        "label": "Tourism Crowding",
         "indicators": [
             {
-                "source": "world_bank",
-                "code": "IC.BUS.NDNS.ZS",
-                "name": "New business density (per 1,000 people)",
-                "weight": 1.0,
-                "direction": "higher_is_better",
+                "source": "world_bank_derived",
+                "code": "tourist_arrivals_per_capita",
+                "name": "Tourist arrivals per capita",
+                "weight": 0.55,
+                "direction": "lower_is_better",
+                "normalization": "linear",
+            },
+            {
+                "source": "world_bank_derived",
+                "code": "tourism_receipts_per_capita",
+                "name": "Tourism receipts per capita",
+                "weight": 0.45,
+                "direction": "lower_is_better",
                 "normalization": "linear",
             },
         ],
@@ -302,170 +281,114 @@ def _with_trajectory(weights: dict[str, float], trajectory_mult: float) -> dict[
     return out
 
 
-# Industry vertical weight profiles (API applies these on query; compute_tvi stores equal-weight).
-# COUPLING: keep in sync with server/api/src/config/tvi.ts INDUSTRY_VERTICALS.
-# Trajectory multipliers: tech_saas/telecom 1.3, manufacturing/energy 0.7, else 1.0.
-INDUSTRY_VERTICALS = {
-    "all": {
-        "label": "All Industries",
+# Traveler profile weight maps (API applies these on query; compute_tvi stores balanced).
+# COUPLING: keep in sync with server/api/src/config/tvi.ts TRAVELER_PROFILES.
+# Trajectory weight = avg(base) * multiplier (rounded to 3 decimals).
+TRAVELER_PROFILES = {
+    "balanced": {
+        "label": "Balanced",
         "weights": _with_trajectory(
             {
-                "marketSizeAndGrowth": 0.167,
-                "talentDensity": 0.167,
-                "taxEnvironment": 0.167,
-                "regulatoryEase": 0.167,
-                "infrastructure": 0.167,
-                "competitorSaturation": 0.167,
+                "tourismInfrastructure": 0.17,
+                "accessibility": 0.17,
+                "costIndex": 0.17,
+                "safetyAndEntry": 0.17,
+                "travelInfrastructure": 0.17,
+                "crowding": 0.15,
             },
             1.0,
         ),
     },
-    "tech_saas": {
-        "label": "Technology & SaaS",
+    "solo_backpacker": {
+        "label": "Solo Backpacker",
         "weights": _with_trajectory(
             {
-                "marketSizeAndGrowth": 0.15,
-                "talentDensity": 0.25,
-                "taxEnvironment": 0.15,
-                "regulatoryEase": 0.10,
-                "infrastructure": 0.20,
-                "competitorSaturation": 0.15,
+                "tourismInfrastructure": 0.10,
+                "accessibility": 0.20,
+                "costIndex": 0.30,
+                "safetyAndEntry": 0.20,
+                "travelInfrastructure": 0.10,
+                "crowding": 0.10,
             },
             1.3,
         ),
     },
-    "financial": {
-        "label": "Financial Services",
+    "couple": {
+        "label": "Couple / Honeymoon",
         "weights": _with_trajectory(
             {
-                "marketSizeAndGrowth": 0.20,
-                "talentDensity": 0.15,
-                "taxEnvironment": 0.20,
-                "regulatoryEase": 0.25,
-                "infrastructure": 0.10,
-                "competitorSaturation": 0.10,
+                "tourismInfrastructure": 0.15,
+                "accessibility": 0.15,
+                "costIndex": 0.15,
+                "safetyAndEntry": 0.25,
+                "travelInfrastructure": 0.20,
+                "crowding": 0.10,
             },
             1.0,
         ),
     },
-    "manufacturing": {
-        "label": "Manufacturing",
+    "family": {
+        "label": "Family",
         "weights": _with_trajectory(
             {
-                "marketSizeAndGrowth": 0.15,
-                "talentDensity": 0.10,
-                "taxEnvironment": 0.15,
-                "regulatoryEase": 0.20,
-                "infrastructure": 0.25,
-                "competitorSaturation": 0.15,
+                "tourismInfrastructure": 0.10,
+                "accessibility": 0.15,
+                "costIndex": 0.15,
+                "safetyAndEntry": 0.30,
+                "travelInfrastructure": 0.20,
+                "crowding": 0.10,
             },
             0.7,
         ),
     },
-    "healthcare": {
-        "label": "Healthcare & Life Sciences",
+    "group": {
+        "label": "Group / Tour",
         "weights": _with_trajectory(
             {
-                "marketSizeAndGrowth": 0.20,
-                "talentDensity": 0.20,
-                "taxEnvironment": 0.10,
-                "regulatoryEase": 0.25,
-                "infrastructure": 0.15,
-                "competitorSaturation": 0.10,
+                "tourismInfrastructure": 0.20,
+                "accessibility": 0.25,
+                "costIndex": 0.15,
+                "safetyAndEntry": 0.15,
+                "travelInfrastructure": 0.15,
+                "crowding": 0.10,
             },
             1.0,
         ),
     },
-    "ecommerce": {
-        "label": "E-Commerce & Retail",
+    "luxury": {
+        "label": "Luxury",
         "weights": _with_trajectory(
             {
-                "marketSizeAndGrowth": 0.25,
-                "talentDensity": 0.10,
-                "taxEnvironment": 0.15,
-                "regulatoryEase": 0.10,
-                "infrastructure": 0.25,
-                "competitorSaturation": 0.15,
+                "tourismInfrastructure": 0.20,
+                "accessibility": 0.10,
+                "costIndex": 0.05,
+                "safetyAndEntry": 0.20,
+                "travelInfrastructure": 0.30,
+                "crowding": 0.15,
             },
             1.0,
         ),
     },
-    "energy": {
-        "label": "Energy & Renewables",
+    "budget": {
+        "label": "Budget",
         "weights": _with_trajectory(
             {
-                "marketSizeAndGrowth": 0.15,
-                "talentDensity": 0.10,
-                "taxEnvironment": 0.15,
-                "regulatoryEase": 0.25,
-                "infrastructure": 0.25,
-                "competitorSaturation": 0.10,
-            },
-            0.7,
-        ),
-    },
-    "professional": {
-        "label": "Professional Services",
-        "weights": _with_trajectory(
-            {
-                "marketSizeAndGrowth": 0.15,
-                "talentDensity": 0.30,
-                "taxEnvironment": 0.15,
-                "regulatoryEase": 0.15,
-                "infrastructure": 0.10,
-                "competitorSaturation": 0.15,
-            },
-            1.0,
-        ),
-    },
-    "logistics": {
-        "label": "Logistics & Supply Chain",
-        "weights": _with_trajectory(
-            {
-                "marketSizeAndGrowth": 0.20,
-                "talentDensity": 0.05,
-                "taxEnvironment": 0.15,
-                "regulatoryEase": 0.15,
-                "infrastructure": 0.35,
-                "competitorSaturation": 0.10,
-            },
-            1.0,
-        ),
-    },
-    "telecom": {
-        "label": "Telecommunications",
-        "weights": _with_trajectory(
-            {
-                "marketSizeAndGrowth": 0.20,
-                "talentDensity": 0.15,
-                "taxEnvironment": 0.10,
-                "regulatoryEase": 0.20,
-                "infrastructure": 0.25,
-                "competitorSaturation": 0.10,
+                "tourismInfrastructure": 0.10,
+                "accessibility": 0.15,
+                "costIndex": 0.35,
+                "safetyAndEntry": 0.15,
+                "travelInfrastructure": 0.10,
+                "crowding": 0.15,
             },
             1.3,
         ),
     },
-    "consumer_goods": {
-        "label": "Consumer Goods & CPG",
-        "weights": _with_trajectory(
-            {
-                "marketSizeAndGrowth": 0.25,
-                "talentDensity": 0.10,
-                "taxEnvironment": 0.10,
-                "regulatoryEase": 0.15,
-                "infrastructure": 0.20,
-                "competitorSaturation": 0.20,
-            },
-            1.0,
-        ),
-    },
 }
 
-# Legacy equal-weight map used by compute_tvi batch (DB industry_vertical key).
-VERTICAL_WEIGHTS = {
-    "all_industries": INDUSTRY_VERTICALS["all"]["weights"],
+# Batch compute writes one row per geography under the balanced profile key.
+PROFILE_WEIGHTS = {
+    "balanced": TRAVELER_PROFILES["balanced"]["weights"],
 }
 
-INDUSTRY_VERTICAL = "all_industries"
+STORED_PROFILE = "balanced"
 MIN_DIMENSIONS_FOR_OVERALL = 3

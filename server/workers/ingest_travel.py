@@ -1,8 +1,10 @@
 """
-Ingest US State Department travel advisories into market_signals (Layer 2).
+Ingest US State Department travel advisories into market_signals (Layer 2)
+and write numeric advisory levels to raw_indicators for base TVI scoring.
 
 RSS: https://travel.state.gov/_res/rss/TAsTWs.xml (no auth)
-Only Level 3 and Level 4 advisories become signals.
+- market_signals: Level 3 and Level 4 only (unchanged Layer 2 behavior)
+- raw_indicators: travel_advisory_level (1–4) for all countries; default 1
 """
 
 from __future__ import annotations
@@ -17,18 +19,21 @@ from typing import Optional
 import requests
 
 from config import LOGS_DIR
-from db import get_cursor, load_geography_iso_map
+from db import get_cursor, load_geography_iso_map, upsert_indicator
 from notify_signals import trigger_signal_notifications
 
 SOURCE = "state_dept"
-SIGNAL_TYPE = "political_instability"
+SIGNAL_TYPE = "travel_advisory"
+RAW_SOURCE = "state_dept_advisory"
+RAW_CODE = "travel_advisory_level"
+RAW_NAME = "US State Department travel advisory level"
 RSS_URL = "https://travel.state.gov/_res/rss/TAsTWs.xml"
 EVENT_URL = (
     "https://travel.state.gov/content/travel/en/traveladvisories/traveladvisories.html"
 )
 REQUEST_TIMEOUT_SEC = 90
 EXPIRE_DAYS = 90
-AFFECTED_DIMENSIONS = ["regulatoryEase", "marketSizeAndGrowth"]
+AFFECTED_DIMENSIONS = ["safetyAndEntry", "crowding"]
 
 FIPS_TO_ISO3: dict[str, str] = {
     "AF": "AFG", "AL": "ALB", "AG": "DZA", "AQ": "ASM", "AN": "AND",
@@ -172,18 +177,8 @@ def upsert_signal(
     return "insert"
 
 
-def ingest() -> None:
-    response = requests.get(
-        RSS_URL,
-        headers={"User-Agent": "outbound-mvp/1.0", "Accept": "application/rss+xml, text/xml"},
-        timeout=REQUEST_TIMEOUT_SEC,
-    )
-    response.raise_for_status()
-    root = ET.fromstring(response.content)
-    items = root.findall(".//item")
-    logger.info("Parsed %s travel advisory RSS items", len(items))
-
-    # Keep highest level per ISO3 if duplicates
+def parse_rss_advisories(items: list) -> dict[str, dict]:
+    """Return highest advisory level per ISO3 for all levels 1–4."""
     by_iso: dict[str, dict] = {}
     skipped_fips = 0
     skipped_level = 0
@@ -201,7 +196,7 @@ def ingest() -> None:
             elif domain == "Threat-Level":
                 level_text = text
         level = parse_level(level_text) or parse_level(title)
-        if level is None or level < 3:
+        if level is None or level < 1 or level > 4:
             skipped_level += 1
             continue
         if not fips:
@@ -222,18 +217,39 @@ def ingest() -> None:
         }
 
     logger.info(
-        "Level 3/4 advisories for %s countries (skipped_level=%s skipped_fips=%s)",
+        "Parsed advisories for %s countries (skipped_level=%s skipped_fips=%s)",
         len(by_iso),
         skipped_level,
         skipped_fips,
     )
+    return by_iso
 
+
+def ingest() -> None:
+    response = requests.get(
+        RSS_URL,
+        headers={"User-Agent": "outbound-mvp/1.0", "Accept": "application/rss+xml, text/xml"},
+        timeout=REQUEST_TIMEOUT_SEC,
+    )
+    response.raise_for_status()
+    root = ET.fromstring(response.content)
+    items = root.findall(".//item")
+    logger.info("Parsed %s travel advisory RSS items", len(items))
+
+    by_iso = parse_rss_advisories(items)
     expires_at = datetime.now(timezone.utc) + timedelta(days=EXPIRE_DAYS)
+    year = datetime.now(timezone.utc).year
+
     inserted = updated = skipped_geo = 0
+    raw_written = 0
 
     with get_cursor() as cursor:
         iso_map = load_geography_iso_map(cursor)
+
+        # Layer 2 signals: Level 3/4 only
         for iso3, meta in by_iso.items():
+            if meta["level"] < 3:
+                continue
             geography_id = iso_map.get(iso3)
             if not geography_id:
                 skipped_geo += 1
@@ -256,11 +272,28 @@ def ingest() -> None:
             else:
                 updated += 1
 
+        # Base scoring indicator: level for every country (default 1)
+        for iso3, geography_id in iso_map.items():
+            level = by_iso[iso3]["level"] if iso3 in by_iso else 1
+            upsert_indicator(
+                cursor,
+                geography_id=geography_id,
+                source=RAW_SOURCE,
+                indicator_code=RAW_CODE,
+                indicator_name=RAW_NAME,
+                value=level,
+                unit="advisory_level_1_4",
+                year=year,
+                data_url=EVENT_URL,
+            )
+            raw_written += 1
+
     logger.info(
-        "Done inserted=%s updated=%s skipped_geo=%s",
+        "Done signals inserted=%s updated=%s skipped_geo=%s raw_indicators=%s",
         inserted,
         updated,
         skipped_geo,
+        raw_written,
     )
     trigger_signal_notifications()
     logger.info("ingest_travel completed successfully")

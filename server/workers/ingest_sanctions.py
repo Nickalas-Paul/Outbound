@@ -32,7 +32,7 @@ EVENT_URL = "https://www.opensanctions.org/datasets/sanctions/"
 REQUEST_TIMEOUT_SEC = 300
 MIN_ENTITIES = 10
 EXPIRE_DAYS = 30
-AFFECTED_DIMENSIONS = ["regulatoryEase", "marketSizeAndGrowth"]
+AFFECTED_DIMENSIONS = ["safetyAndEntry", "accessibility"]
 
 # ISO 3166-1 alpha-2 → alpha-3 (stable; no pycountry dependency)
 ISO2_TO_ISO3: dict[str, str] = {
