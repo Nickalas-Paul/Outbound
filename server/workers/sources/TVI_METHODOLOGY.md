@@ -211,7 +211,7 @@ Re-running the engine with the same `raw_indicators` produces the **same** base 
 
 ## Design principles
 
-1. **Transparent** — every score can be traced to `(source, indicator, year)` tuples in `mvi_scores.sources`.
+1. **Transparent** — every score can be traced to `(source, indicator, year)` tuples in `destination_scores.sources`.
 2. **Honest about gaps** — nulls and confidence flags beat false precision.
 3. **Configurable** — indicator maps and weights live in `scoring_config.py`; the engine does not hardcode them.
 4. **Canonical naming** — dimension keys match the TypeScript `TVIScore.dimensions` contract (`dimensions`, never `dimension_scores`).

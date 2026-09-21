@@ -318,7 +318,7 @@ export const SOURCE_CATALOG: Record<
   },
 };
 
-/** DB key used by compute_tvi.py / mvi_scores.industry_vertical (equal-weight batch). */
+/** DB key used by compute_tvi.py / destination_scores.industry_vertical (equal-weight batch). */
 export const STORED_TVI_VERTICAL = 'all_industries';
 
 export type DimensionWeights = Record<DimensionKey, number>;

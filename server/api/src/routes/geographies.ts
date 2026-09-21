@@ -364,7 +364,7 @@ async function metaCounts(): Promise<{ total: number; scored: number }> {
       count(*)::text AS total,
       count(*) FILTER (WHERE m.overall_score IS NOT NULL)::text AS scored
     FROM geographies g
-    LEFT JOIN mvi_scores m
+    LEFT JOIN destination_scores m
       ON m.geography_id = g.id
      AND m.industry_vertical = $1
     WHERE g.region_type = 'country'
@@ -414,7 +414,7 @@ router.get('/', async (req: Request, res: Response) => {
       `
       SELECT ${GEO_SELECT}${geometrySelect}${sourcesSelect}
       FROM geographies g
-      LEFT JOIN mvi_scores m
+      LEFT JOIN destination_scores m
         ON m.geography_id = g.id
        AND m.industry_vertical = $1
       WHERE ${where.join(' AND ')}
@@ -507,7 +507,7 @@ router.get('/search', async (req: Request, res: Response) => {
       `
       SELECT ${GEO_SELECT}
       FROM geographies g
-      LEFT JOIN mvi_scores m
+      LEFT JOIN destination_scores m
         ON m.geography_id = g.id
        AND m.industry_vertical = $1
       WHERE g.region_type = 'country'
@@ -581,7 +581,7 @@ router.get('/geojson', optionalAuth, async (req: Request, res: Response) => {
         m.confidence,
         ST_AsGeoJSON(${geomExpr}) AS geometry_geojson
       FROM geographies g
-      LEFT JOIN mvi_scores m
+      LEFT JOIN destination_scores m
         ON m.geography_id = g.id
        AND m.industry_vertical = $1
       WHERE g.region_type = 'country'
@@ -643,7 +643,7 @@ router.get('/geojson', optionalAuth, async (req: Request, res: Response) => {
 /**
  * POST /api/geographies/filter
  *
- * Dimension filters use mvi_scores.dimensions JSONB (0–100 scores).
+ * Dimension filters use destination_scores.dimensions JSONB (0–100 scores).
  * maxCorpTaxRate joins raw_indicators for the latest tax_foundation corp_tax_rate
  * (raw percent), matching the mockup filter semantics.
  */
@@ -798,7 +798,7 @@ router.post('/filter', optionalAuth, requireFilterAccess, async (req: Request, r
       `
       SELECT ${GEO_SELECT}
       FROM geographies g
-      LEFT JOIN mvi_scores m
+      LEFT JOIN destination_scores m
         ON m.geography_id = g.id
        AND m.industry_vertical = $1
       WHERE ${where.join(' AND ')}
@@ -1038,7 +1038,7 @@ router.get('/:id', async (req: Request, res: Response) => {
         ST_AsGeoJSON(g.geometry) AS geometry_geojson,
         m.sources
       FROM geographies g
-      LEFT JOIN mvi_scores m
+      LEFT JOIN destination_scores m
         ON m.geography_id = g.id
        AND m.industry_vertical = $1
       WHERE ${isIso ? 'upper(g.iso_code) = upper($2)' : 'g.id = $2::uuid'}

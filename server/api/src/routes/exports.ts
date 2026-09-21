@@ -182,7 +182,7 @@ async function loadExportBundle(
   }>(
     `
     SELECT overall_score, dimensions, confidence, data_freshness, sources
-    FROM mvi_scores
+    FROM destination_scores
     WHERE geography_id = $1 AND industry_vertical = $2
     LIMIT 1
     `,

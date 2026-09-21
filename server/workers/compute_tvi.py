@@ -1,7 +1,7 @@
 """
 TVI scoring engine.
 
-Reads raw_indicators + scoring_config, writes mvi_scores for industry_vertical
+Reads raw_indicators + scoring_config, writes destination_scores for industry_vertical
 'all_industries'. Deterministic: same inputs produce the same scores.
 
 Dependency order:
@@ -237,7 +237,7 @@ def upsert_tvi_score(
 ) -> None:
     cursor.execute(
         """
-        INSERT INTO mvi_scores (
+        INSERT INTO destination_scores (
             geography_id,
             industry_vertical,
             overall_score,
@@ -427,7 +427,7 @@ def compute_all() -> None:
             scored += 1
 
         logger.info(
-            "Wrote %s mvi_scores rows (null_overall=%s trajectory=%s) confidence=%s",
+            "Wrote %s destination_scores rows (null_overall=%s trajectory=%s) confidence=%s",
             scored,
             null_overall,
             trajectory_present,
