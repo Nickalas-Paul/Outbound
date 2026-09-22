@@ -79,7 +79,7 @@ export default function ExplorerScreen() {
   }, [authLoading, isAuthenticated]);
 
   const dataLabel = useMemo(() => new Date().toISOString().slice(0, 10), []);
-  const freshnessLabel = { prefix: 'Data', label: dataLabel };
+  const freshnessLabel = { prefix: 'Updated', label: dataLabel };
 
   useEffect(() => {
     let cancelled = false;

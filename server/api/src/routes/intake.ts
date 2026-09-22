@@ -28,7 +28,7 @@ import { apiError } from '../utils/response';
 const router = Router();
 
 const SUCCESS_MESSAGE =
-  "Your trip request has been received. We'll be in touch soon.";
+  "Your trip request has been received. I'll be in touch soon.";
 
 /** Stricter than global limiter: 5 submissions / 15 minutes / IP. */
 const intakeLimiter = rateLimit({
@@ -149,7 +149,7 @@ async function upsertClientProfile(
 
 function successMessage(payload: IntakePayload): string {
   const email = payload.email.trim();
-  return `Your trip request has been received. Please check ${email} to verify your email — we'll prepare your trip plan once you confirm.`;
+  return `Your trip request has been received. Please check ${email} to verify your email — I'll start crafting your trip plan once you confirm.`;
 }
 
 async function createTrip(
@@ -317,7 +317,7 @@ router.get('/verify', async (req: Request, res: Response) => {
 
     res.status(200).json({
       success: true,
-      message: "Email verified. We're preparing your trip plan.",
+      message: "Email verified. I'm putting together your trip plan now.",
       clientProfileId: result.clientProfileId,
       tripId: result.tripId,
     });

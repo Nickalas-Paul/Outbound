@@ -54,7 +54,7 @@ export default function LoginScreen() {
     <MarketingShell>
       <View style={styles.card}>
         <Text style={styles.title}>Log in</Text>
-        <Text style={styles.subtitle}>Access your Outbound workspace.</Text>
+        <Text style={styles.subtitle}>Sign in to Outbound.</Text>
 
         <Text style={styles.label}>Email</Text>
         <TextInput
