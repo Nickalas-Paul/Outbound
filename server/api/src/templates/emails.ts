@@ -95,7 +95,7 @@ export function verificationEmail(params: {
   return { subject, html, text };
 }
 
-/** Placeholder — wired when draft delivery ships. */
+/** Draft itinerary delivery — sent after successful composition. */
 export function itineraryDraftEmail(params: {
   name: string;
   tripSummary: string;
@@ -105,20 +105,31 @@ export function itineraryDraftEmail(params: {
   const subject = 'Your draft itinerary is ready for review — Outbound';
   const html = layout({
     title: subject,
+    preheader: 'Your personalized trip plan is ready to review.',
     bodyHtml: `
       <h1 style="margin:0 0 12px;font-size:22px;font-weight:700;">Hi ${escapeHtml(name)},</h1>
-      <p style="margin:0 0 12px;font-size:15px;line-height:1.55;">Your draft itinerary is ready for review.</p>
-      <p style="margin:0 0 16px;font-size:14px;color:#52525b;">${escapeHtml(params.tripSummary)}</p>
-      <p style="margin:0;"><a href="${escapeHtml(params.itineraryUrl)}" style="color:#3b82f6;">View your draft itinerary</a></p>
+      <p style="margin:0 0 12px;font-size:15px;line-height:1.55;">
+        Your draft itinerary is ready. Take a look and let us know if you'd like any changes.
+      </p>
+      <p style="margin:0 0 16px;font-size:14px;color:#52525b;white-space:pre-wrap;">${escapeHtml(params.tripSummary)}</p>
+      <p style="margin:0 0 24px;text-align:center;">
+        <a href="${escapeHtml(params.itineraryUrl)}" style="display:inline-block;background:#18181b;color:#ffffff;text-decoration:none;font-size:15px;font-weight:600;padding:12px 22px;border-radius:8px;">
+          Download itinerary PDF
+        </a>
+      </p>
+      <p style="margin:0;font-size:13px;line-height:1.5;color:#71717a;">
+        Or open this link: <a href="${escapeHtml(params.itineraryUrl)}" style="color:#3b82f6;word-break:break-all;">${escapeHtml(params.itineraryUrl)}</a>
+      </p>
     `,
   });
   const text = [
     `Hi ${name},`,
     '',
-    'Your draft itinerary is ready for review.',
+    'Your draft itinerary is ready. Take a look and let us know if you\'d like any changes.',
+    '',
     params.tripSummary,
     '',
-    `View it here: ${params.itineraryUrl}`,
+    `Download PDF: ${params.itineraryUrl}`,
     '',
     'Outbound — Travel Intelligence & Concierge',
   ].join('\n');

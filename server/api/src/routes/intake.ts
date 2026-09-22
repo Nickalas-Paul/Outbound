@@ -16,6 +16,7 @@ import rateLimit from 'express-rate-limit';
 import { pool } from '../config/database';
 import { optionalAuth } from '../middleware/optionalAuth';
 import { sendEmail } from '../services/email';
+import { scheduleComposeItinerary } from '../services/composition';
 import {
   buildVerificationUrl,
   createVerificationToken,
@@ -320,6 +321,11 @@ router.get('/verify', async (req: Request, res: Response) => {
       clientProfileId: result.clientProfileId,
       tripId: result.tripId,
     });
+
+    // Fire composition off the request cycle — do not await.
+    if (result.tripId) {
+      scheduleComposeItinerary(result.tripId);
+    }
   } catch (err) {
     console.error('[intake] verify error:', err);
     res.status(500).json(apiError('Verification failed'));
