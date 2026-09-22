@@ -97,3 +97,27 @@ export {
   isGroupSizeSoftWarning,
   type IntakePayload,
 } from "./schemas/intake";
+
+// Explorer traveler preferences (Phase 3)
+export {
+  BUDGET_TIERS,
+  CROWDING_PREFERENCES,
+  DEFAULT_TRAVELER_PREFERENCES,
+  EASE_OF_TRAVEL,
+  SAFETY_TOLERANCES,
+  TRIP_TYPES_PREF,
+  isTravelerPreferences,
+  normalizeWeights,
+  parseTravelerPreferences,
+  preferencesToFilters,
+  preferencesToWeights,
+  weightSum,
+  type BudgetTier,
+  type CrowdingPreference,
+  type DimensionWeights,
+  type EaseOfTravel,
+  type PreferenceHardFilters,
+  type SafetyTolerance,
+  type TravelerPreferences,
+  type TripTypePref,
+} from "./preferences";

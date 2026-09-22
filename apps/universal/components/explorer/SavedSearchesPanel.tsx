@@ -11,7 +11,6 @@ import {
 import { useSavedSearches } from '@/hooks/useSavedSearches';
 import { useTierAccess } from '@/hooks/useTierAccess';
 import {
-  DEFAULT_FILTERS,
   stateToSavedFilters,
   type ExplorerFilterState,
 } from '@/lib/explorerFilters';
@@ -24,8 +23,7 @@ type Props = {
 
 export default function SavedSearchesPanel({ filters, onChange }: Props) {
   const { isAuthenticated } = useAuth();
-  const { canSaveSearches, canUseFilter, canUseHorizon, canUseTravelerProfile } =
-    useTierAccess();
+  const { canSaveSearches } = useTierAccess();
   const allowed = canSaveSearches();
   const {
     savedSearches,
@@ -70,21 +68,6 @@ export default function SavedSearchesPanel({ filters, onChange }: Props) {
     const search = savedSearches.find((s) => s.id === id);
     if (!search) return;
     const next = applySavedSearch(search);
-
-    // When gating is on, ignore dimensions the user cannot use.
-    if (!canUseFilter('accessibility')) {
-      next.minAccessibility = DEFAULT_FILTERS.minAccessibility;
-    }
-    if (!canUseFilter('crowding')) {
-      next.maxCrowding = DEFAULT_FILTERS.maxCrowding;
-    }
-    if (!canUseTravelerProfile()) {
-      next.profile = DEFAULT_FILTERS.profile;
-    }
-    if (!canUseHorizon(next.horizon)) {
-      next.horizon = DEFAULT_FILTERS.horizon;
-    }
-
     onChange(next);
   };
 
