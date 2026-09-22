@@ -79,12 +79,7 @@ export default function ExplorerScreen() {
   }, [authLoading, isAuthenticated]);
 
   const dataLabel = useMemo(() => new Date().toISOString().slice(0, 10), []);
-  const freshnessLabel =
-    filters.horizon === '2yr'
-      ? { prefix: 'Projected', label: '2-Year' }
-      : filters.horizon === '5yr'
-        ? { prefix: 'Projected', label: '5-Year' }
-        : { prefix: 'Data', label: dataLabel };
+  const freshnessLabel = { prefix: 'Updated', label: dataLabel };
 
   useEffect(() => {
     let cancelled = false;
@@ -99,25 +94,30 @@ export default function ExplorerScreen() {
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
-    void fetchGeographiesGeojson(filters.profile, filters.horizon)
-      .then((fc) => {
-        if (!cancelled) {
-          setGeojson(fc);
-          setLoadError(null);
-        }
-      })
-      .catch((err: unknown) => {
-        if (!cancelled) {
-          setLoadError(err instanceof Error ? err.message : 'Failed to load geographies');
-        }
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
+    const handle = setTimeout(() => {
+      void fetchGeographiesGeojson({ preferences: filters })
+        .then((fc) => {
+          if (!cancelled) {
+            setGeojson(fc);
+            setLoadError(null);
+          }
+        })
+        .catch((err: unknown) => {
+          if (!cancelled) {
+            setLoadError(
+              err instanceof Error ? err.message : 'Failed to load geographies'
+            );
+          }
+        })
+        .finally(() => {
+          if (!cancelled) setLoading(false);
+        });
+    }, 250);
     return () => {
       cancelled = true;
+      clearTimeout(handle);
     };
-  }, [filters.profile, filters.horizon]);
+  }, [filters]);
 
   const selectGeography = useCallback(
     (opts: {
@@ -295,7 +295,6 @@ export default function ExplorerScreen() {
       {showDesktopChrome && selectedKey ? (
         <GeographyDrillDown
           geographyIdOrIso={selectedKey}
-          profile={filters.profile}
           onClose={closeSelection}
         />
       ) : null}
@@ -373,7 +372,6 @@ export default function ExplorerScreen() {
         <BottomSheet visible onClose={closeSelection} height="70%">
           <GeographyDrillDown
             geographyIdOrIso={selectedKey}
-            profile={filters.profile}
             onClose={closeSelection}
             variant="sheet"
             style={styles.mobileDrill}
@@ -392,9 +390,7 @@ export default function ExplorerScreen() {
                 <Pressable
                   style={styles.compareBarBtn}
                   onPress={() =>
-                    router.push(
-                      buildCompareHref(filters.profile) as `/explorer/compare`
-                    )
+                    router.push(buildCompareHref() as `/explorer/compare`)
                   }
                 >
                   <Text style={styles.compareBarBtnText}>View compare →</Text>

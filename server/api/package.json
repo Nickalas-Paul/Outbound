@@ -10,6 +10,8 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@aws-sdk/client-bedrock-runtime": "^3.1137.0",
+    "@duffel/api": "^4.30.0",
     "@outbound/core": "^0.1.0",
     "argon2": "^0.45.1",
     "cookie-parser": "^1.4.7",
@@ -22,7 +24,8 @@
     "jsonwebtoken": "^9.0.3",
     "pdfkit": "^0.19.1",
     "pg": "^8.22.0",
-    "redis": "^6.2.0"
+    "redis": "^6.2.0",
+    "resend": "^6.28.1"
   },
   "devDependencies": {
     "@types/cookie-parser": "^1.4.10",

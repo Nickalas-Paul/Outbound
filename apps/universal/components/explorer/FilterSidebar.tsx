@@ -1,25 +1,10 @@
-import { useId, useState, type ReactNode } from 'react';
-import {
-  Platform,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { type ReactNode } from 'react';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { useTierAccess } from '@/hooks/useTierAccess';
-import {
-  FILTER_LIMITS,
-  formatMaxScore,
-  formatMinScore,
-  formatPopulation,
-  type ExplorerFilterState,
-  type TimeHorizon,
-} from '@/lib/explorerFilters';
-import { DEFAULT_TRAVELER_PROFILE } from '@/lib/travelerProfiles';
-
-import TravelerProfileSelect from './TravelerProfileSelect';
+import PreferenceSegmentedControl from './PreferenceSegmentedControl';
 import SavedSearchesPanel from './SavedSearchesPanel';
+import type { ExplorerFilterState } from '@/lib/explorerFilters';
+import { colors, spacing, typography } from '@/theme/tokens';
 
 type Props = {
   filters: ExplorerFilterState;
@@ -28,338 +13,109 @@ type Props = {
   style?: object;
 };
 
-const HORIZON_OPTIONS: Array<{ value: TimeHorizon; label: string }> = [
-  { value: 'current', label: 'Current' },
-  { value: '2yr', label: '2-Year' },
-  { value: '5yr', label: '5-Year' },
+const TRIP_OPTIONS = [
+  { value: 'solo' as const, label: 'Solo' },
+  { value: 'couple' as const, label: 'Couple' },
+  { value: 'family' as const, label: 'Family' },
+  { value: 'group' as const, label: 'Group' },
 ];
 
-const UPGRADE_PROMPT = 'Upgrade to Pro to unlock';
+const BUDGET_OPTIONS = [
+  { value: 'budget' as const, label: '$' },
+  { value: 'moderate' as const, label: '$$' },
+  { value: 'upscale' as const, label: '$$$' },
+  { value: 'luxury' as const, label: '$$$$' },
+];
 
-function RangeSlider({
-  value,
-  min,
-  max,
-  step,
-  onChange,
-  accent = '#3d8bfd',
-  disabled = false,
-}: {
-  value: number;
-  min: number;
-  max: number;
-  step: number;
-  onChange: (v: number) => void;
-  accent?: string;
-  disabled?: boolean;
-}) {
-  const id = useId();
-  const pct = max === min ? 0 : ((value - min) / (max - min)) * 100;
+const SAFETY_OPTIONS = [
+  { value: 'adventurous' as const, label: 'Go Anywhere' },
+  { value: 'standard' as const, label: 'Standard' },
+  { value: 'strict' as const, label: 'Play it Safe' },
+];
 
-  if (Platform.OS === 'web') {
-    return (
-      <View style={styles.sliderTrackWrap} pointerEvents={disabled ? 'none' : 'auto'}>
-        <View style={styles.sliderTrackBg}>
-          <View
-            style={StyleSheet.flatten([
-              styles.sliderTrackFill,
-              { width: `${pct}%`, backgroundColor: accent },
-            ])}
-          />
-        </View>
-        <input
-          id={id}
-          type="range"
-          min={min}
-          max={max}
-          step={step}
-          value={value}
-          disabled={disabled}
-          onChange={(e) => onChange(Number(e.target.value))}
-          style={{
-            position: 'absolute',
-            left: 0,
-            right: 0,
-            width: '100%',
-            margin: 0,
-            opacity: 0.01,
-            height: 28,
-            cursor: disabled ? 'not-allowed' : 'pointer',
-          }}
-        />
-      </View>
-    );
-  }
+const CROWDING_OPTIONS = [
+  { value: 'popular' as const, label: 'Iconic' },
+  { value: 'balanced' as const, label: 'Balanced' },
+  { value: 'hidden_gems' as const, label: 'Hidden Gems' },
+];
 
-  return (
-    <View
-      style={styles.nativeSliderFallback}
-      pointerEvents={disabled ? 'none' : 'auto'}
-    >
-      <Pressable
-        disabled={disabled}
-        onPress={() => onChange(Math.max(min, value - step))}
-        style={styles.stepBtn}
-      >
-        <Text style={styles.stepBtnText}>-</Text>
-      </Pressable>
-      <View style={StyleSheet.flatten([styles.sliderTrackBg, { flex: 1 }])}>
-        <View
-          style={StyleSheet.flatten([
-            styles.sliderTrackFill,
-            { width: `${pct}%`, backgroundColor: accent },
-          ])}
-        />
-      </View>
-      <Pressable
-        disabled={disabled}
-        onPress={() => onChange(Math.min(max, value + step))}
-        style={styles.stepBtn}
-      >
-        <Text style={styles.stepBtnText}>+</Text>
-      </Pressable>
-    </View>
-  );
-}
+const EASE_OPTIONS = [
+  { value: 'flexible' as const, label: "I'll Figure It Out" },
+  { value: 'moderate' as const, label: 'Some Planning' },
+  { value: 'effortless' as const, label: 'Make It Easy' },
+];
 
-function FilterRow({
+function PrefRow({
   label,
-  valueLabel,
-  locked,
   children,
 }: {
   label: string;
-  valueLabel: string;
-  locked?: boolean;
   children: ReactNode;
 }) {
   return (
     <View style={styles.row}>
-      <View style={styles.rowHeader}>
-        <Text style={styles.rowLabel}>
-          {locked ? `${label} 🔒` : label}
-        </Text>
-        <Text style={styles.rowValue}>{valueLabel}</Text>
-      </View>
+      <Text style={styles.rowLabel}>{label}</Text>
       {children}
     </View>
   );
 }
 
-export default function FilterSidebar({ filters, onChange, onReset, style }: Props) {
-  const {
-    canUseFilter,
-    canUseHorizon,
-    canUseTravelerProfile,
-  } = useTierAccess();
-  const [promptKey, setPromptKey] = useState<string | null>(null);
-
-  const talentLocked = !canUseFilter('accessibility');
-  const competitorLocked = !canUseFilter('crowding');
-  const profileLocked = !canUseTravelerProfile();
-
-  const showPrompt = (key: string) => {
-    setPromptKey(key);
-  };
-
+export default function FilterSidebar({
+  filters,
+  onChange,
+  onReset,
+  style,
+}: Props) {
   return (
     <View style={StyleSheet.flatten([styles.sidebar, style])}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>FILTERS</Text>
+        <Text style={styles.headerTitle}>PREFERENCES</Text>
         <Pressable onPress={onReset} hitSlop={8}>
           <Text style={styles.reset}>Reset</Text>
         </Pressable>
       </View>
 
-      <View style={StyleSheet.flatten([styles.row, styles.verticalRow])}>
-        <Text style={styles.rowLabel}>
-          {profileLocked ? 'Traveler Profile 🔒' : 'Traveler Profile'}
-        </Text>
-        {profileLocked ? (
-          <Pressable
-            style={styles.lockedBlock}
-            onPress={() => showPrompt('profile')}
-          >
-            <TravelerProfileSelect
-              value={DEFAULT_TRAVELER_PROFILE}
-              onChange={() => undefined}
-              locked
-            />
-            {promptKey === 'profile' ? (
-              <Text style={styles.upgradePrompt}>{UPGRADE_PROMPT}</Text>
-            ) : null}
-          </Pressable>
-        ) : (
-          <TravelerProfileSelect
-            value={filters.profile}
-            onChange={(profile) => onChange({ profile })}
-          />
-        )}
-      </View>
-
-      <View style={styles.row}>
-        <Text style={styles.rowLabel}>Time Horizon</Text>
-        <View style={styles.segmentRow}>
-          {HORIZON_OPTIONS.map((opt) => {
-            const active = filters.horizon === opt.value;
-            const locked = !canUseHorizon(opt.value);
-            return (
-              <Pressable
-                key={opt.value}
-                onPress={() => {
-                  if (locked) {
-                    showPrompt(`horizon-${opt.value}`);
-                    return;
-                  }
-                  onChange({ horizon: opt.value });
-                }}
-                style={[
-                  styles.segmentBtn,
-                  active && !locked && styles.segmentBtnActive,
-                  locked && styles.segmentBtnLocked,
-                ]}
-              >
-                <Text
-                  style={[
-                    styles.segmentText,
-                    active && !locked && styles.segmentTextActive,
-                    locked && styles.segmentTextLocked,
-                  ]}
-                >
-                  {locked ? `${opt.label} 🔒` : opt.label}
-                </Text>
-              </Pressable>
-            );
-          })}
-        </View>
-        {promptKey?.startsWith('horizon-') ? (
-          <Text style={styles.upgradePrompt}>{UPGRADE_PROMPT}</Text>
-        ) : null}
-      </View>
-
-      <FilterRow
-        label="Population"
-        valueLabel={formatPopulation(filters.minPopulation)}
-      >
-        <RangeSlider
-          value={filters.minPopulation}
-          min={FILTER_LIMITS.minPopulation.min}
-          max={FILTER_LIMITS.minPopulation.max}
-          step={FILTER_LIMITS.minPopulation.step}
-          accent="#5b8def"
-          onChange={(minPopulation) => onChange({ minPopulation })}
+      <PrefRow label="Trip Type">
+        <PreferenceSegmentedControl
+          options={TRIP_OPTIONS}
+          value={filters.tripType}
+          onChange={(tripType) => onChange({ tripType })}
+          compact
         />
-      </FilterRow>
+      </PrefRow>
 
-      <FilterRow
-        label="Cost Index Min."
-        valueLabel={formatMinScore(filters.minCostIndex)}
-      >
-        <RangeSlider
-          value={filters.minCostIndex}
-          min={FILTER_LIMITS.minCostIndex.min}
-          max={FILTER_LIMITS.minCostIndex.max}
-          step={FILTER_LIMITS.minCostIndex.step}
-          accent="#e0a03a"
-          onChange={(minCostIndex) => onChange({ minCostIndex })}
+      <PrefRow label="Budget">
+        <PreferenceSegmentedControl
+          options={BUDGET_OPTIONS}
+          value={filters.budgetTier}
+          onChange={(budgetTier) => onChange({ budgetTier })}
+          compact
         />
-      </FilterRow>
+      </PrefRow>
 
-      {talentLocked ? (
-        <Pressable
-          onPress={() => showPrompt('accessibility')}
-          style={styles.lockedBlock}
-        >
-          <FilterRow
-            label="Accessibility Min."
-            valueLabel={formatMinScore(filters.minAccessibility)}
-            locked
-          >
-            <RangeSlider
-              value={filters.minAccessibility}
-              min={FILTER_LIMITS.minAccessibility.min}
-              max={FILTER_LIMITS.minAccessibility.max}
-              step={FILTER_LIMITS.minAccessibility.step}
-              accent="#3ecf8e"
-              disabled
-              onChange={() => undefined}
-            />
-          </FilterRow>
-          {promptKey === 'accessibility' ? (
-            <Text style={styles.upgradePrompt}>{UPGRADE_PROMPT}</Text>
-          ) : null}
-        </Pressable>
-      ) : (
-        <FilterRow
-          label="Accessibility Min."
-          valueLabel={formatMinScore(filters.minAccessibility)}
-        >
-          <RangeSlider
-            value={filters.minAccessibility}
-            min={FILTER_LIMITS.minAccessibility.min}
-            max={FILTER_LIMITS.minAccessibility.max}
-            step={FILTER_LIMITS.minAccessibility.step}
-            accent="#3ecf8e"
-            onChange={(minAccessibility) => onChange({ minAccessibility })}
-          />
-        </FilterRow>
-      )}
-
-      {competitorLocked ? (
-        <Pressable
-          onPress={() => showPrompt('crowding')}
-          style={styles.lockedBlock}
-        >
-          <FilterRow
-            label="Tourism Crowding Max."
-            valueLabel={formatMaxScore(filters.maxCrowding)}
-            locked
-          >
-            <RangeSlider
-              value={filters.maxCrowding}
-              min={FILTER_LIMITS.maxCrowding.min}
-              max={FILTER_LIMITS.maxCrowding.max}
-              step={FILTER_LIMITS.maxCrowding.step}
-              accent="#d96b6b"
-              disabled
-              onChange={() => undefined}
-            />
-          </FilterRow>
-          {promptKey === 'crowding' ? (
-            <Text style={styles.upgradePrompt}>{UPGRADE_PROMPT}</Text>
-          ) : null}
-        </Pressable>
-      ) : (
-        <FilterRow
-          label="Tourism Crowding Max."
-          valueLabel={formatMaxScore(filters.maxCrowding)}
-        >
-          <RangeSlider
-            value={filters.maxCrowding}
-            min={FILTER_LIMITS.maxCrowding.min}
-            max={FILTER_LIMITS.maxCrowding.max}
-            step={FILTER_LIMITS.maxCrowding.step}
-            accent="#d96b6b"
-            onChange={(maxCrowding) =>
-              onChange({ maxCrowding })
-            }
-          />
-        </FilterRow>
-      )}
-
-      <FilterRow
-        label="Safety & Entry Floor"
-        valueLabel={formatMinScore(filters.minSafetyAndEntry)}
-      >
-        <RangeSlider
-          value={filters.minSafetyAndEntry}
-          min={FILTER_LIMITS.minSafetyAndEntry.min}
-          max={FILTER_LIMITS.minSafetyAndEntry.max}
-          step={FILTER_LIMITS.minSafetyAndEntry.step}
-          accent="#9b7bde"
-          onChange={(minSafetyAndEntry) => onChange({ minSafetyAndEntry })}
+      <PrefRow label="Safety Comfort">
+        <PreferenceSegmentedControl
+          options={SAFETY_OPTIONS}
+          value={filters.safetyTolerance}
+          onChange={(safetyTolerance) => onChange({ safetyTolerance })}
         />
-      </FilterRow>
+      </PrefRow>
+
+      <PrefRow label="Off the Beaten Path">
+        <PreferenceSegmentedControl
+          options={CROWDING_OPTIONS}
+          value={filters.crowdingPreference}
+          onChange={(crowdingPreference) => onChange({ crowdingPreference })}
+        />
+      </PrefRow>
+
+      <PrefRow label="Ease of Travel">
+        <PreferenceSegmentedControl
+          options={EASE_OPTIONS}
+          value={filters.easeOfTravel}
+          onChange={(easeOfTravel) => onChange({ easeOfTravel })}
+        />
+      </PrefRow>
 
       <SavedSearchesPanel filters={filters} onChange={onChange} />
     </View>
@@ -369,13 +125,13 @@ export default function FilterSidebar({ filters, onChange, onReset, style }: Pro
 const styles = StyleSheet.create({
   sidebar: {
     width: 280,
-    backgroundColor: '#0e0e16',
+    backgroundColor: colors.backgroundElevated,
     borderRightWidth: 1,
-    borderRightColor: '#1c1c2a',
-    paddingHorizontal: 16,
-    paddingTop: 16,
-    paddingBottom: 12,
-    gap: 18,
+    borderRightColor: colors.border,
+    paddingHorizontal: spacing.md,
+    paddingTop: spacing.md,
+    paddingBottom: spacing.sm,
+    gap: spacing.md + 2,
     flexShrink: 0,
   },
   header: {
@@ -385,112 +141,22 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   headerTitle: {
-    color: 'rgba(255,255,255,0.55)',
+    color: colors.textMuted,
     fontSize: 11,
-    fontWeight: '700',
+    fontWeight: typography.fontWeight.bold,
     letterSpacing: 1.4,
   },
   reset: {
-    color: '#7aa2ff',
-    fontSize: 12,
-    fontWeight: '600',
+    color: colors.accentHover,
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.semibold,
   },
   row: {
-    gap: 8,
-  },
-  verticalRow: {
-    zIndex: 40,
-    elevation: 40,
-  },
-  rowHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    gap: spacing.xs,
   },
   rowLabel: {
-    color: 'rgba(255,255,255,0.78)',
-    fontSize: 13,
-    fontWeight: '500',
-  },
-  rowValue: {
-    color: 'rgba(255,255,255,0.55)',
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  sliderTrackWrap: {
-    height: 28,
-    justifyContent: 'center',
-    position: 'relative',
-  },
-  sliderTrackBg: {
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: '#232336',
-    overflow: 'hidden',
-  },
-  sliderTrackFill: {
-    height: 4,
-    borderRadius: 2,
-  },
-  nativeSliderFallback: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    height: 28,
-  },
-  stepBtn: {
-    width: 28,
-    height: 28,
-    borderRadius: 6,
-    backgroundColor: '#1a1a28',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  stepBtnText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  segmentRow: {
-    flexDirection: 'row',
-    gap: 6,
-    marginTop: 4,
-  },
-  segmentBtn: {
-    flex: 1,
-    paddingVertical: 8,
-    borderRadius: 8,
-    backgroundColor: '#161622',
-    borderWidth: 1,
-    borderColor: '#2a2a3a',
-    alignItems: 'center',
-  },
-  segmentBtnActive: {
-    backgroundColor: '#1e2a44',
-    borderColor: '#3d8bfd',
-  },
-  segmentBtnLocked: {
-    opacity: 0.4,
-  },
-  segmentText: {
-    color: 'rgba(255,255,255,0.55)',
-    fontSize: 11,
-    fontWeight: '600',
-  },
-  segmentTextActive: {
-    color: '#fff',
-  },
-  segmentTextLocked: {
-    color: 'rgba(255,255,255,0.55)',
-  },
-  lockedBlock: {
-    opacity: 0.4,
-    gap: 6,
-  },
-  upgradePrompt: {
-    color: '#e0a03a',
-    fontSize: 11,
-    fontWeight: '600',
-    marginTop: 4,
+    color: colors.textSecondary,
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.medium,
   },
 });

@@ -104,12 +104,28 @@ async function optionalAuthHeaders(
 }
 
 export async function fetchGeographiesGeojson(
-  vertical?: string,
-  horizon?: '2yr' | '5yr' | 'current' | null
+  options?: {
+    profile?: string;
+    preferences?: import('@outbound/core').TravelerPreferences;
+    horizon?: '2yr' | '5yr' | 'current' | null;
+  } | string,
+  horizonLegacy?: '2yr' | '5yr' | 'current' | null
 ): Promise<GeographyFeatureCollection> {
+  // Back-compat: fetchGeographiesGeojson(profile, horizon)
+  const opts =
+    typeof options === 'string' || options === undefined
+      ? { profile: options, horizon: horizonLegacy }
+      : options;
+
   const params = new URLSearchParams();
-  if (vertical) params.set('profile', vertical);
-  if (horizon === '2yr' || horizon === '5yr') params.set('horizon', horizon);
+  if (opts.preferences) {
+    params.set('preferences', JSON.stringify(opts.preferences));
+  } else if (opts.profile) {
+    params.set('profile', opts.profile);
+  }
+  if (opts.horizon === '2yr' || opts.horizon === '5yr') {
+    params.set('horizon', opts.horizon);
+  }
   const qs = params.toString() ? `?${params.toString()}` : '';
   const headers = await optionalAuthHeaders();
   const response = await fetch(`${getApiUrl()}/api/geographies/geojson${qs}`, {
@@ -137,6 +153,7 @@ export async function filterGeographies(
   options?: {
     limit?: number;
     profile?: string;
+    preferences?: import('@outbound/core').TravelerPreferences;
     horizon?: '2yr' | '5yr';
   }
 ): Promise<{ data: GeographyListItem[]; total: number }> {
@@ -147,7 +164,10 @@ export async function filterGeographies(
     method: 'POST',
     headers,
     body: JSON.stringify({
-      profile: options?.profile ?? 'balanced',
+      preferences: options?.preferences,
+      profile: options?.preferences
+        ? undefined
+        : (options?.profile ?? 'balanced'),
       horizon: options?.horizon,
       filters,
       sort: { field: 'overall', direction: 'desc' },
@@ -230,10 +250,21 @@ export type GeographyDetail = {
 /** Fetch single geography with full TVI breakdown and Quick Facts. */
 export async function getGeographyDetail(
   id: string,
-  vertical?: string
+  options?: {
+    profile?: string;
+    preferences?: import('@outbound/core').TravelerPreferences;
+  } | string
 ): Promise<GeographyDetail> {
+  const opts =
+    typeof options === 'string' || options === undefined
+      ? { profile: options }
+      : options;
   const params = new URLSearchParams();
-  if (vertical) params.set('profile', vertical);
+  if (opts.preferences) {
+    params.set('preferences', JSON.stringify(opts.preferences));
+  } else if (opts.profile) {
+    params.set('profile', opts.profile);
+  }
   const qs = params.toString() ? `?${params.toString()}` : '';
   const headers = await optionalAuthHeaders();
   const response = await fetch(

@@ -2,6 +2,7 @@
  * Trip intake — public (optionalAuth). Guests and signed-in users submit trip requests.
  *
  * POST /api/intake
+ * GET  /api/intake/verify?token=
  */
 
 import {
@@ -14,12 +15,20 @@ import rateLimit from 'express-rate-limit';
 
 import { pool } from '../config/database';
 import { optionalAuth } from '../middleware/optionalAuth';
+import { sendEmail } from '../services/email';
+import { scheduleComposeItinerary } from '../services/composition';
+import {
+  buildVerificationUrl,
+  createVerificationToken,
+  verifyToken,
+} from '../services/verification';
+import { verificationEmail } from '../templates/emails';
 import { apiError } from '../utils/response';
 
 const router = Router();
 
 const SUCCESS_MESSAGE =
-  "Your trip request has been received. We'll be in touch soon.";
+  "Your trip request has been received. I'll be in touch soon.";
 
 /** Stricter than global limiter: 5 submissions / 15 minutes / IP. */
 const intakeLimiter = rateLimit({
@@ -140,10 +149,7 @@ async function upsertClientProfile(
 
 function successMessage(payload: IntakePayload): string {
   const email = payload.email.trim();
-  if (payload.serviceTier === 'full_service') {
-    return `Your trip request has been received. We'll send a draft itinerary to ${email} for your review. Once you're happy with it, we'll handle all the bookings.`;
-  }
-  return `Your trip request has been received. We'll send your personalized itinerary to ${email} soon.`;
+  return `Your trip request has been received. Please check ${email} to verify your email — I'll start crafting your trip plan once you confirm.`;
 }
 
 async function createTrip(
@@ -193,6 +199,42 @@ async function createTrip(
 }
 
 /**
+ * Send verification email after intake. Failures are logged only —
+ * the trip record is already persisted.
+ */
+async function sendVerificationEmailSafe(
+  clientProfileId: string,
+  payload: IntakePayload
+): Promise<void> {
+  try {
+    const token = await createVerificationToken(clientProfileId);
+    const verificationUrl = buildVerificationUrl(token);
+    const content = verificationEmail({
+      name: payload.name,
+      verificationUrl,
+    });
+    const result = await sendEmail({
+      to: payload.email.toLowerCase().trim(),
+      subject: content.subject,
+      html: content.html,
+      text: content.text,
+    });
+    if (!result.ok) {
+      console.error('[intake] Verification email failed:', result.error, {
+        clientProfileId,
+      });
+    } else if (result.skipped) {
+      console.info('[intake] Verification email skipped (no RESEND_API_KEY)', {
+        clientProfileId,
+        verificationUrl,
+      });
+    }
+  } catch (err) {
+    console.error('[intake] Verification email error (non-fatal):', err);
+  }
+}
+
+/**
  * POST /api/intake
  * Public — optionalAuth. Guests submit without an account; auth links user_id.
  */
@@ -236,6 +278,9 @@ router.post('/', intakeLimiter, optionalAuth, async (req: Request, res: Response
     const clientProfileId = await upsertClientProfile(payload, userId);
     const tripId = await createTrip(clientProfileId, payload);
 
+    // Fire-and-forget email — never fail the intake response
+    void sendVerificationEmailSafe(clientProfileId, payload);
+
     res.status(200).json({
       success: true,
       tripId,
@@ -244,6 +289,46 @@ router.post('/', intakeLimiter, optionalAuth, async (req: Request, res: Response
   } catch (err) {
     console.error('[intake] Failed to store submission:', err);
     res.status(500).json(apiError('Failed to save trip request'));
+  }
+});
+
+/**
+ * GET /api/intake/verify?token=
+ * Public — validates email verification token and advances trip to composing.
+ */
+router.get('/verify', async (req: Request, res: Response) => {
+  try {
+    const token = String(req.query.token ?? '');
+    const result = await verifyToken(token);
+
+    if (!result.valid) {
+      const messages: Record<string, string> = {
+        invalid: 'Invalid verification link.',
+        expired: 'This verification link has expired. Please submit again.',
+        already_used: 'This verification link has already been used.',
+      };
+      res.status(400).json({
+        success: false,
+        error: messages[result.reason] ?? 'Verification failed.',
+        reason: result.reason,
+      });
+      return;
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Email verified. I'm putting together your trip plan now.",
+      clientProfileId: result.clientProfileId,
+      tripId: result.tripId,
+    });
+
+    // Fire composition off the request cycle — do not await.
+    if (result.tripId) {
+      scheduleComposeItinerary(result.tripId);
+    }
+  } catch (err) {
+    console.error('[intake] verify error:', err);
+    res.status(500).json(apiError('Verification failed'));
   }
 });
 

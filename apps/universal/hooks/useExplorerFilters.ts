@@ -7,7 +7,6 @@ import {
   filtersEqual,
   filtersToQueryRecord,
   parseFiltersFromParams,
-  toApiFilters,
   type ExplorerFilterState,
 } from '@/lib/explorerFilters';
 import {
@@ -15,14 +14,16 @@ import {
   type GeographyListItem,
 } from '@/services/geographies';
 
-const DEBOUNCE_MS = 200;
+const DEBOUNCE_MS = 250;
 
 export function useExplorerFilters() {
   const router = useRouter();
   const params = useLocalSearchParams();
   const [filters, setFilters] = useState<ExplorerFilterState>(DEFAULT_FILTERS);
   const [matched, setMatched] = useState<GeographyListItem[]>([]);
-  const [matchedIsoCodes, setMatchedIsoCodes] = useState<Set<string> | null>(null);
+  const [matchedIsoCodes, setMatchedIsoCodes] = useState<Set<string> | null>(
+    null
+  );
   const [filtering, setFiltering] = useState(false);
   const hydrated = useRef(false);
   const skipNextUrlSync = useRef(true);
@@ -30,16 +31,18 @@ export function useExplorerFilters() {
   const applyFilters = useCallback(async (next: ExplorerFilterState) => {
     setFiltering(true);
     try {
-      const apiFilters = toApiFilters(next);
-      const hasActive = Object.keys(apiFilters).length > 0;
-      const result = await filterGeographies(apiFilters, {
-        limit: 200,
-        profile: next.profile,
-        horizon: next.horizon === 'current' ? undefined : next.horizon,
-      });
+      const result = await filterGeographies(
+        {},
+        {
+          limit: 200,
+          preferences: next,
+        }
+      );
       setMatched(result.data);
+      // Preference-derived hard filters may exclude countries — dim non-matches
+      // when the result set is smaller than a full catalog fetch.
       setMatchedIsoCodes(
-        hasActive
+        result.data.length > 0 && result.data.length < 170
           ? new Set(
               result.data
                 .map((g) => g.isoCode)
@@ -65,7 +68,7 @@ export function useExplorerFilters() {
     setFilters(fromUrl);
   }, [params]);
 
-  // Sync filter state → URL query params (never during render)
+  // Sync preference state → URL query params (never during render)
   useEffect(() => {
     if (!hydrated.current) return;
     if (Platform.OS !== 'web') return;
@@ -75,18 +78,24 @@ export function useExplorerFilters() {
     }
     const query = filtersToQueryRecord(filters);
     router.setParams({
-      profile: query.profile ?? undefined,
+      tripType: query.tripType ?? undefined,
+      budgetTier: query.budgetTier ?? undefined,
+      safetyTolerance: query.safetyTolerance ?? undefined,
+      crowdingPreference: query.crowdingPreference ?? undefined,
+      easeOfTravel: query.easeOfTravel ?? undefined,
+      // Clear legacy filter params
+      profile: undefined,
       vertical: undefined,
-      horizon: query.horizon ?? undefined,
-      minPopulation: query.minPopulation ?? undefined,
-      minCostIndex: query.minCostIndex ?? undefined,
-      minAccessibility: query.minAccessibility ?? undefined,
-      maxCrowding: query.maxCrowding ?? undefined,
-      minSafetyAndEntry: query.minSafetyAndEntry ?? undefined,
+      horizon: undefined,
+      minPopulation: undefined,
+      minCostIndex: undefined,
+      minAccessibility: undefined,
+      maxCrowding: undefined,
+      minSafetyAndEntry: undefined,
     });
   }, [filters, router]);
 
-  // Debounced API filter apply when filters change
+  // Debounced API filter apply when preferences change
   useEffect(() => {
     if (!hydrated.current) return;
     const handle = setTimeout(() => {
@@ -105,6 +114,7 @@ export function useExplorerFilters() {
 
   return {
     filters,
+    preferences: filters,
     updateFilters,
     resetFilters,
     matched,

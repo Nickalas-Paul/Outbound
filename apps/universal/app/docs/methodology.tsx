@@ -71,7 +71,7 @@ export default function MethodologyScreen() {
         <Body>
           Core principle: same data + same filters = same scores, every time.
           Re-running the scoring engine against unchanged inputs is deterministic —
-          freshness labels track underlying source years, not the platform clock.
+          freshness labels track underlying source years, not the clock on our servers.
         </Body>
         <Body>
           Each dimension is scored 0–100. Missing dimensions are stored as null

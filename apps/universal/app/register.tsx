@@ -59,7 +59,7 @@ export default function RegisterScreen() {
       <View style={styles.card}>
         <Text style={styles.title}>Create account</Text>
         <Text style={styles.subtitle}>
-          Explore destinations. Plan smarter. Travel better.
+          Explore destinations. Plan thoughtfully. Travel well.
         </Text>
 
         <Text style={styles.label}>Email</Text>

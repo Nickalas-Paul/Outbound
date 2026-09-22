@@ -20,6 +20,9 @@ import tviRoutes from './routes/tvi';
 import savedSearchRoutes from './routes/savedSearches';
 import signalRoutes from './routes/signals';
 import intakeRoutes from './routes/intake';
+import tripRoutes from './routes/trips';
+import correspondenceRoutes from './routes/correspondence';
+import adminRoutes from './routes/admin';
 import devRoutes from './routes/dev';
 
 const app = express();
@@ -34,6 +37,7 @@ app.use(
   })
 );
 app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
 /*
@@ -71,6 +75,9 @@ app.use('/api/signals', signalRoutes);
 app.use('/api/exports', exportRoutes);
 app.use('/api/saved-searches', savedSearchRoutes);
 app.use('/api/intake', intakeRoutes);
+app.use('/api/trips', tripRoutes);
+app.use('/api/correspondence', correspondenceRoutes);
+app.use('/api/admin', adminRoutes);
 // MARKETPLACE: commented out for Outbound — preserved for future vendor/guide marketplace
 // app.use('/api/agents', agentRoutes);
 // app.use('/api/marketplace', marketplaceRoutes);

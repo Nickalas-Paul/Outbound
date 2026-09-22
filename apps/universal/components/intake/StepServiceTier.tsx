@@ -22,7 +22,7 @@ const ITINERARY_INCLUDES = [
 
 const FULL_SERVICE_INCLUDES = [
   'Everything in Itinerary Planning',
-  'Automated flight and hotel booking',
+  'Flight and hotel booking handled for you',
   'Tour and experience reservations',
   'Booking management and modifications',
   'Priority support',
@@ -80,7 +80,7 @@ export function StepServiceTier({
               {/* TODO: finalize pricing */}
               <Text style={styles.price}>$150–300</Text>
               <Text style={styles.cardBody}>
-                Receive a researched, verified itinerary tailored to your trip.
+                A researched, personally curated itinerary tailored to your trip.
                 Includes booking links and recommendations. You handle the
                 bookings yourself.
               </Text>
