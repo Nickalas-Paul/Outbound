@@ -12,13 +12,24 @@
  * Static paths (/search, /geojson, /filter) MUST be registered before /:id.
  */
 
-import { canUseHorizon, getQuickFacts, isGatingEnabled } from '@outbound/core';
+import {
+  canUseHorizon,
+  getQuickFacts,
+  isGatingEnabled,
+  parseTravelerPreferences,
+  preferencesToFilters,
+  preferencesToWeights,
+  type TravelerPreferences,
+} from '@outbound/core';
 import { Router, Request, Response } from 'express';
 import { pool } from '../config/database';
 import {
   computeWeightedOverall,
+  computeWeightedOverallWithWeights,
   DEFAULT_PROFILE,
   DimensionKey,
+  DimensionWeights,
+  getProfileWeights,
   TVI_DIMENSIONS,
   TVI_SCORING_VERSION,
   resolveProfileKey,
@@ -27,6 +38,75 @@ import {
 import { optionalAuth } from '../middleware/optionalAuth';
 import { requireFilterAccess } from '../middleware/requireFilterAccess';
 import { apiError, apiResponse } from '../utils/response';
+
+/** Scoring context: preference weights take priority over legacy profile keys. */
+type ScoringContext = {
+  profileKey: string;
+  weights: DimensionWeights;
+  preferences: TravelerPreferences | null;
+};
+
+function resolveScoringContext(raw: {
+  preferences?: unknown;
+  profile?: unknown;
+  vertical?: unknown;
+}): ScoringContext {
+  const preferences = parseTravelerPreferences(raw.preferences);
+  if (preferences) {
+    return {
+      profileKey: 'preferences',
+      weights: preferencesToWeights(preferences) as DimensionWeights,
+      preferences,
+    };
+  }
+  const profileKey = resolveProfileKey(raw.profile ?? raw.vertical);
+  return {
+    profileKey,
+    weights: getProfileWeights(profileKey),
+    preferences: null,
+  };
+}
+
+function parsePreferencesQuery(raw: unknown): TravelerPreferences | null {
+  if (raw == null || raw === '') return null;
+  if (typeof raw === 'object') return parseTravelerPreferences(raw);
+  if (typeof raw !== 'string') return null;
+  try {
+    return parseTravelerPreferences(JSON.parse(raw));
+  } catch {
+    return null;
+  }
+}
+
+function scoreOverall(
+  dimensions:
+    | Partial<Record<DimensionKey, number | null>>
+    | null
+    | undefined,
+  ctx: ScoringContext
+): number | null {
+  if (ctx.preferences) {
+    return computeWeightedOverallWithWeights(dimensions, ctx.weights);
+  }
+  return computeWeightedOverall(dimensions, ctx.profileKey);
+}
+
+function mergePreferenceFilters(
+  filters: Record<string, unknown>,
+  preferences: TravelerPreferences | null
+): Record<string, unknown> {
+  if (!preferences) return filters;
+  const derived = preferencesToFilters(preferences);
+  const merged = { ...filters };
+  // Preference-derived thresholds fill gaps; explicit client filters win.
+  for (const [key, value] of Object.entries(derived)) {
+    if (value === undefined) continue;
+    if (merged[key] === undefined || merged[key] === null || merged[key] === '') {
+      merged[key] = value;
+    }
+  }
+  return merged;
+}
 
 const DIMENSION_KEYS: DimensionKey[] = TVI_DIMENSIONS.map((d) => d.key);
 /** Base dimensions that have trend vectors (excludes composite Trajectory). */
@@ -178,12 +258,12 @@ function formatDateOnly(value: Date | string | null | undefined): string | null 
 function buildTvi(
   row: DbGeoRow,
   includeSources: boolean,
-  verticalKey: string
+  ctx: ScoringContext
 ): Record<string, unknown> | null {
   if (row.overall_score == null && row.dimensions == null && row.confidence == null) {
     return null;
   }
-  const weighted = computeWeightedOverall(row.dimensions, verticalKey);
+  const weighted = scoreOverall(row.dimensions, ctx);
   const tvi: Record<string, unknown> = {
     overall:
       weighted ??
@@ -194,8 +274,11 @@ function buildTvi(
     calculatedAt: row.calculated_at
       ? new Date(row.calculated_at).toISOString()
       : null,
-    profile: verticalKey || DEFAULT_PROFILE,
+    profile: ctx.profileKey || DEFAULT_PROFILE,
   };
+  if (ctx.preferences) {
+    tvi.preferences = ctx.preferences;
+  }
   if (includeSources) {
     tvi.sources = row.sources ?? [];
   }
@@ -318,10 +401,17 @@ function mapGeography(
     includeGeometry?: boolean;
     includeSources?: boolean;
     profile?: string;
+    preferences?: TravelerPreferences | null;
+    scoring?: ScoringContext;
     quickFacts?: QuickFactsPayload | null;
   } = {}
 ): Record<string, unknown> {
-  const vertical = resolveProfileKey(opts.profile);
+  const ctx =
+    opts.scoring ??
+    resolveScoringContext({
+      preferences: opts.preferences,
+      profile: opts.profile,
+    });
   const population =
     opts.quickFacts?.population ??
     (row.population != null ? Number(row.population) : null);
@@ -350,7 +440,7 @@ function mapGeography(
         : null,
     population,
     gdpPpp,
-    tvi: buildTvi(row, Boolean(opts.includeSources), vertical),
+    tvi: buildTvi(row, Boolean(opts.includeSources), ctx),
   };
 
   if (opts.quickFacts) {
@@ -541,7 +631,13 @@ router.get('/search', optionalAuth, async (req: Request, res: Response) => {
 /** GET /api/geographies/geojson — FeatureCollection for Mapbox */
 router.get('/geojson', optionalAuth, async (req: Request, res: Response) => {
   try {
-    const vertical = parseProfile(req.query.profile ?? req.query.vertical);
+    const preferences =
+      parsePreferencesQuery(req.query.preferences) ??
+      parseTravelerPreferences(req.body?.preferences);
+    const scoring = resolveScoringContext({
+      preferences,
+      profile: req.query.profile ?? req.query.vertical,
+    });
     let horizonQuery = req.query.horizon;
     if (isGatingEnabled()) {
       const tier = req.user?.subscriptionTier ?? 'free';
@@ -605,7 +701,7 @@ router.get('/geojson', optionalAuth, async (req: Request, res: Response) => {
       const overallDims = horizon
         ? applyProjectedDimensions(dims, projectedByGeo?.get(row.id))
         : dims;
-      const overall = computeWeightedOverall(overallDims, vertical);
+      const overall = scoreOverall(overallDims, scoring);
       return {
         type: 'Feature',
         id: row.iso_code ?? row.id,
@@ -624,7 +720,8 @@ router.get('/geojson', optionalAuth, async (req: Request, res: Response) => {
           trajectory: overallDims.trajectory ?? null,
           confidence: row.confidence,
           population: row.population != null ? Number(row.population) : null,
-          profile: vertical,
+          profile: scoring.profileKey,
+          preferences: scoring.preferences,
           horizon: horizon ?? null,
         },
         geometry: row.geometry_geojson ? JSON.parse(row.geometry_geojson) : null,
@@ -636,7 +733,8 @@ router.get('/geojson', optionalAuth, async (req: Request, res: Response) => {
       type: 'FeatureCollection',
       features,
       meta: {
-        profile: vertical,
+        profile: scoring.profileKey,
+        preferences: scoring.preferences,
         dataVersion: TVI_SCORING_VERSION,
         horizon: horizon ?? null,
       },
@@ -657,7 +755,10 @@ router.get('/geojson', optionalAuth, async (req: Request, res: Response) => {
 router.post('/filter', optionalAuth, requireFilterAccess, async (req: Request, res: Response) => {
   try {
     const body = req.body ?? {};
-    const vertical = parseProfile(body.profile ?? body.vertical);
+    const scoring = resolveScoringContext({
+      preferences: body.preferences,
+      profile: body.profile ?? body.vertical,
+    });
     const horizon = parseHorizon(body.horizon);
     if (body.horizon !== undefined && body.horizon !== null && body.horizon !== '' && horizon == null) {
       res.status(400).json(apiError('horizon must be 2yr or 5yr'));
@@ -668,12 +769,13 @@ router.post('/filter', optionalAuth, requireFilterAccess, async (req: Request, r
         ? (body.filters as Record<string, unknown>)
         : {};
     // Accept nested `filters` or top-level min*/max* keys (verify / clients).
-    const filters: Record<string, unknown> = { ...nestedFilters };
+    let filters: Record<string, unknown> = { ...nestedFilters };
     for (const [key, value] of Object.entries(body)) {
       if (
         key === 'filters' ||
         key === 'vertical' ||
         key === 'profile' ||
+        key === 'preferences' ||
         key === 'sort' ||
         key === 'limit' ||
         key === 'horizon'
@@ -687,6 +789,7 @@ router.post('/filter', optionalAuth, requireFilterAccess, async (req: Request, r
         filters[key] = value;
       }
     }
+    filters = mergePreferenceFilters(filters, scoring.preferences);
     const sort = (body.sort ?? { field: 'overall', direction: 'desc' }) as {
       field?: string;
       direction?: string;
@@ -830,13 +933,13 @@ router.post('/filter', optionalAuth, requireFilterAccess, async (req: Request, r
     const projectedByGeo = horizon ? await loadProjectedByGeo(horizon) : null;
 
     let data = result.rows.map((row) => {
-      const mapped = mapGeography(row, { profile: vertical });
+      const mapped = mapGeography(row, { scoring });
       if (!horizon || !mapped.tvi) return mapped;
       const dims = applyProjectedDimensions(
         (mapped.tvi as { dimensions?: TviDimensions | null }).dimensions,
         projectedByGeo?.get(row.id)
       );
-      const overall = computeWeightedOverall(dims, vertical);
+      const overall = scoreOverall(dims, scoring);
       return {
         ...mapped,
         tvi: {
@@ -901,7 +1004,8 @@ router.post('/filter', optionalAuth, requireFilterAccess, async (req: Request, r
     res.json(
       apiResponse(data, {
         total: data.length,
-        profile: vertical,
+        profile: scoring.profileKey,
+        preferences: scoring.preferences,
         horizon: horizon ?? null,
         dataVersion: TVI_SCORING_VERSION,
         limit,
@@ -1047,7 +1151,11 @@ router.get('/:id/trends', optionalAuth, async (req: Request, res: Response) => {
 router.get('/:id', optionalAuth, async (req: Request, res: Response) => {
   try {
     const id = String(req.params.id ?? '').trim();
-    const vertical = parseProfile(req.query.profile ?? req.query.vertical);
+    const preferences = parsePreferencesQuery(req.query.preferences);
+    const scoring = resolveScoringContext({
+      preferences,
+      profile: req.query.profile ?? req.query.vertical,
+    });
     const isIso = /^[A-Za-z]{3}$/.test(id);
 
     const result = await pool.query<DbGeoRow>(
@@ -1079,7 +1187,7 @@ router.get('/:id', optionalAuth, async (req: Request, res: Response) => {
         mapGeography(row, {
           includeGeometry: true,
           includeSources: true,
-          profile: vertical,
+          scoring,
           quickFacts,
         })
       )
