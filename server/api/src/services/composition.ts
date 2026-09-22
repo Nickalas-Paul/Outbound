@@ -20,7 +20,12 @@ import {
   type ItineraryContent,
 } from './itinerary-types';
 import { researchDestinations, type DestinationResearch } from './research';
-import { getAppBaseUrl } from './verification';
+import {
+  buildTripConfirmUrl,
+  buildTripPdfUrl,
+  buildTripReviseUrl,
+  createTripActionTokens,
+} from './verification';
 import { itineraryDraftEmail } from '../templates/emails';
 
 type TripRow = {
@@ -42,11 +47,26 @@ type TripRow = {
   client_email: string;
 };
 
+export type ComposeItineraryOptions = {
+  revisionNotes?: string;
+  previousContent?: ItineraryContent;
+  versionNumber?: number;
+};
+
 function itineraryDataDir(): string {
   return path.resolve(__dirname, '../../data/itineraries');
 }
 
-function buildSystemPrompt(): string {
+function buildSystemPrompt(isRevision: boolean): string {
+  const revisionRule = isRevision
+    ? `
+Revision mode:
+- The client has reviewed a previous draft and requested changes.
+- Revise the itinerary to address their feedback.
+- Keep everything they did not mention unchanged.
+- Return a complete itinerary JSON (not a partial diff).`
+    : '';
+
   return `You are Outbound's expert travel itinerary composer.
 You create practical, day-by-day travel plans grounded in the destination research provided.
 Respond with ONLY a single JSON object — no markdown fences, no preamble, no commentary.
@@ -95,50 +115,58 @@ Rules:
 - Respect budget, trip type, accommodation style, interests, and special requirements.
 - Incorporate active safety/travel signals into importantNotes and daily logistics when relevant.
 - Prefer walkable / efficient day plans; avoid impossible logistics.
-- Cover every day from start to end inclusive when dates are provided.`;
+- Cover every day from start to end inclusive when dates are provided.${revisionRule}`;
 }
 
 function buildUserMessage(
   trip: TripRow,
-  research: DestinationResearch[]
+  research: DestinationResearch[],
+  options?: ComposeItineraryOptions
 ): string {
   const dates = trip.travel_dates || {};
   const budget = trip.budget_range;
-  return JSON.stringify(
-    {
-      trip: {
-        tripType: trip.trip_type,
-        groupSize: trip.group_size,
-        serviceTier: trip.service_tier,
-        travelDates: dates,
-        budgetRange: budget,
-        accommodationStyle: trip.accommodation_style,
-        interests: trip.interests,
-        specialRequirements: trip.special_requirements,
-        alreadyBooked: trip.already_booked,
-        notes: trip.notes,
-        requestedDestinations: trip.destinations,
-      },
-      destinationResearch: research.map((r) => ({
-        isoCode: r.isoCode,
-        name: r.name,
-        region: r.region,
-        population: r.population,
-        tviOverall: r.tvi.overall,
-        tviConfidence: r.tvi.confidence,
-        dimensions: r.tvi.dimensions,
-        activeSignals: r.signals.map((s) => ({
-          type: s.signalType,
-          title: s.title,
-          severity: s.severity,
-          direction: s.direction,
-          description: s.description,
-        })),
-      })),
+  const payload: Record<string, unknown> = {
+    trip: {
+      tripType: trip.trip_type,
+      groupSize: trip.group_size,
+      serviceTier: trip.service_tier,
+      travelDates: dates,
+      budgetRange: budget,
+      accommodationStyle: trip.accommodation_style,
+      interests: trip.interests,
+      specialRequirements: trip.special_requirements,
+      alreadyBooked: trip.already_booked,
+      notes: trip.notes,
+      requestedDestinations: trip.destinations,
     },
-    null,
-    2
-  );
+    destinationResearch: research.map((r) => ({
+      isoCode: r.isoCode,
+      name: r.name,
+      region: r.region,
+      population: r.population,
+      tviOverall: r.tvi.overall,
+      tviConfidence: r.tvi.confidence,
+      dimensions: r.tvi.dimensions,
+      activeSignals: r.signals.map((s) => ({
+        type: s.signalType,
+        title: s.title,
+        severity: s.severity,
+        direction: s.direction,
+        description: s.description,
+      })),
+    })),
+  };
+
+  if (options?.revisionNotes && options.previousContent) {
+    payload.revision = {
+      clientNotes: options.revisionNotes,
+      instruction:
+        'The client has reviewed the previous draft and requested the following changes. Revise the itinerary to address their feedback. Keep everything they did not mention unchanged.',
+      previousItinerary: options.previousContent,
+    };
+  }
+
+  return JSON.stringify(payload, null, 2);
 }
 
 async function nextVersionNumber(tripId: string): Promise<number> {
@@ -151,9 +179,16 @@ async function nextVersionNumber(tripId: string): Promise<number> {
 
 /**
  * Compose itinerary for a trip. Safe to call fire-and-forget; errors are logged.
+ * Pass revisionNotes + previousContent to revise an existing draft.
  */
-export async function composeItinerary(tripId: string): Promise<void> {
-  console.info('[composition] starting', { tripId });
+export async function composeItinerary(
+  tripId: string,
+  options?: ComposeItineraryOptions
+): Promise<void> {
+  const isRevision = Boolean(
+    options?.revisionNotes?.trim() && options.previousContent
+  );
+  console.info('[composition] starting', { tripId, isRevision });
   const startedAt = Date.now();
 
   try {
@@ -191,32 +226,63 @@ export async function composeItinerary(tripId: string): Promise<void> {
 
     const trip = tripResult.rows[0];
     const research = await researchDestinations(trip.destinations || []);
-    const versionNumber = await nextVersionNumber(tripId);
-    const systemPrompt = buildSystemPrompt();
-    const userMessage = buildUserMessage(trip, research);
+    const versionNumber =
+      options?.versionNumber ?? (await nextVersionNumber(tripId));
+    const systemPrompt = buildSystemPrompt(isRevision);
+    const userMessage = buildUserMessage(trip, research, options);
+
+    // Insert composing row early so clients can see work in progress
+    const composingInsert = await pool.query<{ id: string }>(
+      `INSERT INTO itinerary_versions (
+         trip_id, version_number, version_type, content, status, composition_metadata
+       ) VALUES ($1, $2, 'draft', $3::jsonb, 'composing', $4::jsonb)
+       RETURNING id`,
+      [
+        tripId,
+        versionNumber,
+        JSON.stringify(
+          isRevision
+            ? {
+                status: 'composing',
+                revisionNotes: options?.revisionNotes?.slice(0, 4000) ?? null,
+              }
+            : { status: 'composing' }
+        ),
+        JSON.stringify({
+          modelId: SONNET_MODEL_ID,
+          bedrockConfigured: isBedrockConfigured(),
+          isRevision,
+          startedAt: new Date(startedAt).toISOString(),
+        }),
+      ]
+    );
+    const versionId = composingInsert.rows[0].id;
 
     const raw = await composeWithSonnet(systemPrompt, userMessage);
     const metadata: Record<string, unknown> = {
       modelId: SONNET_MODEL_ID,
       bedrockConfigured: isBedrockConfigured(),
+      isRevision,
       promptChars: systemPrompt.length + userMessage.length,
       rawResponseChars: raw.length,
       startedAt: new Date(startedAt).toISOString(),
       finishedAt: new Date().toISOString(),
       durationMs: Date.now() - startedAt,
+      revisionNotes: isRevision
+        ? options?.revisionNotes?.slice(0, 2000)
+        : undefined,
     };
 
     if (raw.startsWith(LLM_UNAVAILABLE_PREFIX)) {
       metadata.rawResponse = raw.slice(0, 8000);
       await pool.query(
-        `INSERT INTO itinerary_versions (
-           trip_id, version_number, version_type, content, status, composition_metadata
-         ) VALUES ($1, $2, 'draft', $3::jsonb, 'failed', $4::jsonb)`,
+        `UPDATE itinerary_versions
+         SET content = $1::jsonb, status = 'failed', composition_metadata = $2::jsonb, updated_at = NOW()
+         WHERE id = $3`,
         [
-          tripId,
-          versionNumber,
           JSON.stringify({ error: 'llm_unavailable', message: raw }),
           JSON.stringify(metadata),
+          versionId,
         ]
       );
       console.error('[composition] LLM unavailable', { tripId, raw });
@@ -236,28 +302,25 @@ export async function composeItinerary(tripId: string): Promise<void> {
       metadata.parseError = message;
       metadata.rawResponse = raw.slice(0, 20000);
       await pool.query(
-        `INSERT INTO itinerary_versions (
-           trip_id, version_number, version_type, content, status, composition_metadata
-         ) VALUES ($1, $2, 'draft', $3::jsonb, 'failed_parsing', $4::jsonb)`,
+        `UPDATE itinerary_versions
+         SET content = $1::jsonb, status = 'failed_parsing', composition_metadata = $2::jsonb, updated_at = NOW()
+         WHERE id = $3`,
         [
-          tripId,
-          versionNumber,
           JSON.stringify({ error: 'failed_parsing', message }),
           JSON.stringify(metadata),
+          versionId,
         ]
       );
       console.error('[composition] JSON parse failed', { tripId, message });
       return;
     }
 
-    const insert = await pool.query<{ id: string }>(
-      `INSERT INTO itinerary_versions (
-         trip_id, version_number, version_type, content, status, composition_metadata
-       ) VALUES ($1, $2, 'draft', $3::jsonb, 'composed', $4::jsonb)
-       RETURNING id`,
-      [tripId, versionNumber, JSON.stringify(content), JSON.stringify(metadata)]
+    await pool.query(
+      `UPDATE itinerary_versions
+       SET content = $1::jsonb, status = 'composed', composition_metadata = $2::jsonb, updated_at = NOW()
+       WHERE id = $3`,
+      [JSON.stringify(content), JSON.stringify(metadata), versionId]
     );
-    const versionId = insert.rows[0].id;
 
     // PDF
     let pdfPath: string | null = null;
@@ -279,20 +342,21 @@ export async function composeItinerary(tripId: string): Promise<void> {
       console.error('[composition] PDF generation failed (continuing):', pdfErr);
     }
 
-    // Draft email
-    const appUrl = getAppBaseUrl().replace(/\/$/, '');
-    const itineraryUrl = `${appUrl.replace('8081', '3001')}/api/trips/${tripId}/itinerary/pdf`;
-    // Prefer API host for PDF download link
-    const apiBase =
-      process.env.OUTBOUND_API_URL?.trim() ||
-      process.env.EXPO_PUBLIC_API_URL?.trim() ||
-      'http://localhost:3001';
-    const pdfUrl = `${apiBase.replace(/\/$/, '')}/api/trips/${tripId}/itinerary/pdf`;
+    // Fresh confirm / revise tokens for this delivery
+    const { confirmToken, revisionToken } = await createTripActionTokens(
+      trip.client_profile_id
+    );
+    const pdfUrl = buildTripPdfUrl(tripId);
+    const confirmUrl = buildTripConfirmUrl(tripId, confirmToken);
+    const reviseUrl = buildTripReviseUrl(tripId, revisionToken);
 
     const emailContent = itineraryDraftEmail({
       name: trip.client_name,
-      tripSummary: `${content.title}\n\n${content.summary}`,
-      itineraryUrl: pdfUrl || itineraryUrl,
+      tripTitle: content.title,
+      tripSummary: content.summary,
+      itineraryUrl: pdfUrl,
+      confirmUrl,
+      reviseUrl,
     });
 
     const emailResult = await sendEmail({
@@ -304,7 +368,7 @@ export async function composeItinerary(tripId: string): Promise<void> {
 
     if (!emailResult.ok) {
       console.error('[composition] draft email failed:', emailResult.error);
-      // Still mark composed; leave trip as composing for manual retry of delivery
+      // Leave version as composed; trip stays composing / in_revision for retry
       return;
     }
 
@@ -317,7 +381,7 @@ export async function composeItinerary(tripId: string): Promise<void> {
     await pool.query(
       `UPDATE trips
        SET status = 'draft_delivered', updated_at = NOW()
-       WHERE id = $1 AND status = 'composing'`,
+       WHERE id = $1 AND status IN ('composing', 'in_revision')`,
       [tripId]
     );
 
@@ -325,6 +389,7 @@ export async function composeItinerary(tripId: string): Promise<void> {
       tripId,
       versionId,
       versionNumber,
+      isRevision,
       pdfPath,
       emailSkipped: emailResult.skipped ?? false,
       durationMs: Date.now() - startedAt,
@@ -337,9 +402,12 @@ export async function composeItinerary(tripId: string): Promise<void> {
 /**
  * Schedule composition off the request cycle (fire-and-forget).
  */
-export function scheduleComposeItinerary(tripId: string): void {
+export function scheduleComposeItinerary(
+  tripId: string,
+  options?: ComposeItineraryOptions
+): void {
   setImmediate(() => {
-    void composeItinerary(tripId).catch((err) => {
+    void composeItinerary(tripId, options).catch((err) => {
       console.error('[composition] unhandled', { tripId, err });
     });
   });
