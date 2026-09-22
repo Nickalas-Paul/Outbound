@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-bedrock-runtime": "^3.1137.0",
+    "@duffel/api": "^4.30.0",
     "@outbound/core": "^0.1.0",
     "argon2": "^0.45.1",
     "cookie-parser": "^1.4.7",

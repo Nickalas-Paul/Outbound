@@ -16,6 +16,7 @@ import { pool } from '../config/database';
 import {
   scheduleComposeItinerary,
 } from '../services/composition';
+import { scheduleExecuteBookings } from '../services/booking/executor';
 import { sendEmail } from '../services/email';
 import { renderItineraryPdf } from '../services/itinerary-pdf';
 import {
@@ -345,6 +346,10 @@ router.get('/:tripId/confirm', async (req: Request, res: Response) => {
     }).catch((err) => {
       console.error('[trips] confirmation email failed:', err);
     });
+
+    if (trip.service_tier === 'full_service') {
+      scheduleExecuteBookings(tripId);
+    }
 
     const acceptsHtml = String(req.headers.accept ?? '').includes('text/html');
     if (acceptsHtml || !req.headers.accept) {
