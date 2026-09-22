@@ -223,26 +223,173 @@ export function confirmationReminderEmail(params: {
   return { subject, html, text };
 }
 
-/** Placeholder ? per-segment booking confirmation. */
+/** Per-segment booking confirmation. */
 export function bookingConfirmationEmail(params: {
   name: string;
-  segmentDetails: string;
+  segmentType: 'flight' | 'hotel' | string;
+  segmentLabel: string;
+  dates: string;
+  confirmationNumber: string;
+  cancellationSummary: string;
+  providerName: string;
 }): EmailContent {
   const name = params.name.trim() || 'there';
-  const subject = `Booking confirmed ${EM} Outbound`;
+  const kind = params.segmentType === 'hotel' ? 'hotel' : 'flight';
+  const subject = `Your ${kind} is confirmed ${EM} Outbound`;
+  const personal =
+    kind === 'hotel'
+      ? `I've secured your ${params.segmentLabel} for ${params.dates}.`
+      : `I've secured your flight (${params.segmentLabel}) for ${params.dates}.`;
+
   const html = layout({
     title: subject,
+    preheader: `Great news ${EM} your ${kind} is confirmed.`,
     bodyHtml: `
       <h1 style="margin:0 0 12px;font-size:22px;font-weight:700;">Hi ${escapeHtml(name)},</h1>
-      <p style="margin:0 0 12px;font-size:15px;line-height:1.55;">A booking segment has been confirmed.</p>
-      <p style="margin:0;font-size:14px;color:#52525b;white-space:pre-wrap;">${escapeHtml(params.segmentDetails)}</p>
+      <p style="margin:0 0 12px;font-size:15px;line-height:1.55;">
+        Great news ${EM} your ${escapeHtml(kind)} is confirmed!
+      </p>
+      <p style="margin:0 0 12px;font-size:15px;line-height:1.55;color:#3f3f46;">
+        ${escapeHtml(personal)}
+      </p>
+      <p style="margin:0 0 8px;font-size:14px;color:#52525b;line-height:1.55;">
+        <strong>Confirmation:</strong> ${escapeHtml(params.confirmationNumber)}<br />
+        <strong>Provider:</strong> ${escapeHtml(params.providerName)}<br />
+        <strong>Dates:</strong> ${escapeHtml(params.dates)}
+      </p>
+      <p style="margin:0;font-size:13px;line-height:1.5;color:#71717a;">
+        Cancellation: ${escapeHtml(params.cancellationSummary)}
+      </p>
     `,
   });
   const text = [
     `Hi ${name},`,
     '',
-    'A booking segment has been confirmed.',
-    params.segmentDetails,
+    `Great news ${EM} your ${kind} is confirmed!`,
+    personal,
+    '',
+    `Confirmation: ${params.confirmationNumber}`,
+    `Provider: ${params.providerName}`,
+    `Dates: ${params.dates}`,
+    `Cancellation: ${params.cancellationSummary}`,
+    '',
+    FOOTER,
+  ].join('\n');
+  return { subject, html, text };
+}
+
+/** Sent when booking run completes (all or partial). */
+export function bookingSummaryEmail(params: {
+  name: string;
+  destinationLabel: string;
+  segments: Array<{
+    type: string;
+    label: string;
+    confirmationNumber: string;
+    amountNote?: string;
+  }>;
+  itineraryUrl: string;
+  notes?: string;
+}): EmailContent {
+  const name = params.name.trim() || 'there';
+  const subject = `All bookings for your ${params.destinationLabel} trip ${EM} Outbound`;
+  const listHtml = params.segments
+    .map(
+      (s) =>
+        `<li style="margin:0 0 8px;">
+          <strong>${escapeHtml(s.type)}</strong> ${EM} ${escapeHtml(s.label)}
+          <br /><span style="color:#52525b;">Conf: ${escapeHtml(s.confirmationNumber)}${
+            s.amountNote ? ` · ${escapeHtml(s.amountNote)}` : ''
+          }</span>
+        </li>`
+    )
+    .join('');
+  const listText = params.segments
+    .map(
+      (s) =>
+        `- ${s.type}: ${s.label} (conf ${s.confirmationNumber}${
+          s.amountNote ? `, ${s.amountNote}` : ''
+        })`
+    )
+    .join('\n');
+
+  const html = layout({
+    title: subject,
+    preheader: 'Your bookings are coming together.',
+    bodyHtml: `
+      <h1 style="margin:0 0 12px;font-size:22px;font-weight:700;">Hi ${escapeHtml(name)},</h1>
+      <p style="margin:0 0 12px;font-size:15px;line-height:1.55;">
+        All bookings for your ${escapeHtml(params.destinationLabel)} trip are confirmed!
+      </p>
+      <ul style="margin:0 0 16px;padding-left:18px;font-size:14px;line-height:1.5;color:#3f3f46;">
+        ${listHtml || '<li>See your segment confirmation emails for details.</li>'}
+      </ul>
+      ${
+        params.notes
+          ? `<p style="margin:0 0 16px;font-size:14px;color:#52525b;">${escapeHtml(params.notes)}</p>`
+          : ''
+      }
+      <p style="margin:0 0 12px;font-size:14px;line-height:1.55;color:#3f3f46;">
+        Pre-trip checklist: passport validity, visas if needed, travel insurance, and local payment cards.
+      </p>
+      <p style="margin:0;font-size:14px;">
+        <a href="${escapeHtml(params.itineraryUrl)}" style="color:#3b82f6;">View your itinerary PDF</a>
+      </p>
+    `,
+  });
+  const text = [
+    `Hi ${name},`,
+    '',
+    `All bookings for your ${params.destinationLabel} trip are confirmed!`,
+    '',
+    listText || 'See your segment confirmation emails for details.',
+    '',
+    params.notes ?? '',
+    '',
+    'Pre-trip checklist: passport validity, visas if needed, travel insurance, and local payment cards.',
+    '',
+    `Itinerary PDF: ${params.itineraryUrl}`,
+    '',
+    FOOTER,
+  ]
+    .filter((line, i, arr) => !(line === '' && arr[i - 1] === ''))
+    .join('\n');
+  return { subject, html, text };
+}
+
+/** Sent when a segment fails or exceeds price tolerance. */
+export function bookingFailureEmail(params: {
+  name: string;
+  destinationLabel: string;
+  reason: string;
+  optionsNote: string;
+}): EmailContent {
+  const name = params.name.trim() || 'there';
+  const subject = `I need your input on your ${params.destinationLabel} booking ${EM} Outbound`;
+  const html = layout({
+    title: subject,
+    preheader: 'A booking segment needs your attention.',
+    bodyHtml: `
+      <h1 style="margin:0 0 12px;font-size:22px;font-weight:700;">Hi ${escapeHtml(name)},</h1>
+      <p style="margin:0 0 12px;font-size:15px;line-height:1.55;">
+        I need your input on part of your ${escapeHtml(params.destinationLabel)} booking.
+      </p>
+      <p style="margin:0 0 12px;font-size:15px;line-height:1.55;color:#3f3f46;">
+        ${escapeHtml(params.reason)}
+      </p>
+      <p style="margin:0;font-size:15px;line-height:1.55;color:#3f3f46;">
+        ${escapeHtml(params.optionsNote)}
+      </p>
+    `,
+  });
+  const text = [
+    `Hi ${name},`,
+    '',
+    `I need your input on part of your ${params.destinationLabel} booking.`,
+    '',
+    params.reason,
+    '',
+    params.optionsNote,
     '',
     FOOTER,
   ].join('\n');
