@@ -26,11 +26,11 @@ const VALUE_PROPS: Array<{
 }> = [
   {
     icon: 'map-search-outline',
-    text: 'Interactive scores for safety, cost, crowding, and access — backed by real indicators',
+    text: 'Clear-eyed destination guidance on safety, cost, crowding, and ease of travel',
   },
   {
     icon: 'routes',
-    text: 'Itineraries shaped to how you travel, not a one-size package',
+    text: 'Itineraries crafted around how you actually travel — not a one-size package',
   },
   {
     icon: 'handshake-outline',
@@ -159,7 +159,7 @@ export default function WelcomeOverlay({ onDismissed }: Props) {
             style={[styles.headline, compact && styles.headlineCompact]}
             accessibilityRole="header"
           >
-            See destinations as they are — then build the trip that fits.
+            See destinations clearly — then plan a trip that fits how you travel.
           </Text>
 
           <View style={[styles.props, compact && styles.propsCompact]}>

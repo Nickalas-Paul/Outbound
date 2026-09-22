@@ -27,24 +27,24 @@ const STEPS: Array<{ n: string; title: string; body: string }> = [
   {
     n: '1',
     title: 'Explore',
-    body: 'Browse destinations scored on safety, cost, crowding, accessibility, and infrastructure. Filter by how you actually travel.',
+    body: 'Browse destinations with a clear view of safety, cost, crowding, accessibility, and infrastructure — filtered by how you actually travel.',
   },
   {
     n: '2',
     title: 'Plan',
-    body: 'Submit your trip details. Receive a researched itinerary tailored to your preferences — not a generic package.',
+    body: 'Share your trip details. Receive a researched itinerary tailored to your preferences — not a generic package.',
   },
   {
     n: '3',
     title: 'Travel',
-    body: 'Book yourself with the links we provide, or choose full-service and let the platform handle flights, hotels, and experiences.',
+    body: 'Book yourself with the links we provide, or choose full-service and let us handle flights, hotels, and experiences for you.',
   },
 ];
 
 const DIFFERENTIATORS: string[] = [
-  'Live destination intelligence from institutional data sources — not blog opinions or outdated guidebooks.',
-  'Every itinerary recommendation is checked for current operation before it ships — closed venues and dead links do not make the cut.',
-  'Built for near-zero overhead: the platform runs autonomously, which keeps turnaround fast and fees grounded.',
+  'Firsthand knowledge from years living and traveling across Korea, Spain, Argentina, and Mexico — not blog opinions or outdated guidebooks.',
+  'Every recommendation is checked against what is actually open and bookable before it reaches you.',
+  'A dedicated concierge relationship: thoughtful turnaround, careful fees, and judgment when a trip needs a human call.',
 ];
 
 export default function AboutScreen() {
@@ -56,20 +56,19 @@ export default function AboutScreen() {
     >
       <Text style={styles.pageTitle}>About Outbound</Text>
       <Text style={styles.pageLead}>
-        Travel intelligence and concierge — built to respect your time.
+        A personal travel concierge — grounded in lived international experience.
       </Text>
 
       <Section title="What Outbound is">
         <Body>
-          Outbound is a travel intelligence and concierge platform. It pairs
-          live destination data with AI-assisted trip planning so you can decide
-          where to go with evidence, then turn that decision into a workable
-          itinerary.
+          Outbound is a travel concierge service. We help you choose where to go
+          with a clear-eyed view of each destination, then craft a workable
+          itinerary designed around how you travel.
         </Body>
         <Body>
           You can take a researched plan and book it yourself, or hand the
-          logistics to the platform end-to-end — flights, stays, and experiences
-          included. Same underlying intelligence either way.
+          logistics to us end-to-end — flights, stays, and experiences included.
+          Same care either way.
         </Body>
       </Section>
 
@@ -100,9 +99,12 @@ export default function AboutScreen() {
 
       <Section title="Who operates it">
         <Body>
-          Outbound is run by an operator with lived experience across Korea,
-          Spain, Argentina, and Mexico — not a faceless aggregator. When a trip
-          needs judgment beyond the automation, direct consultation is available.
+          Outbound is run by someone who has lived and traveled extensively in
+          Korea, Spain, Argentina, and Mexico — not a faceless aggregator. That
+          experience shows up in the details: how culture actually works on the
+          ground, which logistics trip people up, and where the quieter gems still
+          are. When a trip needs judgment beyond the guidebook, you can talk to
+          the person who planned it.
         </Body>
       </Section>
 

@@ -12,6 +12,8 @@ function escapeHtml(s: string): string {
     .replace(/"/g, '&quot;');
 }
 
+const FOOTER = 'Outbound — Personal travel concierge';
+
 function layout(opts: {
   title: string;
   bodyHtml: string;
@@ -38,7 +40,7 @@ function layout(opts: {
               <p style="margin:0 0 24px;font-size:13px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#52525b;">Outbound</p>
               ${opts.bodyHtml}
               <hr style="border:none;border-top:1px solid #e4e4e7;margin:28px 0;" />
-              <p style="margin:0;font-size:12px;color:#71717a;line-height:1.5;">Outbound — Travel Intelligence &amp; Concierge</p>
+              <p style="margin:0;font-size:12px;color:#71717a;line-height:1.5;">${escapeHtml(FOOTER)}</p>
             </td>
           </tr>
         </table>
@@ -59,11 +61,11 @@ export function verificationEmail(params: {
 
   const html = layout({
     title: subject,
-    preheader: 'Confirm your email so we can prepare your trip plan.',
+    preheader: 'Confirm your email so I can start crafting your trip plan.',
     bodyHtml: `
       <h1 style="margin:0 0 12px;font-size:22px;font-weight:700;line-height:1.3;">Hi ${escapeHtml(name)},</h1>
       <p style="margin:0 0 16px;font-size:15px;line-height:1.55;color:#3f3f46;">
-        Thanks for submitting your trip request. Please verify your email so we can prepare your personalized plan.
+        Thanks for submitting your trip request. Please verify your email so I can start crafting your personalized plan.
       </p>
       <p style="margin:0 0 24px;text-align:center;">
         <a href="${escapeHtml(url)}" style="display:inline-block;background:#18181b;color:#ffffff;text-decoration:none;font-size:15px;font-weight:600;padding:12px 22px;border-radius:8px;">
@@ -83,19 +85,19 @@ export function verificationEmail(params: {
   const text = [
     `Hi ${name},`,
     '',
-    'Thanks for submitting your trip request. Please verify your email so we can prepare your personalized plan.',
+    'Thanks for submitting your trip request. Please verify your email so I can start crafting your personalized plan.',
     '',
     `Verify your email: ${url}`,
     '',
     'This link expires in 24 hours.',
     '',
-    'Outbound — Travel Intelligence & Concierge',
+    FOOTER,
   ].join('\n');
 
   return { subject, html, text };
 }
 
-/** Draft itinerary delivery — sent after successful composition. */
+/** Draft itinerary delivery — sent after a trip plan is ready. */
 export function itineraryDraftEmail(params: {
   name: string;
   tripSummary: string;
@@ -109,7 +111,7 @@ export function itineraryDraftEmail(params: {
     bodyHtml: `
       <h1 style="margin:0 0 12px;font-size:22px;font-weight:700;">Hi ${escapeHtml(name)},</h1>
       <p style="margin:0 0 12px;font-size:15px;line-height:1.55;">
-        Your draft itinerary is ready. Take a look and let us know if you'd like any changes.
+        I've put together a draft itinerary for your trip. Take a look and let me know if you'd like any changes.
       </p>
       <p style="margin:0 0 16px;font-size:14px;color:#52525b;white-space:pre-wrap;">${escapeHtml(params.tripSummary)}</p>
       <p style="margin:0 0 24px;text-align:center;">
@@ -125,13 +127,13 @@ export function itineraryDraftEmail(params: {
   const text = [
     `Hi ${name},`,
     '',
-    'Your draft itinerary is ready. Take a look and let us know if you\'d like any changes.',
+    "I've put together a draft itinerary for your trip. Take a look and let me know if you'd like any changes.",
     '',
     params.tripSummary,
     '',
     `Download PDF: ${params.itineraryUrl}`,
     '',
-    'Outbound — Travel Intelligence & Concierge',
+    FOOTER,
   ].join('\n');
   return { subject, html, text };
 }
@@ -147,17 +149,17 @@ export function confirmationReminderEmail(params: {
     title: subject,
     bodyHtml: `
       <h1 style="margin:0 0 12px;font-size:22px;font-weight:700;">Hi ${escapeHtml(name)},</h1>
-      <p style="margin:0 0 12px;font-size:15px;line-height:1.55;">Just a reminder that your draft itinerary is waiting for your review.</p>
+      <p style="margin:0 0 12px;font-size:15px;line-height:1.55;">Just a gentle reminder — your draft itinerary is ready whenever you are.</p>
       <p style="margin:0;font-size:14px;color:#52525b;">${escapeHtml(params.tripSummary)}</p>
     `,
   });
   const text = [
     `Hi ${name},`,
     '',
-    'Just a reminder that your draft itinerary is waiting for your review.',
+    'Just a gentle reminder — your draft itinerary is ready whenever you are.',
     params.tripSummary,
     '',
-    'Outbound — Travel Intelligence & Concierge',
+    FOOTER,
   ].join('\n');
   return { subject, html, text };
 }
@@ -183,7 +185,7 @@ export function bookingConfirmationEmail(params: {
     'A booking segment has been confirmed.',
     params.segmentDetails,
     '',
-    'Outbound — Travel Intelligence & Concierge',
+    FOOTER,
   ].join('\n');
   return { subject, html, text };
 }
@@ -213,7 +215,7 @@ export function preTripEmail(params: {
     '',
     params.signalAlerts,
     '',
-    'Outbound — Travel Intelligence & Concierge',
+    FOOTER,
   ].join('\n');
   return { subject, html, text };
 }
@@ -230,16 +232,16 @@ export function postTripEmail(params: {
     bodyHtml: `
       <h1 style="margin:0 0 12px;font-size:22px;font-weight:700;">Hi ${escapeHtml(name)},</h1>
       <p style="margin:0;font-size:15px;line-height:1.55;">
-        We hope you enjoyed ${escapeHtml(params.destination)}. We'd love to hear how it went.
+        I hope you enjoyed ${escapeHtml(params.destination)}. I'd love to hear how it went.
       </p>
     `,
   });
   const text = [
     `Hi ${name},`,
     '',
-    `We hope you enjoyed ${params.destination}. We'd love to hear how it went.`,
+    `I hope you enjoyed ${params.destination}. I'd love to hear how it went.`,
     '',
-    'Outbound — Travel Intelligence & Concierge',
+    FOOTER,
   ].join('\n');
   return { subject, html, text };
 }
