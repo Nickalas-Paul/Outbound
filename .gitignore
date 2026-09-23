@@ -22,3 +22,7 @@ server/workers/logs/
 server/api/data/itineraries/*
 !server/api/data/itineraries/.gitkeep
 
+# Local diagnostic / integration artifacts
+apps/universal/.integration-shots/
+logs_*.txt
+
