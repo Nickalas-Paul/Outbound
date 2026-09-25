@@ -38,7 +38,9 @@
         {
           "RNMapboxMapsVersion": "11.20.1"
         }
-      ]
+      ],
+      "expo-splash-screen",
+      "@react-native-community/datetimepicker"
     ],
     "experiments": {
       "typedRoutes": false
@@ -46,7 +48,7 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "b7bad06c-f988-4d7e-abfa-622ec49220f5"
+        "projectId": "256c934d-8c68-4d0f-82ee-357421dc7056"
       }
     },
     "owner": "nickstersam"

@@ -19,8 +19,8 @@ Every step is verified on web **and** Android before merge (rule 10).
 | # | Step | Status |
 |---|---|---|
 | 0 | Housekeeping | ✅ Done (`baec4af`) |
-| 1 | Native running: EAS dev build on Pixel, parity checklist | ▶ Next |
-| 2 | Parity and critical fixes: `/verify` route, Turnstile on native, shared storage, native trend chart, OAuth callback, orphan cleanup | |
+| 1 | Native running: EAS dev build on Pixel, parity checklist | ✅ Done (pending merge hash) |
+| 2 | Parity and critical fixes: `/verify` route, Turnstile on native, shared storage, native trend chart, OAuth callback, orphan cleanup; map color scale and legend use the design-system score scale on both platforms (currently red = best, legends differ between web and Android); native header overlap (gear over Log in) and stray '100' text | ▶ Next |
 | 3 | Unified date field | |
 | 4 | Correspondence hardening: webhook security, identity policy, confirmation via link only | |
 | 5 | Payments and ledger (test mode): client card collection, payment state machine, payments/refunds ledger | |
@@ -42,7 +42,8 @@ This step list is fixed for the phase. A new finding goes into the existing step
 
 ### Parked list
 
-*(empty)*
+- Spain scores "Low Crowding" (90) — likely crowding normalization issue from Phase 1
+- Destination page shows "Last refresh: Jan 1, 2020" while map shows current date — stale seed timestamp
 
 ---
 

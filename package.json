@@ -13,7 +13,7 @@
     "test": "turbo run test"
   },
   "devDependencies": {
-    "expo": "~56.0.19",
+    "expo": "~56.0.22",
     "turbo": "latest",
     "typescript": "5.9.3"
   },
