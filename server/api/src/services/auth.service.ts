@@ -52,7 +52,28 @@ interface AuthResult extends AuthTokens {
 }
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const CLIENT_AUTH_CALLBACK = 'http://localhost:8081/auth/callback';
+const AUTH_EXCHANGE_TTL_MS = 60_000;
+
+/** Short-lived single-use codes for client OAuth callback (tokens never in URL). */
+const pendingAuthCodes = new Map<
+  string,
+  { result: AuthResult; expiresAt: number }
+>();
+
+function getClientAuthCallbackBase(): string {
+  const explicit = process.env.OUTBOUND_CLIENT_AUTH_CALLBACK?.trim();
+  if (explicit) return explicit;
+  const appUrl =
+    process.env.OUTBOUND_APP_URL?.trim() ||
+    process.env.EXPO_PUBLIC_APP_URL?.trim();
+  if (appUrl) {
+    return `${appUrl.replace(/\/$/, '')}/auth/callback`;
+  }
+  throw new AuthError(
+    500,
+    'OUTBOUND_CLIENT_AUTH_CALLBACK (or OUTBOUND_APP_URL / EXPO_PUBLIC_APP_URL) is required'
+  );
+}
 
 function toPublicUser(row: UserRow): PublicUser {
   return {
@@ -311,11 +332,84 @@ export function getGoogleAuthUrl(state?: string): string {
   return `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
 }
 
-export function getClientAuthCallbackUrl(tokens: AuthTokens): string {
-  const url = new URL(CLIENT_AUTH_CALLBACK);
-  url.searchParams.set('accessToken', tokens.accessToken);
-  url.searchParams.set('refreshToken', tokens.refreshToken);
+/** Store tokens behind a one-time code; redirect URL contains only ?code=. */
+export function createAuthExchangeCode(result: AuthResult): string {
+  const code = crypto.randomBytes(32).toString('hex');
+  pendingAuthCodes.set(code, {
+    result,
+    expiresAt: Date.now() + AUTH_EXCHANGE_TTL_MS,
+  });
+  return code;
+}
+
+export function exchangeAuthCode(code: string): AuthResult {
+  const trimmed = code?.trim() ?? '';
+  if (!trimmed) {
+    throw new AuthError(400, 'Exchange code is required');
+  }
+
+  const entry = pendingAuthCodes.get(trimmed);
+  pendingAuthCodes.delete(trimmed);
+
+  if (!entry || entry.expiresAt <= Date.now()) {
+    throw new AuthError(401, 'Invalid or expired exchange code');
+  }
+
+  return entry.result;
+}
+
+export function getClientAuthCallbackUrl(exchangeCode: string): string {
+  const url = new URL(getClientAuthCallbackBase());
+  url.searchParams.set('code', exchangeCode);
   return url.toString();
+}
+
+async function upsertGoogleUser(profile: {
+  id: string;
+  email: string;
+  name?: string | null;
+  picture?: string | null;
+}): Promise<AuthResult> {
+  const email = profile.email.trim().toLowerCase();
+
+  const byGoogle = await pool.query<UserRow>(
+    'SELECT * FROM users WHERE google_id = $1',
+    [profile.id]
+  );
+
+  if (byGoogle.rows[0]) {
+    return issueTokens(toPublicUser(byGoogle.rows[0]));
+  }
+
+  const byEmail = await pool.query<UserRow>(
+    'SELECT * FROM users WHERE email = $1',
+    [email]
+  );
+
+  if (byEmail.rows[0]) {
+    const linked = await pool.query<UserRow>(
+      `UPDATE users
+       SET google_id = $1,
+           email_verified = true,
+           display_name = COALESCE(display_name, $2),
+           avatar_url = COALESCE(avatar_url, $3),
+           updated_at = NOW()
+       WHERE id = $4
+       RETURNING *`,
+      [profile.id, profile.name ?? null, profile.picture ?? null, byEmail.rows[0].id]
+    );
+    return issueTokens(toPublicUser(linked.rows[0]));
+  }
+
+  const created = await pool.query<UserRow>(
+    `INSERT INTO users (
+       email, password_hash, display_name, avatar_url, google_id, email_verified
+     ) VALUES ($1, NULL, $2, $3, $4, true)
+     RETURNING *`,
+    [email, profile.name ?? null, profile.picture ?? null, profile.id]
+  );
+
+  return issueTokens(toPublicUser(created.rows[0]));
 }
 
 export async function handleGoogleCallback(code: string): Promise<AuthResult> {
@@ -376,44 +470,87 @@ export async function handleGoogleCallback(code: string): Promise<AuthResult> {
     throw new AuthError(401, 'Google profile missing required fields');
   }
 
-  const email = profile.email.trim().toLowerCase();
+  return upsertGoogleUser({
+    id: profile.id,
+    email: profile.email,
+    name: profile.name,
+    picture: profile.picture,
+  });
+}
 
-  const byGoogle = await pool.query<UserRow>(
-    'SELECT * FROM users WHERE google_id = $1',
-    [profile.id]
-  );
-
-  if (byGoogle.rows[0]) {
-    return issueTokens(toPublicUser(byGoogle.rows[0]));
+/**
+ * Verify a Google ID token from the native SDK and issue Outbound tokens.
+ * Checks iss, aud (GOOGLE_CLIENT_ID), and exp via google-auth-library.
+ */
+export async function handleGoogleNativeIdToken(
+  idToken: string
+): Promise<AuthResult> {
+  const trimmed = idToken?.trim() ?? '';
+  if (!trimmed) {
+    throw new AuthError(400, 'idToken is required');
   }
 
-  const byEmail = await pool.query<UserRow>(
-    'SELECT * FROM users WHERE email = $1',
-    [email]
-  );
-
-  if (byEmail.rows[0]) {
-    const linked = await pool.query<UserRow>(
-      `UPDATE users
-       SET google_id = $1,
-           email_verified = true,
-           display_name = COALESCE(display_name, $2),
-           avatar_url = COALESCE(avatar_url, $3),
-           updated_at = NOW()
-       WHERE id = $4
-       RETURNING *`,
-      [profile.id, profile.name ?? null, profile.picture ?? null, byEmail.rows[0].id]
-    );
-    return issueTokens(toPublicUser(linked.rows[0]));
+  const clientId = process.env.GOOGLE_CLIENT_ID?.trim();
+  if (!clientId) {
+    throw new AuthError(500, 'Google OAuth is not configured');
   }
 
-  const created = await pool.query<UserRow>(
-    `INSERT INTO users (
-       email, password_hash, display_name, avatar_url, google_id, email_verified
-     ) VALUES ($1, NULL, $2, $3, $4, true)
-     RETURNING *`,
-    [email, profile.name ?? null, profile.picture ?? null, profile.id]
-  );
+  const { OAuth2Client } = await import('google-auth-library');
+  const client = new OAuth2Client(clientId);
 
-  return issueTokens(toPublicUser(created.rows[0]));
+  let payload: {
+    sub?: string;
+    email?: string;
+    name?: string;
+    picture?: string;
+    iss?: string;
+    aud?: string | string[];
+    exp?: number;
+  };
+  try {
+    const ticket = await client.verifyIdToken({
+      idToken: trimmed,
+      audience: clientId,
+    });
+    payload = ticket.getPayload() ?? {};
+  } catch (err) {
+    console.error('[auth] Google ID token verification failed:', err);
+    throw new AuthError(401, 'Invalid Google ID token');
+  }
+
+  const iss = payload.iss ?? '';
+  if (
+    iss !== 'https://accounts.google.com' &&
+    iss !== 'accounts.google.com'
+  ) {
+    throw new AuthError(401, 'Invalid Google ID token issuer');
+  }
+
+  const aud = payload.aud;
+  const audOk = Array.isArray(aud)
+    ? aud.includes(clientId)
+    : aud === clientId;
+  if (!audOk) {
+    throw new AuthError(401, 'Invalid Google ID token audience');
+  }
+
+  if (typeof payload.exp === 'number' && payload.exp * 1000 <= Date.now()) {
+    throw new AuthError(401, 'Google ID token has expired');
+  }
+
+  if (!payload.sub || !payload.email) {
+    throw new AuthError(401, 'Google ID token missing required claims');
+  }
+
+  return upsertGoogleUser({
+    id: payload.sub,
+    email: payload.email,
+    name: payload.name ?? null,
+    picture: payload.picture ?? null,
+  });
+}
+
+/** Test helper — clear in-memory exchange codes between unit tests. */
+export function __clearPendingAuthCodesForTests(): void {
+  pendingAuthCodes.clear();
 }

@@ -98,6 +98,16 @@ export {
   type IntakePayload,
 } from "./schemas/intake";
 
+// Shared score choropleth (web + native + legends)
+export {
+  SCORE_COLOR_STOPS,
+  SCORE_NULL_FILL,
+  SCORE_STOP_MAX,
+  SCORE_STOP_MIN,
+  scoreColor,
+  scoreFillColorExpression,
+} from "./scoreColors";
+
 // Explorer traveler preferences (Phase 3)
 export {
   BUDGET_TIERS,

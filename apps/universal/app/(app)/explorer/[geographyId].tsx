@@ -22,6 +22,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import TrendAnalysisSection from '@/components/explorer/TrendAnalysisSection';
+import { tviScoreColor } from '@/lib/tviColors';
 import {
   directionLabel,
   formatProbabilityPct,
@@ -256,12 +257,9 @@ function uniqueSourceLabels(sources: TviSourceRef[]): string[] {
   return labels;
 }
 
-/** Standard dimension cards: high score = good. */
+/** Standard dimension cards: shared sequential scale (high = vivid green, never red). */
 function dimensionScoreColor(score: number | null | undefined): string {
-  if (score == null || Number.isNaN(score)) return colors.textMuted;
-  if (score >= 65) return colors.success;
-  if (score >= 40) return colors.warning;
-  return colors.error;
+  return tviScoreColor(score);
 }
 
 /**

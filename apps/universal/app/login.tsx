@@ -1,8 +1,9 @@
 import { Link, Redirect, router } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Linking,
+  Platform,
   Pressable,
   StyleSheet,
   Text,
@@ -11,17 +12,26 @@ import {
 } from 'react-native';
 
 import { MarketingShell } from '@/components/MarketingShell';
+import {
+  configureNativeGoogleSignIn,
+  signInWithNativeGoogle,
+} from '@/lib/nativeGoogleSignIn';
+import * as api from '@/services/api';
 import { ApiError, getApiUrl } from '@/services/api';
 import { useAuth } from '@/services/auth';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export default function LoginScreen() {
-  const { login, isAuthenticated, isLoading } = useAuth();
+  const { login, setSession, isAuthenticated, isLoading } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    configureNativeGoogleSignIn();
+  }, []);
 
   if (!isLoading && isAuthenticated) {
     return <Redirect href="/" />;
@@ -45,6 +55,27 @@ export default function LoginScreen() {
       router.replace('/');
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Login failed');
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  async function onGoogle() {
+    setError(null);
+    setSubmitting(true);
+    try {
+      if (Platform.OS === 'web') {
+        await Linking.openURL(`${getApiUrl()}/api/auth/google`);
+        return;
+      }
+
+      const idToken = await signInWithNativeGoogle();
+      const result = await api.loginWithGoogleIdToken(idToken);
+      await setSession(result.accessToken, result.refreshToken);
+      router.replace('/');
+    } catch (err) {
+      if (err instanceof Error && err.message === 'cancelled') return;
+      setError(err instanceof ApiError ? err.message : 'Google Sign-In failed');
     } finally {
       setSubmitting(false);
     }
@@ -93,8 +124,9 @@ export default function LoginScreen() {
         </Pressable>
 
         <Pressable
-          style={styles.secondaryBtn}
-          onPress={() => void Linking.openURL(`${getApiUrl()}/api/auth/google`)}
+          style={[styles.secondaryBtn, submitting && styles.btnDisabled]}
+          onPress={() => void onGoogle()}
+          disabled={submitting}
         >
           <Text style={styles.secondaryBtnText}>Continue with Google</Text>
         </Pressable>

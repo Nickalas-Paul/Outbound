@@ -22,6 +22,34 @@ export type ValidateTripTokenResult =
       reason: 'invalid' | 'expired' | 'already_used' | 'wrong_trip';
     };
 
+export type PeekVerificationResult =
+  | { status: 'valid'; clientProfileId: string }
+  | { status: 'expired' | 'already_used' | 'invalid' };
+
+export type ConsumeVerificationResult =
+  | {
+      ok: true;
+      alreadyVerified: true;
+      clientProfileId: string;
+      tripId: string | null;
+    }
+  | {
+      ok: true;
+      alreadyVerified: false;
+      clientProfileId: string;
+      tripId: string | null;
+      /** True when composition should be scheduled for tripId. */
+      composed: true;
+    }
+  | {
+      ok: true;
+      alreadyVerified: false;
+      clientProfileId: string;
+      tripId: null;
+      composed: false;
+    }
+  | { ok: false; reason: 'invalid' | 'expired' | 'already_used' };
+
 /**
  * Generate a cryptographically random token, store with 24h expiry, return token.
  */
@@ -154,14 +182,76 @@ export async function validateTripToken(opts: {
   }
 }
 
+function parseExpiresAt(value: Date | string): Date {
+  return value instanceof Date ? value : new Date(value);
+}
+
 /**
- * Validate token: not expired, not used.
- * On success: mark used, set email_verified, move latest intake_received trip → composing.
+ * Non-mutating status check for an email verification token.
  */
-export async function verifyToken(token: string): Promise<VerifyTokenResult> {
+export async function peekVerificationToken(
+  token: string
+): Promise<PeekVerificationResult> {
   const trimmed = token?.trim() ?? '';
   if (!trimmed) {
-    return { valid: false, reason: 'invalid' };
+    return { status: 'invalid' };
+  }
+
+  const found = await pool.query<{
+    client_profile_id: string;
+    expires_at: Date;
+    used_at: Date | null;
+  }>(
+    `SELECT client_profile_id, expires_at, used_at
+     FROM verification_tokens
+     WHERE token = $1
+       AND type = 'email_verification'
+     LIMIT 1`,
+    [trimmed]
+  );
+
+  if (found.rows.length === 0) {
+    return { status: 'invalid' };
+  }
+
+  const row = found.rows[0];
+  if (row.used_at != null) {
+    return { status: 'already_used' };
+  }
+
+  if (parseExpiresAt(row.expires_at).getTime() <= Date.now()) {
+    return { status: 'expired' };
+  }
+
+  return { status: 'valid', clientProfileId: row.client_profile_id };
+}
+
+async function latestTripId(
+  client: { query: typeof pool.query },
+  clientProfileId: string
+): Promise<string | null> {
+  const trip = await client.query<{ id: string }>(
+    `SELECT id FROM trips
+     WHERE client_profile_id = $1
+     ORDER BY created_at DESC
+     LIMIT 1`,
+    [clientProfileId]
+  );
+  return trip.rows[0]?.id ?? null;
+}
+
+/**
+ * Consume an email verification token.
+ * - already_used + profile email_verified → idempotent success (no mutate/schedule)
+ * - valid unused → mark used, set email_verified, advance trip → composing
+ * - otherwise → ok:false with reason
+ */
+export async function consumeVerificationToken(
+  token: string
+): Promise<ConsumeVerificationResult> {
+  const trimmed = token?.trim() ?? '';
+  if (!trimmed) {
+    return { ok: false, reason: 'invalid' };
   }
 
   const client = await pool.connect();
@@ -184,23 +274,34 @@ export async function verifyToken(token: string): Promise<VerifyTokenResult> {
 
     if (found.rows.length === 0) {
       await client.query('ROLLBACK');
-      return { valid: false, reason: 'invalid' };
+      return { ok: false, reason: 'invalid' };
     }
 
     const row = found.rows[0];
 
     if (row.used_at != null) {
+      const profile = await client.query<{ email_verified: boolean }>(
+        `SELECT email_verified FROM client_profiles WHERE id = $1`,
+        [row.client_profile_id]
+      );
+      const emailVerified = profile.rows[0]?.email_verified === true;
+      if (emailVerified) {
+        const tripId = await latestTripId(client, row.client_profile_id);
+        await client.query('COMMIT');
+        return {
+          ok: true,
+          alreadyVerified: true,
+          clientProfileId: row.client_profile_id,
+          tripId,
+        };
+      }
       await client.query('ROLLBACK');
-      return { valid: false, reason: 'already_used' };
+      return { ok: false, reason: 'already_used' };
     }
 
-    const expiresAt =
-      row.expires_at instanceof Date
-        ? row.expires_at
-        : new Date(row.expires_at);
-    if (expiresAt.getTime() <= Date.now()) {
+    if (parseExpiresAt(row.expires_at).getTime() <= Date.now()) {
       await client.query('ROLLBACK');
-      return { valid: false, reason: 'expired' };
+      return { ok: false, reason: 'expired' };
     }
 
     await client.query(
@@ -231,10 +332,23 @@ export async function verifyToken(token: string): Promise<VerifyTokenResult> {
 
     await client.query('COMMIT');
 
+    const tripId = trip.rows[0]?.id ?? null;
+    if (tripId) {
+      return {
+        ok: true,
+        alreadyVerified: false,
+        clientProfileId: row.client_profile_id,
+        tripId,
+        composed: true,
+      };
+    }
+
     return {
-      valid: true,
+      ok: true,
+      alreadyVerified: false,
       clientProfileId: row.client_profile_id,
-      tripId: trip.rows[0]?.id ?? null,
+      tripId: null,
+      composed: false,
     };
   } catch (err) {
     await client.query('ROLLBACK');
@@ -244,22 +358,47 @@ export async function verifyToken(token: string): Promise<VerifyTokenResult> {
   }
 }
 
+/**
+ * @deprecated Prefer consumeVerificationToken. Kept for callers that expect VerifyTokenResult.
+ */
+export async function verifyToken(token: string): Promise<VerifyTokenResult> {
+  const result = await consumeVerificationToken(token);
+  if (!result.ok) {
+    return { valid: false, reason: result.reason };
+  }
+  if (result.alreadyVerified) {
+    return { valid: false, reason: 'already_used' };
+  }
+  return {
+    valid: true,
+    clientProfileId: result.clientProfileId,
+    tripId: result.tripId,
+  };
+}
+
 export function getAppBaseUrl(): string {
-  return (
+  const url =
     process.env.OUTBOUND_APP_URL?.trim() ||
-    process.env.EXPO_PUBLIC_APP_URL?.trim() ||
-    'http://localhost:8081'
-  );
+    process.env.EXPO_PUBLIC_APP_URL?.trim();
+  if (!url) {
+    throw new Error(
+      'OUTBOUND_APP_URL (or EXPO_PUBLIC_APP_URL) is required to build app links'
+    );
+  }
+  return url;
 }
 
 /** Base URL for /api/trips/* links in emails (confirm, revise, PDF). */
 export function getApiBaseUrl(): string {
-  return (
+  const url =
     process.env.OUTBOUND_API_URL?.trim() ||
-    process.env.EXPO_PUBLIC_API_URL?.trim() ||
-    process.env.OUTBOUND_APP_URL?.trim() ||
-    'http://localhost:3001'
-  ).replace(/\/$/, '');
+    process.env.EXPO_PUBLIC_API_URL?.trim();
+  if (!url) {
+    throw new Error(
+      'OUTBOUND_API_URL (or EXPO_PUBLIC_API_URL) is required to build API links'
+    );
+  }
+  return url.replace(/\/$/, '');
 }
 
 export function buildVerificationUrl(token: string): string {

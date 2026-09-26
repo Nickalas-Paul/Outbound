@@ -75,7 +75,13 @@ export default function ExplorerScreen() {
       setShowWelcome(false);
       return;
     }
-    setShowWelcome(!hasSeenWelcome());
+    let cancelled = false;
+    void hasSeenWelcome().then((seen) => {
+      if (!cancelled) setShowWelcome(!seen);
+    });
+    return () => {
+      cancelled = true;
+    };
   }, [authLoading, isAuthenticated]);
 
   const dataLabel = useMemo(() => new Date().toISOString().slice(0, 10), []);

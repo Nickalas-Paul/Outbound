@@ -150,6 +150,24 @@ export async function getMe(accessToken: string): Promise<{ user: AuthUser }> {
   return request<{ user: AuthUser }>('/api/auth/me', { method: 'GET' }, accessToken);
 }
 
+/** Exchange a short-lived OAuth callback code for tokens + user. */
+export async function exchangeAuthCode(code: string): Promise<AuthResponse> {
+  return request<AuthResponse>('/api/auth/exchange', {
+    method: 'POST',
+    body: JSON.stringify({ code }),
+  });
+}
+
+/** Native Google Sign-In: verify ID token server-side and issue Outbound tokens. */
+export async function loginWithGoogleIdToken(
+  idToken: string
+): Promise<AuthResponse> {
+  return request<AuthResponse>('/api/auth/google/native', {
+    method: 'POST',
+    body: JSON.stringify({ idToken }),
+  });
+}
+
 export type SubscriptionTierName = 'free' | 'pro' | 'marketplace';
 
 /** Dev-only: update the current user's subscription_tier (non-production API). */

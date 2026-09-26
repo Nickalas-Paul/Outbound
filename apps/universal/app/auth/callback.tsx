@@ -2,39 +2,48 @@ import { Redirect, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 
+import * as api from '@/services/api';
 import { useAuth } from '@/services/auth';
+
+function firstParam(value: string | string[] | undefined): string {
+  if (Array.isArray(value)) return value[0] ?? '';
+  return value ?? '';
+}
 
 export default function AuthCallbackScreen() {
   const params = useLocalSearchParams<{
-    accessToken?: string | string[];
-    refreshToken?: string | string[];
+    code?: string | string[];
   }>();
   const { setSession, isAuthenticated } = useAuth();
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
 
   useEffect(() => {
-    const accessToken = Array.isArray(params.accessToken)
-      ? params.accessToken[0]
-      : params.accessToken;
-    const refreshToken = Array.isArray(params.refreshToken)
-      ? params.refreshToken[0]
-      : params.refreshToken;
+    const code = firstParam(params.code).trim();
 
-    if (!accessToken || !refreshToken) {
-      setError('Missing OAuth tokens in callback URL');
+    if (!code) {
+      setError('Missing OAuth code in callback URL');
       return;
     }
 
+    let cancelled = false;
     (async () => {
       try {
-        await setSession(accessToken, refreshToken);
+        const result = await api.exchangeAuthCode(code);
+        if (cancelled) return;
+        await setSession(result.accessToken, result.refreshToken);
         setDone(true);
       } catch {
-        setError('Failed to establish session from OAuth callback');
+        if (!cancelled) {
+          setError('Failed to establish session from OAuth callback');
+        }
       }
     })();
-  }, [params.accessToken, params.refreshToken, setSession]);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [params.code, setSession]);
 
   if (error) {
     return (

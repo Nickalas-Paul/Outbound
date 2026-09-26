@@ -93,7 +93,7 @@ export default function WelcomeOverlay({ onDismissed }: Props) {
   }, []);
 
   const finishDismiss = () => {
-    markWelcomeSeen();
+    void markWelcomeSeen();
     Animated.timing(opacity, {
       toValue: 0,
       duration: 180,
@@ -104,7 +104,7 @@ export default function WelcomeOverlay({ onDismissed }: Props) {
   };
 
   const onPlanTrip = () => {
-    markWelcomeSeen();
+    void markWelcomeSeen();
     Animated.timing(opacity, {
       toValue: 0,
       duration: 180,

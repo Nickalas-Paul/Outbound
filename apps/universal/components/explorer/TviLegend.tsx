@@ -1,25 +1,40 @@
 import { StyleSheet, Text, View } from 'react-native';
+import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
 
-import { TVI_LEGEND_GRADIENT } from '@/lib/tviColors';
+import { SCORE_COLOR_STOPS, SCORE_STOP_MAX, SCORE_STOP_MIN } from '@outbound/core';
 
 type Props = {
   style?: object;
 };
 
 export default function TviLegend({ style }: Props) {
+  const stops = SCORE_COLOR_STOPS;
   return (
     <View style={StyleSheet.flatten([styles.wrap, style])} pointerEvents="none">
       <Text style={styles.caption}>TRAVEL VIABILITY INDEX</Text>
       <View style={styles.barRow}>
-        <Text style={styles.edge}>0</Text>
-        <View
-          style={StyleSheet.flatten([
-            styles.bar,
-            // RN Web accepts CSS backgroundImage on View
-            { backgroundImage: TVI_LEGEND_GRADIENT } as object,
-          ])}
-        />
-        <Text style={styles.edge}>100</Text>
+        <Text style={styles.edge}>{SCORE_STOP_MIN}</Text>
+        <View style={styles.barHost}>
+          <Svg width="100%" height="8" viewBox="0 0 100 8" preserveAspectRatio="none">
+            <Defs>
+              <LinearGradient id="tviLegendGrad" x1="0" y1="0" x2="1" y2="0">
+                {stops.map(([score, color], i) => {
+                  const offset =
+                    (score - SCORE_STOP_MIN) / (SCORE_STOP_MAX - SCORE_STOP_MIN);
+                  return (
+                    <Stop
+                      key={`${score}-${i}`}
+                      offset={`${Math.round(offset * 100)}%`}
+                      stopColor={color}
+                    />
+                  );
+                })}
+              </LinearGradient>
+            </Defs>
+            <Rect x="0" y="0" width="100" height="8" rx="4" fill="url(#tviLegendGrad)" />
+          </Svg>
+        </View>
+        <Text style={styles.edge}>{SCORE_STOP_MAX}</Text>
       </View>
     </View>
   );
@@ -55,10 +70,10 @@ const styles = StyleSheet.create({
     width: 22,
     textAlign: 'center',
   },
-  bar: {
+  barHost: {
     flex: 1,
     height: 8,
     borderRadius: 4,
-    backgroundColor: '#1a6b5a',
+    overflow: 'hidden',
   },
 });

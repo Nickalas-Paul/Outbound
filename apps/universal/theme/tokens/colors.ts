@@ -18,12 +18,12 @@ export const palette = {
   ink900: '#1a1a1a',
   white: '#ffffff',
 
-  // TVI choropleth scale (low → high)
-  score1: '#1e3a5f',
-  score2: '#1a6b5a',
-  score3: '#7a7a2e',
-  score4: '#c4651a',
-  score5: '#d93025',
+  // TVI choropleth scale (low muted → high vivid green; never red-high)
+  score1: '#3a4a62',
+  score2: '#2d6a7e',
+  score3: '#1f8f7a',
+  score4: '#22b45a',
+  score5: '#5ce08a',
 
   // Filter / data accents
   blue500: '#5b8def',

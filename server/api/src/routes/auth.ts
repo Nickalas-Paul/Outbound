@@ -3,10 +3,13 @@ import { requireAuth } from '../middleware/auth';
 import { requireFields, validateBody } from '../middleware/validate';
 import {
   AuthError,
+  createAuthExchangeCode,
+  exchangeAuthCode,
   getClientAuthCallbackUrl,
   getCurrentUser,
   getGoogleAuthUrl,
   handleGoogleCallback,
+  handleGoogleNativeIdToken,
   login,
   logout,
   refresh,
@@ -103,10 +106,39 @@ router.get('/google/callback', async (req: Request, res: Response) => {
     }
 
     const result = await handleGoogleCallback(code);
-    res.redirect(302, getClientAuthCallbackUrl(result));
+    const exchangeCode = createAuthExchangeCode(result);
+    res.redirect(302, getClientAuthCallbackUrl(exchangeCode));
   } catch (err) {
     handleAuthError(res, err);
   }
 });
+
+/** Exchange a short-lived OAuth callback code for tokens + user. */
+router.post(
+  '/exchange',
+  validateBody(requireFields('code')),
+  async (req: Request, res: Response) => {
+    try {
+      const result = exchangeAuthCode(String(req.body.code));
+      res.json(result);
+    } catch (err) {
+      handleAuthError(res, err);
+    }
+  }
+);
+
+/** Native Google Sign-In: verify ID token and issue Outbound tokens. */
+router.post(
+  '/google/native',
+  validateBody(requireFields('idToken')),
+  async (req: Request, res: Response) => {
+    try {
+      const result = await handleGoogleNativeIdToken(String(req.body.idToken));
+      res.json(result);
+    } catch (err) {
+      handleAuthError(res, err);
+    }
+  }
+);
 
 export default router;

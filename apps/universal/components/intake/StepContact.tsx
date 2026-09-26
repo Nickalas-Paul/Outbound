@@ -1,6 +1,5 @@
 import type { IntakePayload } from '@outbound/core';
 import { type RefObject } from 'react';
-import { Platform } from 'react-native';
 import {
   StyleSheet,
   Text,
@@ -297,7 +296,7 @@ export function StepContact({
         />
       </Field>
 
-      {Platform.OS === 'web' && SITE_KEY ? (
+      {SITE_KEY ? (
         <Field
           fieldId="turnstileToken"
           label="Verification"
@@ -318,7 +317,6 @@ export function StepContact({
           />
         </Field>
       ) : null}
-      {/* TODO: native Turnstile via WebView if mobile app goes public */}
     </View>
   );
 }

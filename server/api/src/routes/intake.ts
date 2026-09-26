@@ -2,7 +2,9 @@
  * Trip intake — public (optionalAuth). Guests and signed-in users submit trip requests.
  *
  * POST /api/intake
- * GET  /api/intake/verify?token=
+ * GET  /api/intake/verify?token=   (status only — non-mutating)
+ * POST /api/intake/verify          { token } — consume + schedule compose
+ * GET  /api/intake/turnstile       Turnstile widget HTML for native WebView
  */
 
 import {
@@ -19,8 +21,9 @@ import { sendEmail } from '../services/email';
 import { scheduleComposeItinerary } from '../services/composition';
 import {
   buildVerificationUrl,
+  consumeVerificationToken,
   createVerificationToken,
-  verifyToken,
+  peekVerificationToken,
 } from '../services/verification';
 import { verificationEmail } from '../templates/emails';
 import { apiError } from '../utils/response';
@@ -294,14 +297,29 @@ router.post('/', intakeLimiter, optionalAuth, async (req: Request, res: Response
 
 /**
  * GET /api/intake/verify?token=
- * Public — validates email verification token and advances trip to composing.
+ * Public — non-mutating status only (valid / expired / already_used / invalid).
  */
 router.get('/verify', async (req: Request, res: Response) => {
   try {
     const token = String(req.query.token ?? '');
-    const result = await verifyToken(token);
+    const result = await peekVerificationToken(token);
+    res.status(200).json(result);
+  } catch (err) {
+    console.error('[intake] verify status error:', err);
+    res.status(500).json(apiError('Verification status check failed'));
+  }
+});
 
-    if (!result.valid) {
+/**
+ * POST /api/intake/verify
+ * Public — consume token; schedule composition once when newly verified.
+ */
+router.post('/verify', async (req: Request, res: Response) => {
+  try {
+    const token = String(req.body?.token ?? '');
+    const result = await consumeVerificationToken(token);
+
+    if (!result.ok) {
       const messages: Record<string, string> = {
         invalid: 'Invalid verification link.',
         expired: 'This verification link has expired. Please submit again.',
@@ -315,21 +333,102 @@ router.get('/verify', async (req: Request, res: Response) => {
       return;
     }
 
+    if (result.alreadyVerified) {
+      res.status(200).json({
+        success: true,
+        alreadyVerified: true,
+        message: 'Your email is already verified.',
+        clientProfileId: result.clientProfileId,
+        tripId: result.tripId,
+      });
+      return;
+    }
+
     res.status(200).json({
       success: true,
+      alreadyVerified: false,
       message: "Email verified. I'm putting together your trip plan now.",
       clientProfileId: result.clientProfileId,
       tripId: result.tripId,
     });
 
-    // Fire composition off the request cycle — do not await.
-    if (result.tripId) {
+    if (result.composed && result.tripId) {
       scheduleComposeItinerary(result.tripId);
     }
   } catch (err) {
     console.error('[intake] verify error:', err);
     res.status(500).json(apiError('Verification failed'));
   }
+});
+
+/**
+ * GET /api/intake/turnstile
+ * Minimal HTML page with Cloudflare Turnstile; posts token to ReactNativeWebView.
+ */
+router.get('/turnstile', (_req: Request, res: Response) => {
+  const siteKey =
+    process.env.EXPO_PUBLIC_TURNSTILE_SITE_KEY?.trim() ||
+    process.env.TURNSTILE_SITE_KEY?.trim() ||
+    '';
+
+  if (!siteKey) {
+    res
+      .status(500)
+      .type('html')
+      .send(
+        '<!DOCTYPE html><html><body><p>Turnstile site key is not configured.</p></body></html>'
+      );
+    return;
+  }
+
+  const safeKey = siteKey.replace(/[^a-zA-Z0-9_-]/g, '');
+
+  res.setHeader(
+    'Content-Security-Policy',
+    [
+      "default-src 'none'",
+      "script-src 'unsafe-inline' https://challenges.cloudflare.com",
+      "frame-src https://challenges.cloudflare.com",
+      "style-src 'unsafe-inline'",
+      "connect-src https://challenges.cloudflare.com",
+      "img-src data: https://challenges.cloudflare.com",
+    ].join('; ')
+  );
+  res.type('html').send(`<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Verification</title>
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+  <style>
+    html, body { margin: 0; padding: 0; background: transparent; }
+    #wrap { display: flex; justify-content: center; padding: 8px; }
+  </style>
+</head>
+<body>
+  <div id="wrap">
+    <div class="cf-turnstile"
+         data-sitekey="${safeKey}"
+         data-theme="light"
+         data-callback="onTurnstileSuccess"
+         data-expired-callback="onTurnstileExpire"
+         data-error-callback="onTurnstileError"></div>
+  </div>
+  <script>
+    function post(payload) {
+      try {
+        if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
+          window.ReactNativeWebView.postMessage(JSON.stringify(payload));
+        }
+      } catch (e) {}
+    }
+    function onTurnstileSuccess(token) { post({ type: 'token', token: token }); }
+    function onTurnstileExpire() { post({ type: 'expire' }); }
+    function onTurnstileError() { post({ type: 'error' }); }
+  </script>
+</body>
+</html>`);
 });
 
 export default router;

@@ -93,11 +93,10 @@ async function json(method, path, body, token) {
   const verifyToken = tok.rows[0]?.token;
   report.steps.push({ verifyToken: Boolean(verifyToken) });
 
-  // 3) Verify
-  const verify = await json(
-    'GET',
-    `/api/intake/verify?token=${encodeURIComponent(verifyToken)}`
-  );
+  // 3) Verify (POST consumes token; GET is status-only)
+  const verify = await json('POST', `/api/intake/verify`, {
+    token: verifyToken,
+  });
   report.steps.push({
     verify: verify.status,
     message: verify.data?.message,

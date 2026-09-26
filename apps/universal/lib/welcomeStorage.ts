@@ -1,19 +1,38 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Platform } from 'react-native';
+
 const WELCOME_SEEN_KEY = 'outbound_welcome_seen';
 
-export function hasSeenWelcome(): boolean {
+async function getItem(key: string): Promise<string | null> {
   try {
-    if (typeof localStorage === 'undefined') return false;
-    return localStorage.getItem(WELCOME_SEEN_KEY) === 'true';
+    if (Platform.OS === 'web') {
+      if (typeof localStorage === 'undefined') return null;
+      return localStorage.getItem(key);
+    }
+    return await AsyncStorage.getItem(key);
   } catch {
-    return false;
+    return null;
   }
 }
 
-export function markWelcomeSeen(): void {
+async function setItem(key: string, value: string): Promise<void> {
   try {
-    if (typeof localStorage === 'undefined') return;
-    localStorage.setItem(WELCOME_SEEN_KEY, 'true');
+    if (Platform.OS === 'web') {
+      if (typeof localStorage === 'undefined') return;
+      localStorage.setItem(key, value);
+      return;
+    }
+    await AsyncStorage.setItem(key, value);
   } catch {
     // Private browsing / unavailable storage — show again next time.
   }
+}
+
+export async function hasSeenWelcome(): Promise<boolean> {
+  const value = await getItem(WELCOME_SEEN_KEY);
+  return value === 'true';
+}
+
+export async function markWelcomeSeen(): Promise<void> {
+  await setItem(WELCOME_SEEN_KEY, 'true');
 }

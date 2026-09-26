@@ -1,5 +1,5 @@
 /**
- * Trip intake client — POST /api/intake
+ * Trip intake client — POST /api/intake + email verification
  */
 
 import type { IntakePayload } from '@outbound/core';
@@ -17,6 +17,24 @@ export type IntakeValidationError = {
   error: string;
   details?: Array<{ path: string; message: string }>;
 };
+
+export type VerifyEmailSuccess = {
+  success: true;
+  alreadyVerified: boolean;
+  message: string;
+  clientProfileId: string;
+  tripId: string | null;
+};
+
+export type VerifyEmailFailure = {
+  success: false;
+  error: string;
+  reason: 'invalid' | 'expired' | 'already_used';
+};
+
+export type VerifyStatus =
+  | { status: 'valid'; clientProfileId: string }
+  | { status: 'expired' | 'already_used' | 'invalid' };
 
 export async function submitIntake(
   payload: IntakePayload
@@ -61,4 +79,55 @@ export async function submitIntake(
   }
 
   return body as IntakeSuccess;
+}
+
+/** Non-mutating GET status for a verification token. */
+export async function peekVerifyToken(token: string): Promise<VerifyStatus> {
+  const response = await fetch(
+    `${getApiUrl()}/api/intake/verify?token=${encodeURIComponent(token)}`
+  );
+  if (!response.ok) {
+    throw new ApiError(response.status, 'Could not check verification status');
+  }
+  return (await response.json()) as VerifyStatus;
+}
+
+/** POST — consume token and start composition when newly verified. */
+export async function postVerifyToken(
+  token: string
+): Promise<VerifyEmailSuccess> {
+  const response = await fetch(`${getApiUrl()}/api/intake/verify`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ token }),
+  });
+
+  let body: unknown = null;
+  try {
+    body = await response.json();
+  } catch {
+    body = null;
+  }
+
+  if (!response.ok) {
+    const errBody = body as VerifyEmailFailure | { error?: string } | null;
+    const message =
+      errBody && typeof errBody === 'object' && 'error' in errBody && errBody.error
+        ? String(errBody.error)
+        : `Verification failed (${response.status})`;
+    const error = new ApiError(response.status, message) as ApiError & {
+      reason?: string;
+    };
+    if (
+      errBody &&
+      typeof errBody === 'object' &&
+      'reason' in errBody &&
+      typeof errBody.reason === 'string'
+    ) {
+      error.reason = errBody.reason;
+    }
+    throw error;
+  }
+
+  return body as VerifyEmailSuccess;
 }
